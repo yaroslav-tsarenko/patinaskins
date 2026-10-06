@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { REDUCED_MOTION_QUERY } from "@/lib/hooks/useMediaQuery";
 import { onIdle } from "@/lib/motion/env";
 import { cssEase, MOTION_DURATION } from "@/lib/motion/tokens";
-import type { CartAddDetail } from "@/lib/motion/cart-flight";
+import { flyToCart, type CartAddDetail } from "@/lib/motion/cart-flight";
 
 export function MotionRoot() {
   const pathname = usePathname();
@@ -29,7 +29,6 @@ export function MotionRoot() {
     const start = () => {
       if (media.matches) return;
       cancelIdle = onIdle(() => {
-        import("@/lib/motion/cart-flight");
         import("@/lib/motion/engine").then(({ mountMotion }) => {
           if (!disposed) destroy = mountMotion(document);
         });
@@ -57,10 +56,7 @@ export function MotionRoot() {
   }, [pathname]);
 
   useEffect(() => {
-    const onAdd = (event: Event) => {
-      const detail = (event as CustomEvent<CartAddDetail>).detail;
-      import("@/lib/motion/cart-flight").then(({ flyToCart }) => flyToCart(detail));
-    };
+    const onAdd = (event: Event) => flyToCart((event as CustomEvent<CartAddDetail>).detail);
     window.addEventListener("patina:cart-add", onAdd);
     return () => window.removeEventListener("patina:cart-add", onAdd);
   }, []);

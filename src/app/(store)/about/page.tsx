@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { CredentialsSheet } from "@/components/layout/Credentials/CredentialsSheet";
 import { buttonClasses } from "@/components/ui/button-classes";
 import { CalibratedRuler } from "@/components/skin/FloatRuler";
+import { SplitWords } from "@/components/motion/SplitWords";
 import { NAV_CATEGORIES } from "@/config/navigation";
 import { BRAND } from "@/lib/brand";
 import { POLICY_FACTS } from "@/lib/policy-facts";
@@ -41,7 +42,7 @@ export default async function AboutPage() {
       <section aria-labelledby="about-title" data-section="about-hero" data-scene="calibration" className="grid items-end gap-10 pb-20 pt-6 lg:grid-cols-12">
         <div className="lg:col-span-6">
           <h1 id="about-title" data-anim="words" className="m-0 text-step-6 font-[680] leading-[0.96] tracking-[-0.01em] text-ink">
-            A store for CS2 skins, nothing else
+            <SplitWords text="A store for CS2 skins, nothing else" />
           </h1>
           <p className="m-0 mt-6 max-w-[56ch] text-step-1 leading-[1.5] text-ink-muted">{t("hero.lead", { brand: BRAND.name, countries: f.marketCountries, game: f.game })}</p>
         </div>

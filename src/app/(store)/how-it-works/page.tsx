@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { buttonClasses } from "@/components/ui/button-classes";
 import { CalibratedRuler } from "@/components/skin/FloatRuler";
+import { SplitWords } from "@/components/motion/SplitWords";
 import { TimelineSteps } from "@/components/skin/PurchaseTimeline";
 import { STORE_POLICY } from "@/config/store-policy";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -41,7 +42,7 @@ export default function HowItWorksPage() {
       <section aria-labelledby="hiw-title" data-scene="calibration" className="grid items-end gap-10 pb-20 pt-6 lg:grid-cols-12">
         <div className="lg:col-span-6">
           <h1 id="hiw-title" data-anim="words" className="m-0 text-step-6 font-[680] leading-[0.96] tracking-[-0.01em] text-ink">
-            How delivery works
+            <SplitWords text="How delivery works" />
           </h1>
           <p className="m-0 mt-6 max-w-[52ch] text-step-1 leading-[1.5] text-ink-muted">You pay by card, we send the skin to your Steam account as a trade offer, you accept it in Steam.</p>
         </div>

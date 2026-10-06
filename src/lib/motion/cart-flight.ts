@@ -5,6 +5,12 @@ export interface CartAddDetail {
   source?: Element | null;
 }
 
+let landsAt = 0;
+
+export function flightRemaining(): number {
+  return Math.max(0, landsAt - performance.now());
+}
+
 function visibleRect(el: Element | null | undefined): DOMRect | null {
   if (!el) return null;
   const rect = el.getBoundingClientRect();
@@ -13,24 +19,31 @@ function visibleRect(el: Element | null | undefined): DOMRect | null {
   return rect;
 }
 
+function dimLamp(stage: HTMLElement | null) {
+  if (!stage) return;
+  stage.style.setProperty("--lamp-level", String(MOTION_LIMITS.lampDim));
+  window.setTimeout(() => stage.style.removeProperty("--lamp-level"), MOTION_DURATION.cartFlight);
+}
+
 export function flyToCart(detail: CartAddDetail | undefined) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const source = detail?.source ?? null;
+  const source = detail?.source ?? null;
   const stage = source?.querySelector<HTMLElement>("[data-stage]") ?? null;
-  const img = source?.querySelector<HTMLImageElement>("[data-render] img, img") ?? null;
+  const img = source?.querySelector<HTMLImageElement>("[data-render] img") ?? null;
   const from = visibleRect(stage ?? img);
   const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-cart-target]"));
   const target = targets.map((el) => ({ el, rect: visibleRect(el) })).find((t) => t.rect);
   if (!from || !img || !target?.rect) return;
 
   const size = Math.min(from.width, from.height);
+  const startX = from.left + (from.width - size) / 2;
+  const startY = from.top + (from.height - size) / 2;
   const ghost = document.createElement("div");
   ghost.setAttribute("aria-hidden", "true");
-  ghost.className = "stage";
   Object.assign(ghost.style, {
     position: "fixed",
-    left: `${from.left + (from.width - size) / 2}px`,
-    top: `${from.top + (from.height - size) / 2}px`,
+    left: `${startX}px`,
+    top: `${startY}px`,
     width: `${size}px`,
     height: `${size}px`,
     zIndex: "85",
@@ -46,25 +59,28 @@ export function flyToCart(detail: CartAddDetail | undefined) {
   ghost.appendChild(picture);
   document.body.appendChild(ghost);
 
+  dimLamp(stage);
+  landsAt = performance.now() + MOTION_DURATION.cartFlight;
+  target.el.dataset.arriving = "";
+
   const scale = MOTION_LIMITS.cartGhost / size;
-  const startX = from.left + (from.width - size) / 2;
-  const startY = from.top + (from.height - size) / 2;
   const endX = target.rect.left + target.rect.width / 2 - MOTION_LIMITS.cartGhost / 2;
   const endY = target.rect.top + target.rect.height / 2 - MOTION_LIMITS.cartGhost / 2;
-  const dx = endX - startX;
-  const dy = endY - startY;
-
   const flight = ghost.animate(
     [
       { transform: "translate(0px, 0px) scale(1)", opacity: MOTION_LIMITS.cartGhostOpacity },
-      { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: 0.35 },
+      { transform: `translate(${endX - startX}px, ${endY - startY}px) scale(${scale})`, opacity: 0.35 },
     ],
     { duration: MOTION_DURATION.cartFlight, easing: cssEase("instrument"), fill: "forwards" },
   );
 
-  const finish = () => {
+  const land = () => {
     ghost.remove();
     target.el.animate([{ transform: "translateY(1px)" }, { transform: "translateY(0)" }], { duration: MOTION_DURATION.micro, easing: cssEase("instrument") });
+    window.setTimeout(() => delete target.el.dataset.arriving, MOTION_DURATION.ui + 40);
   };
-  flight.finished.then(finish, () => ghost.remove());
+  flight.finished.then(land, () => {
+    ghost.remove();
+    delete target.el.dataset.arriving;
+  });
 }

@@ -36,7 +36,7 @@ function HeroReadout({ product }: { product: SkinProduct }) {
         <SkinMarks face={face} className="contents" />
       </div>
       {face.exteriorCode ? (
-        <CalibratedRuler lit={[face.exteriorCode]} labels={false} minor={false} readout={exteriorReadout(face.exteriorCode)} />
+        <CalibratedRuler lit={[face.exteriorCode]} labels={false} minor={false} draw readout={exteriorReadout(face.exteriorCode)} />
       ) : (
         <p className="m-0 font-mono text-data text-ink">Not painted</p>
       )}
@@ -69,7 +69,7 @@ export function HomeHero({ liveCount, hero }: HeroProps) {
 
   return (
     <section aria-labelledby="hero-title" data-scene="bay-hero" data-section="hero" className="relative overflow-hidden">
-      <div className="relative mx-auto grid max-w-wide gap-x-6 gap-y-10 px-gutter pb-14 pt-10 lg:min-h-[calc(100svh-var(--header-height))] lg:grid-cols-12 lg:items-center lg:pb-16 lg:pt-12">
+      <div data-hero-pin="" className="relative mx-auto grid max-w-wide gap-x-6 gap-y-10 px-gutter pb-14 pt-10 lg:min-h-[calc(100svh-var(--header-height))] lg:grid-cols-12 lg:items-center lg:pb-16 lg:pt-12">
         <div className="min-w-0 lg:col-span-5">
           <p className="eyebrow m-0">CS2 skin store</p>
           <h1 id="hero-title" data-anim="words" className="m-0 mt-4 text-step-6 font-[720] leading-[0.92] tracking-[-0.015em] text-ink lg:text-[clamp(3.5rem,1.2rem+5.4vw,7.5rem)] lg:leading-[0.9]">
@@ -133,7 +133,7 @@ export function HomeHero({ liveCount, hero }: HeroProps) {
         {hero && face ? (
           <div className="relative min-w-0 lg:col-span-7 lg:pb-10">
             <div aria-hidden="true" data-depth="0" data-horizon="" className="pointer-events-none absolute -right-[50vw] left-[-6%] top-[72%] hidden h-px bg-line lg:block" />
-            <div className="relative">
+            <div data-hero-dolly="" className="relative">
               <article data-tray="" data-tilt="8" data-depth="2" data-rarity={face.rarity} className="tray lg:w-[calc(100%-240px)]">
                 <SkinStage src={hero.images?.[0]?.url} alt={hero.images?.[0]?.alt || hero.name} aspect="16/10" priority sizes="(min-width: 1024px) 720px, 100vw" viewTransition={`render-${hero.id}`}>
                   <div data-lamp="webgl" aria-hidden="true" className="absolute inset-0 z-[2]" />

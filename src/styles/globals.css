@@ -251,13 +251,14 @@
 
 @layer components {
   .stage {
-    --stage-lamp: radial-gradient(ellipse 70% 62% at var(--lx, 50%) var(--ly, 0%), rgb(var(--lamp-rgb) / var(--lamp-pool-alpha)), transparent 72%);
+    --stage-lamp: radial-gradient(ellipse 70% 62% at var(--lx, 50%) var(--ly, 0%), rgb(var(--lamp-rgb) / calc(var(--lamp-pool-alpha) * var(--lamp-level, 1))), transparent 72%);
     position: relative;
     isolation: isolate;
     overflow: hidden;
     background-color: var(--color-stage);
     background-image: var(--stage-lamp);
     color: var(--color-on-stage);
+    transition: --lamp-level var(--dur-micro) var(--ease-std);
   }
 
   .stage::before {
@@ -270,7 +271,7 @@
     z-index: 3;
     pointer-events: none;
     background: var(--lamp-line);
-    transition: opacity var(--dur-micro) var(--ease-std);
+    opacity: min(1, var(--lamp-level, 1));
   }
 
   .stage[data-lamp="off"] {

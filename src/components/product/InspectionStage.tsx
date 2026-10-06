@@ -119,7 +119,7 @@ export function InspectionStage({ src, alt, rarity, exterior, productId }: Inspe
         </button>
       </div>
       {exterior ? (
-        <CalibratedRuler lit={[exterior]} readout={exteriorReadout(exterior)} className="mt-6 lg:mt-8" />
+        <CalibratedRuler lit={[exterior]} readout={exteriorReadout(exterior)} draw className="mt-6 lg:mt-8" />
       ) : (
         <p className="m-0 mt-6 font-mono text-data text-ink-muted">Not painted: this knife has no finish, so it has no exterior or float range.</p>
       )}

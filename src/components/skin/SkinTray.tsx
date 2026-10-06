@@ -59,6 +59,7 @@ export function useAddToCart(product: SkinProduct) {
   const imageUrl = product.imageUrl ?? product.images?.[0]?.url ?? null;
   const inCart = cart.items.some((item) => item.productId === product.id);
   const add = (source?: Element | null) => {
+    window.dispatchEvent(new CustomEvent("patina:cart-add", { detail: { productId: product.id, source: source ?? null } }));
     addItem({
       productId: product.id,
       name: product.name,
@@ -70,7 +71,6 @@ export function useAddToCart(product: SkinProduct) {
       maxQuantity: itemQuantityCap(product.quantity),
       skin: product.skin ?? undefined,
     });
-    window.dispatchEvent(new CustomEvent("patina:cart-add", { detail: { productId: product.id, source: source ?? null } }));
   };
   return { add, inCart, openSheet, price, imageUrl };
 }

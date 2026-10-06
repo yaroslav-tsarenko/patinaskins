@@ -32,6 +32,21 @@ export function readMotionEnv(): MotionEnv {
   };
 }
 
+export function frozenTime(): number | null {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("t")) return null;
+  return Math.max(0, Number(params.get("t")) || 0);
+}
+
+export function interactiveDesktop(env: MotionEnv): boolean {
+  return !env.reduced && env.desktop && env.finePointer;
+}
+
+export function webglAllowed(env: MotionEnv): boolean {
+  if (frozenTime() !== null) return !env.reduced;
+  return interactiveDesktop(env) && !env.saveData && !env.lowPower;
+}
+
 export function documentTop(el: Element): number {
   return el.getBoundingClientRect().top + window.scrollY;
 }

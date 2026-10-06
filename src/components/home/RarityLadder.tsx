@@ -24,7 +24,7 @@ export function RarityLadder({ tiers }: { tiers: HomeRarityTier[] }) {
             const empty = tier.count === 0;
             const body = (
               <>
-                <span aria-hidden="true" data-spine="" className="absolute bottom-0 left-0 top-0 w-[3px] origin-bottom bg-rarity transition-[width] duration-[140ms] group-hover:w-1.5" />
+                <span aria-hidden="true" data-spine="" className="absolute bottom-0 left-0 top-0 w-[3px] origin-bottom-left bg-rarity transition-[scale] duration-[140ms] ease-[var(--ease-instrument)] group-hover:scale-x-200 group-focus-visible:scale-x-200" />
                 <span className="block min-h-[2.5em] font-mono text-[0.75rem] font-medium uppercase leading-[1.25] tracking-[0.06em] text-rarity [font-stretch:87.5%]">{tier.label}</span>
                 <span className="mt-1 block font-mono text-[0.75rem] text-ink-muted">{empty ? "0 in stock" : `${tier.count.toLocaleString("en-GB")} in stock`}</span>
                 {tier.product && face ? (

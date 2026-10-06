@@ -128,7 +128,7 @@ export function CalibratedRuler({
               );
             })}
             {jaw !== null ? (
-              <span className="absolute top-0 flex -translate-x-1/2 flex-col items-center" style={{ left: pct(Math.min(1, Math.max(0, jaw))) }}>
+              <span data-jaw="" className="absolute top-0 flex -translate-x-1/2 flex-col items-center" style={{ left: pct(Math.min(1, Math.max(0, jaw))), ["--jaw" as string]: Math.min(1, Math.max(0, jaw)) }}>
                 <span className="mb-1 whitespace-nowrap font-mono text-[0.75rem] leading-none text-ink">{jawLabel ?? jaw.toFixed(4)}</span>
               </span>
             ) : null}
@@ -144,14 +144,19 @@ export function CalibratedRuler({
             />
           ))}
           <RulerTicks minor={minor} />
+          {draw && zones.length === 1 ? (
+            <span aria-hidden="true" data-ruler-scan="" className="pointer-events-none absolute inset-x-0 bottom-0 h-3" style={{ ["--scan-to" as string]: pct(zones[0].floatMax) }}>
+              <span className="absolute bottom-0 left-0 h-3 w-px bg-ink" />
+            </span>
+          ) : null}
           {jaw !== null ? (
-            <span className="absolute bottom-[3px] -translate-x-1/2" style={{ left: pct(Math.min(1, Math.max(0, jaw))) }}>
+            <span data-jaw="" className="absolute bottom-[3px] -translate-x-1/2" style={{ left: pct(Math.min(1, Math.max(0, jaw))), ["--jaw" as string]: Math.min(1, Math.max(0, jaw)) }}>
               <Jaw />
             </span>
           ) : null}
           {children}
         </div>
-        <div className="h-px bg-rule" />
+        <div data-ruler-base="" className="h-px origin-left bg-rule" />
         {labels ? (
           <div className="relative h-[34px]">
             {BOUNDS.map((b, i) => (

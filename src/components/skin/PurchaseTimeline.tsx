@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ArrowUpRight, Clock } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Jaw } from "./FloatRuler";
+import { TimelineAdvance } from "@/components/motion/TimelineAdvance";
 
 const HAPPY = ["Payment confirmed", "Processing", "Trade offer sent", "Delivered"] as const;
 
@@ -85,21 +86,23 @@ export function PurchaseTimeline({ status, paidAt, finishedAt, refundedAt, offer
 
   return (
     <div data-timeline="" data-status={status} className={cn("min-w-0", className)}>
+      <TimelineAdvance status={status} />
       <ol className={cn("relative m-0 grid list-none p-0", large ? "max-sm:gap-6 sm:grid-flow-col sm:auto-cols-fr" : "max-sm:gap-4 sm:grid-flow-col sm:auto-cols-fr")}>
         {nodes.map((node, i) => (
           <li key={`${node.label}-${i}`} data-node={node.state} aria-current={node.state === "current" ? "step" : undefined} className="relative min-w-0 max-sm:pl-7 sm:pt-7">
             {i > 0 ? (
-              <span aria-hidden="true" className={cn("absolute bg-rule max-sm:left-[4.5px] max-sm:-top-6 max-sm:h-[calc(100%)] max-sm:w-px sm:right-[calc(100%-5px)] sm:top-[4.5px] sm:h-px sm:w-full", large ? "max-sm:-top-6" : "max-sm:-top-4")} />
+              <span aria-hidden="true" data-seg="" className={cn("absolute bg-rule max-sm:left-[4.5px] max-sm:-top-6 max-sm:h-[calc(100%)] max-sm:w-px sm:right-[calc(100%-5px)] sm:top-[4.5px] sm:h-px sm:w-full", large ? "max-sm:-top-6" : "max-sm:-top-4")} />
             ) : null}
             {node.state === "current" ? (
-              <span aria-hidden="true" className="absolute max-sm:-left-[1px] max-sm:-top-5 sm:-top-[20px] sm:left-[-1px]">
+              <span aria-hidden="true" data-timeline-jaw="" className="absolute max-sm:-left-[1px] max-sm:-top-5 sm:-top-[20px] sm:left-[-1px]">
                 <Jaw />
               </span>
             ) : null}
             <span
               aria-hidden="true"
+              data-dot=""
               className={cn(
-                "absolute left-0 top-0 z-[1] size-2.5 rounded-full border max-sm:top-1.5",
+                "absolute left-0 top-0 z-[1] size-2.5 rounded-full border transition-colors duration-[200ms] max-sm:top-1.5",
                 node.state === "done" && "border-ink bg-ink",
                 node.state === "current" && "border-2 border-brand bg-surface",
                 node.state === "upcoming" && "border-line-hover bg-surface",

@@ -11,6 +11,7 @@ import { TextLink } from "./SectionHead";
 export function PriceBands({ bands }: { bands: HomePriceBand[] }) {
   const { currency, convert } = useCurrency();
   const [active, setActive] = useState(bands[0]?.key ?? "");
+  const [swapped, setSwapped] = useState(false);
   if (bands.length === 0) return null;
   const whole = (n: number) => formatPrice(Math.round(convert(n)), currency).replace(/\.00$/, "");
   const under = (b: HomePriceBand) => b.max !== null && (b.min === null || bands.some((o) => o.min === null && o.max === b.min));
@@ -33,12 +34,20 @@ export function PriceBands({ bands }: { bands: HomePriceBand[] }) {
             <p className="m-0 mt-3 text-step-0 text-ink-muted">A spread from the cheapest to the dearest skin in each band, in your currency.</p>
           </div>
           <div className="no-scrollbar -mx-gutter max-w-[100vw] overflow-x-auto px-gutter">
-            <Segmented label="Price band" value={band.key} onChange={setActive} options={bands.map((b) => ({ value: b.key, label: label(b) }))} />
+            <Segmented
+              label="Price band"
+              value={band.key}
+              onChange={(key) => {
+                setActive(key);
+                setSwapped(true);
+              }}
+              options={bands.map((b) => ({ value: b.key, label: label(b) }))}
+            />
           </div>
         </div>
-        <div role="region" aria-live="polite" aria-label={label(band)} className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        <div data-band-grid="" data-swapped={swapped || undefined} role="region" aria-live="polite" aria-label={label(band)} className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
           {feature ? (
-            <div className="col-span-2 lg:row-span-2">
+            <div key={feature.id} className="col-span-2 lg:row-span-2">
               <SkinTray product={feature} variant="feature" stageAspect="4/3" fill sizes="(min-width: 1024px) 640px, 100vw" />
             </div>
           ) : null}

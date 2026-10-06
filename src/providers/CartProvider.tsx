@@ -7,6 +7,7 @@ import type { Cart, CartItem } from "@/types/cart";
 import { CartToast } from "@/components/cart/CartToast/CartToast";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { computeTotals, itemQuantityCap, orderQuantityRoom, type Totals } from "@/lib/pricing";
+import { flightRemaining } from "@/lib/motion/cart-flight";
 
 interface CartContextType {
   cart: Cart;
@@ -118,10 +119,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const added: CartItem = { ...newItem, id, quantity: quantity - (existing?.quantity ?? 0) };
         setCartBounce((b) => b + 1);
         setLastAdded(added);
-        toast.custom(
-          (toastId) => <CartToast toastId={toastId} name={added.name} imageUrl={added.imageUrl} quantity={added.quantity} />,
-          { duration: 5000, className: "!w-auto !border-0 !bg-transparent !p-0 !shadow-none" },
-        );
+        const showToast = () =>
+          toast.custom(
+            (toastId) => <CartToast toastId={toastId} name={added.name} imageUrl={added.imageUrl} quantity={added.quantity} />,
+            { duration: 5000, className: "!w-auto !border-0 !bg-transparent !p-0 !shadow-none" },
+          );
+        const wait = flightRemaining();
+        if (wait > 0) window.setTimeout(showToast, wait);
+        else showToast();
       }
       if (limitNotice === "itemLimit") toast(t("limitPerItem", { max: perItem }));
       if (limitNotice === "orderLimit") toast(t("limitPerOrder", { max: orderQuantityRoom(0) }));
