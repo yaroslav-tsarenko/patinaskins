@@ -1,0 +1,163 @@
+{
+  "title": "Questions",
+  "metaTitle": "Questions about ordering, delivery and returns",
+  "metaDescription": "Answers on orders, delivery from Spain to the UK and EU, the {withdrawalDays}-day return window, card payment, product care and your {brand} account.",
+  "lead": "Short answers about ordering from {brand}. The full terms are in our <policies>policies</policies>.",
+  "home": "Home",
+  "groupsNav": "Question groups",
+  "stillNeedHelp": "Still need help?",
+  "stillNeedHelpBody": "Write to us and we reply {replyTime}. Support hours: {supportHours}.",
+  "contactUs": "Contact us",
+  "groups": {
+    "orders": {
+      "title": "Orders",
+      "items": {
+        "place": {
+          "q": "How do I place an order?",
+          "a": "Add items to your bag, go to checkout, enter your contact and delivery details, review the order and pay on our payment provider's secure page. We email your order confirmation once the payment is confirmed."
+        },
+        "guest": {
+          "q": "Do I need an account to order?",
+          "a": "No. You can check out as a guest. With an account you can see your orders, keep saved items and check out with your details already filled in."
+        },
+        "change": {
+          "q": "Can I change or cancel my order?",
+          "a": "Email us with your order number as soon as you can. If the order has not been dispatched, we cancel it and refund the full amount. Once it has been dispatched, you can still cancel within {withdrawalDays} days of delivery, as set out in our <returns>Returns and refunds policy</returns>."
+        },
+        "limits": {
+          "q": "Is there a limit on how many I can buy?",
+          "a": "You can buy up to {maxQty} units of one product and up to {maxItems} items in one order."
+        },
+        "noEmail": {
+          "q": "I paid but did not get a confirmation email.",
+          "a": "Check your spam or promotions folder first. The confirmation is sent once the payment provider confirms the payment. If your card was charged and no email has arrived, contact us with the email address you used."
+        }
+      }
+    },
+    "delivery": {
+      "title": "Delivery",
+      "items": {
+        "where": {
+          "q": "Where do you deliver?",
+          "a": "To the {countries}. We do not deliver to {restricted}, or to the temporarily occupied territories of Ukraine."
+        },
+        "from": {
+          "q": "Where do orders ship from?",
+          "a": "Every order is packed and dispatched from {dispatchFrom}, within {processingDays} of your payment being confirmed."
+        },
+        "time": {
+          "q": "How long does delivery take?",
+          "a": "To EU addresses, {deliveryEu}. To the United Kingdom, {deliveryUk}. These are estimates, not guaranteed dates."
+        },
+        "cost": {
+          "q": "How much does delivery cost?",
+          "a": "{deliveryCost} per order, and free on orders of {freeThreshold} or more. The charge is shown at checkout before you pay."
+        },
+        "duties": {
+          "q": "Will I pay import charges in the UK?",
+          "a": "{ukImportNote}"
+        },
+        "tracking": {
+          "q": "How do I track my order?",
+          "a": "We email you when your order is dispatched, with the tracking number where the carrier provides one. If you have an account, the order status is also under Your orders."
+        }
+      }
+    },
+    "returns": {
+      "title": "Returns and refunds",
+      "items": {
+        "can": {
+          "q": "Can I return something I don't want?",
+          "a": "Yes. You can cancel within {withdrawalDays} days of receiving your order, without giving a reason, and then send the items back within {returnShipDays} days. Tell us by email or through the contact form first."
+        },
+        "postage": {
+          "q": "Who pays for return postage?",
+          "a": "You do, if you have changed your mind. If an item is faulty, damaged or not what you ordered, we pay."
+        },
+        "refund": {
+          "q": "When will I get my refund?",
+          "a": "Within {refundDays} days of the day we receive the items back, or of the day you send us proof of return if that is earlier. The refund goes to the card you paid with, in the same currency."
+        },
+        "used": {
+          "q": "Can I return something I have used?",
+          "a": "You can handle an item as you would in a shop. If it has been cooked with, washed or used to store food, we may reduce the refund by the loss in value. Faulty items are always refunded in full."
+        },
+        "damaged": {
+          "q": "What if an item arrives damaged?",
+          "a": "Email us your order number and photographs of the item and packaging. We send a replacement or refund you, at no cost to you."
+        }
+      }
+    },
+    "payment": {
+      "title": "Payment",
+      "items": {
+        "methods": {
+          "q": "How can I pay?",
+          "a": "By {cardMethods} card. You enter your card details on our PCI DSS compliant payment provider's hosted page. We do not accept other payment methods."
+        },
+        "safe": {
+          "q": "Is my card information safe?",
+          "a": "We do not store or process full payment card data. All card payments are processed by our PCI DSS compliant payment provider. Your bank may ask you to confirm the payment with 3-D Secure, for example in your banking app."
+        },
+        "currencies": {
+          "q": "Which currencies can I pay in?",
+          "a": "{currencies}. You are charged in the currency selected at checkout. If your card is in another currency, your bank may add a conversion fee."
+        },
+        "vatNo": {
+          "q": "Do your prices include VAT?",
+          "a": "{company} is not registered for VAT, so we do not charge VAT and none is added at checkout."
+        },
+        "vatYes": {
+          "q": "Do your prices include VAT?",
+          "a": "Yes. Prices include VAT at the rate that applies to your order."
+        },
+        "when": {
+          "q": "When is my card charged?",
+          "a": "When you complete payment on the provider's page. If the payment is declined or cancelled, no order is created and nothing is charged."
+        }
+      }
+    },
+    "products": {
+      "title": "Products and care",
+      "items": {
+        "range": {
+          "q": "What do you sell?",
+          "a": "Cookware, bakeware, utensils, tableware, cutlery, glassware, kitchen and table linen, food storage, coffee and tea accessories, and bar and wine accessories. We do not sell electrical appliances or knives."
+        },
+        "suitability": {
+          "q": "How do I know if something is dishwasher safe or works on induction?",
+          "a": "Each product page lists the materials, dimensions and care instructions we have for that item, including dishwasher, oven and hob suitability where it applies."
+        },
+        "care": {
+          "q": "How should I look after my pans?",
+          "a": "Cast iron: dry it straight after washing and wipe with a little oil. Enamel: avoid metal scourers. Non-stick: use low to medium heat and wooden or silicone tools. Glass: avoid sudden changes of temperature."
+        },
+        "warranty": {
+          "q": "Is there a warranty?",
+          "a": "Yes. Every product has a {warrantyMonths}-month warranty against manufacturing defects, on top of your statutory rights. See our <warranty>Warranty</warranty> for what it covers and how to claim."
+        }
+      }
+    },
+    "account": {
+      "title": "Account",
+      "items": {
+        "who": {
+          "q": "Who can open an account?",
+          "a": "Anyone aged {minAge} or over who lives in a country we deliver to. We ask for your date of birth when you register."
+        },
+        "password": {
+          "q": "I forgot my password.",
+          "a": "Select \"Forgot your password?\" on the sign-in page and enter your email. If an account exists for it, we send you a link to set a new password."
+        },
+        "delete": {
+          "q": "How do I delete my account or my data?",
+          "a": "Email {email} from the address on your account. We close the account and delete your data, apart from order records we must keep by law, as explained in our <privacy>Privacy policy</privacy>."
+        },
+        "newsletter": {
+          "q": "How do I unsubscribe from emails?",
+          "a": "Email {email} and we remove your address from the newsletter list. Order and account emails are still sent, because they are part of your order."
+        }
+      }
+    }
+  }
+}

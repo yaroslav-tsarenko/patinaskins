@@ -1,0 +1,15 @@
+{
+  "home": "Home",
+  "catalog": "Shop",
+  "cart": "Bag",
+  "account": "Account",
+  "login": "Sign in",
+  "register": "Create account",
+  "logout": "Sign out",
+  "admin": "Admin",
+  "search": "Search pans, plates, glasses…",
+  "allCategories": "All categories",
+  "contact": "Contact us",
+  "faq": "Questions",
+  "policies": "Policies"
+}

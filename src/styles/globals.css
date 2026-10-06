@@ -1,0 +1,382 @@
+@import "tailwindcss";
+@import "./variables.css";
+@import "./animations.css";
+@import "./motion.css";
+
+@custom-variant dark ([data-theme="dark"] &);
+@custom-variant hover-device (@media (hover: hover) and (pointer: fine));
+@custom-variant touch-device {
+  @media (hover: none), (pointer: coarse) {
+    @slot;
+  }
+}
+
+@theme inline {
+  --color-surface: var(--color-bg);
+  --color-surface-1: var(--color-bg-secondary);
+  --color-surface-2: var(--color-bg-tertiary);
+  --color-surface-warm: var(--color-bg-warm);
+  --color-raised: var(--color-raised);
+  --color-stage: var(--color-stage);
+  --color-on-stage: var(--color-on-stage);
+  --color-paint: var(--color-paint);
+  --color-plinth: var(--color-plinth);
+
+  --color-ink: var(--color-text);
+  --color-ink-muted: var(--color-text-secondary);
+  --color-ink-subtle: var(--color-text-tertiary);
+  --color-on-paint: var(--color-on-paint);
+  --color-on-paint-muted: var(--color-on-paint-muted);
+  --color-on-paint-line: var(--color-on-paint-line);
+
+  --color-brand: var(--color-accent);
+  --color-brand-hover: var(--color-accent-hover);
+  --color-brand-soft: var(--color-accent-light);
+  --color-brand-2: var(--color-accent-2);
+  --color-on-brand: var(--color-on-accent);
+  --color-sale: var(--color-accent-3);
+
+  --color-brass: var(--color-brass);
+  --color-on-brass: var(--color-on-brass);
+  --color-brass-tint: var(--color-brass-tint);
+  --color-brass-on-paint: var(--color-brass-on-paint);
+
+  --color-shelf: var(--color-shelf);
+  --color-shelf-hairline: var(--color-shelf-hairline);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+  --color-success-tint: var(--color-success-tint);
+  --color-warning-tint: var(--color-warning-tint);
+  --color-danger-tint: var(--color-danger-tint);
+  --color-info-tint: var(--color-info-tint);
+  --color-on-danger: var(--color-on-danger);
+
+  --color-line: var(--color-border);
+  --color-line-hover: var(--color-border-hover);
+  --color-control: var(--color-border-control);
+  --color-focus: var(--color-focus);
+  --color-focus-on-paint: var(--color-focus-on-paint);
+  --color-scrim: var(--color-scrim);
+
+  --font-sans: var(--font-commissioner), "Commissioner Variable", "Commissioner Fallback", "Segoe UI", sans-serif;
+  --font-display: var(--font-gloock), "Gloock", "Gloock Fallback", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --text-step--1: 0.75rem;
+  --text-step-0: 1rem;
+  --text-step-1: clamp(1.125rem, 1.05rem + 0.35vw, 1.333rem);
+  --text-step-2: clamp(1.375rem, 1.2rem + 0.8vw, 1.777rem);
+  --text-step-3: clamp(1.625rem, 1.3rem + 1.5vw, 2.369rem);
+  --text-step-4: clamp(2rem, 1.5rem + 2.4vw, 3.157rem);
+  --text-step-5: clamp(2.5rem, 1.7rem + 3.8vw, 4.209rem);
+  --text-step-6: clamp(3rem, 1.8rem + 5.6vw, 5.61rem);
+  --text-display-xl: clamp(4rem, 1rem + 12vw, 12rem);
+  --text-ui-md: 0.9375rem;
+  --text-ui-sm: 0.875rem;
+  --text-ui-xs: 0.8125rem;
+
+  --radius-xs: 0;
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+  --radius-pill: var(--radius-pill);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-accent: var(--shadow-accent);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-panel-left: var(--shadow-panel-left);
+
+  --spacing-gutter: var(--gutter);
+
+  --container-read: 720px;
+  --container-narrow: 1120px;
+  --container-container: 1320px;
+  --container-shop: 1320px;
+  --container-wide: 1440px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-furniture: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-weight: 400;
+    font-synthesis: none;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  :where(.on-paint) :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline-color: var(--color-focus-on-paint);
+  }
+
+  ::selection {
+    background: var(--selection-bg);
+    color: var(--selection-fg);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-hover);
+    border-radius: 0;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-tertiary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: var(--dur-reduced) !important;
+      transition-property: opacity, color, background-color, border-color !important;
+    }
+  }
+}
+
+@layer components {
+  :is(.bevel, .bevel-xs, .bevel-sm, .bevel-lg, .bevel-outline) {
+    --b: var(--bevel-md);
+    --bw: 1.5px;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .bevel-xs {
+    --b: var(--bevel-xs);
+  }
+
+  .bevel-sm {
+    --b: var(--bevel-sm);
+  }
+
+  .bevel-lg {
+    --b: var(--bevel-lg);
+  }
+
+  :is(.bevel, .bevel-xs, .bevel-sm, .bevel-lg, .bevel-outline)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--bevel-fill, currentColor);
+    transition: background-color var(--dur-micro) var(--ease-std);
+    clip-path: polygon(
+      var(--b) 0,
+      calc(100% - var(--b)) 0,
+      100% var(--b),
+      100% calc(100% - var(--b)),
+      calc(100% - var(--b)) 100%,
+      var(--b) 100%,
+      0 calc(100% - var(--b)),
+      0 var(--b)
+    );
+  }
+
+  .bevel-outline {
+    --i: calc(var(--b) + var(--bw) * 0.4142);
+  }
+
+  .bevel-outline::before {
+    background-color: var(--bevel-line, currentColor);
+    clip-path: polygon(
+      evenodd,
+      var(--b) 0,
+      calc(100% - var(--b)) 0,
+      100% var(--b),
+      100% calc(100% - var(--b)),
+      calc(100% - var(--b)) 100%,
+      var(--b) 100%,
+      0 calc(100% - var(--b)),
+      0 var(--b),
+      var(--b) 0,
+      var(--i) var(--bw),
+      var(--bw) var(--i),
+      var(--bw) calc(100% - var(--i)),
+      var(--i) calc(100% - var(--bw)),
+      calc(100% - var(--i)) calc(100% - var(--bw)),
+      calc(100% - var(--bw)) calc(100% - var(--i)),
+      calc(100% - var(--bw)) var(--i),
+      calc(100% - var(--i)) var(--bw),
+      var(--i) var(--bw)
+    );
+  }
+
+  .bevel-outline::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--bevel-fill, transparent);
+    transition: background-color var(--dur-micro) var(--ease-std);
+    clip-path: polygon(
+      var(--i) var(--bw),
+      calc(100% - var(--i)) var(--bw),
+      calc(100% - var(--bw)) var(--i),
+      calc(100% - var(--bw)) calc(100% - var(--i)),
+      calc(100% - var(--i)) calc(100% - var(--bw)),
+      var(--i) calc(100% - var(--bw)),
+      var(--bw) calc(100% - var(--i)),
+      var(--bw) var(--i)
+    );
+  }
+
+  .shelf-rule {
+    display: block;
+    height: calc(var(--shelf-weight) + var(--shelf-gap) + var(--shelf-hairline-weight));
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-shelf) 0 var(--shelf-weight),
+      transparent var(--shelf-weight) calc(var(--shelf-weight) + var(--shelf-gap)),
+      var(--color-shelf-hairline) calc(var(--shelf-weight) + var(--shelf-gap)) 100%
+    );
+  }
+
+  .shelf-rule-solid {
+    display: block;
+    height: var(--shelf-weight);
+    background-color: var(--color-shelf);
+  }
+
+  .contact-shadow {
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    bottom: calc(6% - 4px);
+    height: 12px;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(closest-side, var(--shadow-contact), transparent);
+    transform-origin: center;
+    transition:
+      transform var(--dur-micro) var(--ease-furniture),
+      opacity var(--dur-micro) var(--ease-std);
+  }
+}
+
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@utility measure {
+  max-width: 68ch;
+}
+
+@utility meta {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+svg.lucide {
+  stroke-width: 1.5;
+  flex-shrink: 0;
+}
+
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+}

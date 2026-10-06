@@ -1,0 +1,77 @@
+{
+  "metaTitle": "{brand} — Cookware, tableware and glassware for the UK and EU",
+  "metaDescription": "Pans, bakeware, plates, glasses, cutlery, coffee and bar tools from {brand}, shipped from {dispatchFrom} to the UK and EU. {withdrawalDays}-day returns and a {warrantyMonths}-month warranty.",
+  "hero": {
+    "title": "Cookware, tableware and glass for kitchens across the UK and EU",
+    "lead": "Pans, plates, glasses and the tools between them, chosen to be used every day.",
+    "open": "Open the cupboards",
+    "browse": "Browse all categories",
+    "shipsFrom": "Ships from {dispatchFrom} to the {countries}.",
+    "shelfLabel": "{category}, open shelf",
+    "cupboardLabel": "{category}, cupboard",
+    "drawersLabel": "Drawers"
+  },
+  "drawers": {
+    "title": "Every drawer in the shop",
+    "lead": "All {products, plural, one {# product} other {# products}}, sorted into {drawers, plural, one {# drawer} other {# drawers}}.",
+    "count": "{count, plural, one {# item} other {# items}}"
+  },
+  "topShelf": {
+    "plate": "Top shelf",
+    "titleRanked": "Most chosen this month",
+    "title": "Picked for the top shelf"
+  },
+  "rack": {
+    "title": "Plates, bowls and serveware",
+    "all": "All {category}"
+  },
+  "hooks": {
+    "title": "From the hooks",
+    "lead": "Mugs, coffee pots and bar tools, hung within reach."
+  },
+  "reduced": {
+    "title": "Reduced",
+    "lead": "Lowered prices on these pieces, with the previous price shown beside each.",
+    "plate": "Reduced −{percent}%",
+    "all": "See everything reduced"
+  },
+  "newest": {
+    "title": "New on the shelf",
+    "link": "Newest first"
+  },
+  "care": {
+    "title": "Looking after it",
+    "lead": "How to clean and store the materials you will find on our shelves.",
+    "castIron": {
+      "title": "Cast iron",
+      "body": "Wash with hot water and a brush, then dry it straight away and wipe a thin film of cooking oil over the surface while it is still warm. Left wet or soaked, bare cast iron rusts.",
+      "link": "Cast iron pieces"
+    },
+    "enamel": {
+      "title": "Enamel",
+      "body": "Use a soft sponge or a nylon brush. Metal scourers and abrasive powders scratch the glaze, so soak stubborn residue in warm soapy water instead.",
+      "link": "Enamelled pieces"
+    },
+    "nonStick": {
+      "title": "Non-stick",
+      "body": "Cook on low to medium heat and turn food with wooden or silicone tools. High heat and metal utensils wear the coating away.",
+      "link": "Non-stick pans"
+    },
+    "glass": {
+      "title": "Glass",
+      "body": "Avoid sudden temperature changes: don't pour boiling water into a cold glass or set a hot dish down on a cold, wet surface. Let it cool before washing.",
+      "link": "Glassware & drinkware"
+    }
+  },
+  "newsletter": {
+    "title": "New pieces, by email",
+    "lead": "A short note when new pieces go on the shelves.",
+    "label": "Email address",
+    "cta": "Sign up",
+    "note": "Unsubscribe any time. We do not sell your personal data.",
+    "privacy": "How we use your email",
+    "success": "Thanks. We'll write to {email} when new pieces arrive.",
+    "invalid": "Enter an email address in the format name@domain.com",
+    "error": "We couldn't sign you up just now. Please try again."
+  }
+}

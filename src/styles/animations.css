@@ -1,0 +1,184 @@
+@keyframes shelf-settle {
+  0% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes shelf-settle-shadow {
+  0% {
+    transform: scaleX(0.85);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes drawer-out {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes plate-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes door-open {
+  from {
+    opacity: 0;
+    transform: perspective(1600px) translateX(24px) rotateY(-12deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1600px) translateX(0) rotateY(0deg);
+  }
+}
+
+@keyframes door-open-left {
+  from {
+    opacity: 0;
+    transform: perspective(1600px) translateX(-24px) rotateY(12deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1600px) translateX(0) rotateY(0deg);
+  }
+}
+
+@keyframes door-close {
+  from {
+    opacity: 1;
+    transform: perspective(1600px) translateX(0) rotateY(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: perspective(1600px) translateX(24px) rotateY(-12deg);
+  }
+}
+
+@keyframes door-close-left {
+  from {
+    opacity: 1;
+    transform: perspective(1600px) translateX(0) rotateY(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: perspective(1600px) translateX(-24px) rotateY(12deg);
+  }
+}
+
+@keyframes shelf-loader {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  20%,
+  60% {
+    background-color: var(--color-accent);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility animate-shelf-settle {
+  animation: shelf-settle var(--dur-ui) var(--ease-furniture);
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear both;
+  }
+}
+
+@utility animate-drawer-out {
+  animation: drawer-out var(--dur-ui) var(--ease-furniture) both;
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear both;
+  }
+}
+
+@utility animate-plate-in {
+  animation: plate-in var(--dur-micro) var(--ease-furniture) both;
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear both;
+  }
+}
+
+@utility animate-rise-in {
+  animation: rise-in var(--dur-panel) var(--ease-furniture) both;
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear both;
+  }
+}
+
+@utility animate-fade-in {
+  animation: fade-in var(--dur-micro) var(--ease-std) both;
+}
+
+@utility animate-door-open {
+  animation: door-open var(--dur-panel) var(--ease-furniture) both;
+  transform-origin: right center;
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear both;
+  }
+}
+
+@utility animate-door-open-left {
+  animation: door-open-left var(--dur-panel) var(--ease-furniture) both;
+  transform-origin: left center;
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear both;
+  }
+}
+
+@utility animate-door-close {
+  animation: door-close var(--dur-panel-close) var(--ease-furniture) both;
+  transform-origin: right center;
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear reverse both;
+  }
+}
+
+@utility animate-door-close-left {
+  animation: door-close-left var(--dur-panel-close) var(--ease-furniture) both;
+  transform-origin: left center;
+  @media (prefers-reduced-motion: reduce) {
+    animation: fade-in var(--dur-reduced) linear reverse both;
+  }
+}

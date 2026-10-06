@@ -1,0 +1,517 @@
+@keyframes dresser-door-left-load {
+  0% {
+    transform: rotateY(0deg);
+    animation-timing-function: var(--ease-std);
+  }
+  22% {
+    transform: rotateY(-6deg);
+    animation-timing-function: var(--ease-in-out);
+  }
+  100% {
+    transform: rotateY(-105deg);
+  }
+}
+
+@keyframes dresser-door-right-load {
+  0% {
+    transform: rotateY(0deg);
+    animation-timing-function: var(--ease-std);
+  }
+  22% {
+    transform: rotateY(6deg);
+    animation-timing-function: var(--ease-in-out);
+  }
+  100% {
+    transform: rotateY(105deg);
+  }
+}
+
+@keyframes dresser-light-load {
+  0%,
+  8% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.9;
+  }
+  55%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes dresser-settle {
+  from {
+    transform: translateY(-10px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes dresser-door-left {
+  0% {
+    transform: rotateY(0deg);
+    animation-timing-function: var(--ease-std);
+  }
+  15% {
+    transform: rotateY(-6deg);
+    animation-timing-function: var(--ease-in-out);
+  }
+  60%,
+  100% {
+    transform: rotateY(-105deg);
+  }
+}
+
+@keyframes dresser-door-right {
+  0% {
+    transform: rotateY(0deg);
+    animation-timing-function: var(--ease-std);
+  }
+  15% {
+    transform: rotateY(6deg);
+    animation-timing-function: var(--ease-in-out);
+  }
+  60%,
+  100% {
+    transform: rotateY(105deg);
+  }
+}
+
+@keyframes dresser-light {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  34%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes dresser-dolly {
+  from {
+    transform: none;
+    animation-timing-function: var(--ease-in-out);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes rack-track {
+  to {
+    transform: translateX(calc(-1 * var(--rack-distance)));
+  }
+}
+
+@keyframes rack-drift {
+  from {
+    translate: 14px 0;
+  }
+  to {
+    translate: -14px 0;
+  }
+}
+
+@keyframes rack-shadow-drift {
+  from {
+    translate: -4px 0;
+  }
+  to {
+    translate: 4px 0;
+  }
+}
+
+@keyframes rack-drop {
+  from {
+    transform: translateY(-16px);
+    animation-timing-function: var(--ease-furniture);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rack-shadow-drop {
+  from {
+    transform: scaleX(0.7);
+    opacity: 0.4;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes shelf-reveal {
+  from {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes shadow-reveal {
+  from {
+    transform: scaleX(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes plaque-press {
+  from {
+    transform: translateY(-8px) scale(1.012);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes plinth-line {
+  from {
+    transform: scaleX(0.4);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes plinth-rise {
+  from {
+    transform: translateY(40px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes draw-stroke {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes word-settle {
+  from {
+    transform: translateY(0.32em);
+    opacity: 0.45;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes row-rise {
+  from {
+    transform: translateY(18px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes depth-lag {
+  to {
+    transform: translateY(var(--lag, 36px));
+  }
+}
+
+@keyframes doors-close-left {
+  from {
+    transform: rotateY(-100deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes doors-close-right {
+  from {
+    transform: rotateY(100deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes plaque-rise {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+[data-pin="rack"] [data-rack-pin] {
+  --rack-inner: calc(min(100cqw, var(--max-width)) - 2 * var(--gutter));
+  --rack-left: calc((100cqw - min(100cqw, var(--max-width))) / 2 + var(--gutter));
+  --rack-distance: max(0px, calc(var(--rack-count) * 196px + 3px - var(--rack-inner)));
+}
+
+[data-draw] [data-stroke] {
+  stroke-dasharray: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-scene="dresser"] [data-door="left"] {
+    animation: dresser-door-left-load 1500ms 250ms both;
+  }
+
+  [data-scene="dresser"] [data-door="right"] {
+    animation: dresser-door-right-load 1500ms 250ms both;
+  }
+
+  [data-scene="dresser"] [data-door-light] {
+    animation: dresser-light-load 1500ms 250ms linear both;
+  }
+
+  [data-scene="dresser"] [data-cupboard] [data-settle] [data-packshot] {
+    animation: dresser-settle 600ms calc(1150ms + var(--i, 0) * 70ms) var(--ease-furniture) both;
+  }
+
+  [data-scene="drawers"] [data-drawer-contents] {
+    overflow: clip;
+  }
+
+  [data-scene="drawers"] [data-drawer-tray] {
+    transition: transform 620ms var(--ease-furniture) calc(var(--i, 0) * 90ms);
+  }
+
+  [data-scene="drawers"][data-drawers="closed"] [data-drawer-tray] {
+    transform: translateY(calc(-100% - 0.75rem));
+  }
+
+  [data-scene="drawers"][data-drawers="closed"] [data-drawer-slot]:is(:hover, :focus-within) [data-drawer-tray] {
+    transform: none;
+    transition-duration: var(--dur-ui);
+    transition-delay: 0s;
+  }
+
+  [data-draw] [data-stroke] {
+    animation: draw-stroke 1600ms calc(200ms + var(--i, 0) * 40ms) var(--ease-furniture) both;
+  }
+
+  [data-anim="words"] [data-word] {
+    animation: word-settle var(--dur-reveal) calc(120ms + var(--i, 0) * 40ms) var(--ease-furniture) both;
+  }
+
+  [data-scene="doors-close"][data-play] > :first-child {
+    perspective: 900px;
+  }
+
+  [data-scene="doors-close"][data-play] [data-door="left"] {
+    transform-origin: left center;
+    animation: doors-close-left 600ms 200ms var(--ease-in-out) both;
+  }
+
+  [data-scene="doors-close"][data-play] [data-door="right"] {
+    transform-origin: right center;
+    animation: doors-close-right 600ms 200ms var(--ease-in-out) both;
+  }
+
+  [data-scene="doors-close"][data-play] [data-plaque] {
+    animation: plaque-rise 420ms 680ms var(--ease-furniture) both;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  [data-scene="dresser"][data-doors="closed"] [data-door] {
+    pointer-events: auto;
+    cursor: pointer;
+    transition: rotate var(--dur-micro) var(--ease-furniture);
+  }
+
+  [data-scene="dresser"][data-doors="closed"] [data-door="left"]:hover {
+    rotate: y -6deg;
+  }
+
+  [data-scene="dresser"][data-doors="closed"] [data-door="right"]:hover {
+    rotate: y 6deg;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+    [data-scene="dresser"] {
+      height: 220vh;
+      view-timeline: --dresser block;
+    }
+
+    [data-scene="dresser"] [data-scene-stage] {
+      position: sticky;
+      top: var(--stage-top, 0px);
+    }
+
+    [data-scene="dresser"] [data-door="left"] {
+      animation: dresser-door-left linear both;
+      animation-timeline: --dresser;
+      animation-range: contain 0% contain 100%;
+    }
+
+    [data-scene="dresser"] [data-door="right"] {
+      animation: dresser-door-right linear both;
+      animation-timeline: --dresser;
+      animation-range: contain 0% contain 100%;
+    }
+
+    [data-scene="dresser"] [data-door-light] {
+      animation: dresser-light linear both;
+      animation-timeline: --dresser;
+      animation-range: contain 0% contain 100%;
+    }
+
+    [data-scene="dresser"] [data-cupboard] [data-settle] [data-packshot] {
+      animation: dresser-settle linear both;
+      animation-timeline: --dresser;
+      animation-range: contain calc(26% + var(--i, 0) * 4%) contain calc(50% + var(--i, 0) * 4%);
+    }
+
+    [data-scene="dresser"] [data-dresser] {
+      transform-origin: 72% var(--dolly-y, 72%);
+      animation: dresser-dolly linear both;
+      animation-timeline: --dresser;
+      animation-range: contain 60% contain 100%;
+    }
+
+    [data-pin="rack"] [data-rack-pin] {
+      --rack-top: calc((100vh - var(--rack-stage-h, 640px)) / 2);
+      --rack-start: calc(100vh - var(--rack-top));
+      view-timeline: --rack block;
+    }
+
+    [data-pin="rack"] [data-rack-stage] {
+      position: sticky;
+      top: var(--rack-top);
+    }
+
+    [data-pin="rack"] [data-rack-spacer] {
+      height: var(--rack-distance);
+    }
+
+    [data-pin="rack"] [data-rack-scroller] {
+      overflow: visible;
+    }
+
+    [data-pin="rack"] [data-rack-track] {
+      animation: rack-track linear both;
+      animation-timeline: --rack;
+      animation-range: cover var(--rack-start) cover calc(var(--rack-start) + var(--rack-distance));
+    }
+
+    [data-pin="rack"] [data-rack-item] {
+      --rack-at: calc(var(--rack-start) + var(--rack-left) + 99.5px + var(--i, 0) * 196px - 40cqw);
+    }
+
+    [data-pin="rack"] [data-rack-item] [data-depth="2"] {
+      animation: rack-drift linear both;
+      animation-timeline: --rack;
+      animation-range: cover calc(var(--rack-at) - 60cqw - 98px) cover calc(var(--rack-at) + 40cqw + 98px);
+    }
+
+    [data-pin="rack"] [data-rack-item] [data-packshot] {
+      animation: rack-drop linear both;
+      animation-timeline: --rack;
+      animation-range: cover calc(var(--rack-at) - 110px) cover calc(var(--rack-at) + 30px);
+    }
+
+    [data-pin="rack"] [data-rack-item] .contact-shadow {
+      animation:
+        rack-shadow-drop linear both,
+        rack-shadow-drift linear both;
+      animation-timeline: --rack, --rack;
+      animation-range:
+        cover calc(var(--rack-at) - 110px) cover calc(var(--rack-at) + 30px),
+        cover calc(var(--rack-at) - 60cqw - 98px) cover calc(var(--rack-at) + 40cqw + 98px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (max-width: 1023.98px) {
+    [data-pin="rack"] [data-rack-item] [data-packshot] {
+      animation: rack-drop linear both;
+      animation-timeline: view(inline);
+      animation-range: entry 20% entry 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal="shelf"] [data-cubby] img {
+      animation: shelf-reveal linear both;
+      animation-timeline: view();
+      animation-range: cover calc(4% + var(--i, 0) * 4%) cover calc(30% + var(--i, 0) * 4%);
+    }
+
+    [data-reveal="shelf"] [data-cubby] .contact-shadow {
+      animation: shadow-reveal linear both;
+      animation-timeline: view();
+      animation-range: cover calc(8% + var(--i, 0) * 4%) cover calc(32% + var(--i, 0) * 4%);
+    }
+
+    [data-landing] [data-plaque],
+    main:has(> [data-landing]) ~ footer [data-plaque] {
+      animation: plaque-press linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+
+    main:has(> [data-landing]) ~ footer[data-plinth] > span:first-child {
+      animation: plinth-line linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+
+    main:has(> [data-landing]) ~ footer[data-plinth] > div > div {
+      animation: plinth-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+
+    [data-landing="about"] [data-row] {
+      animation: row-rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(10% + var(--i, 0) * 12%) cover calc(30% + var(--i, 0) * 6%);
+    }
+
+    [data-landing="about"] [data-scene="elevation"] [data-draw] {
+      --lag: 48px;
+      animation: depth-lag linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 800px;
+    }
+
+    [data-category-opener] [data-depth="1"] {
+      --lag: 36px;
+      animation: depth-lag linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 600px;
+    }
+
+    [data-category-opener] [data-depth="1"] [data-packshot] {
+      --lag: -10px;
+      animation: depth-lag linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 600px;
+    }
+  }
+}

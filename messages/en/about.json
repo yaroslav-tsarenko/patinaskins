@@ -1,0 +1,58 @@
+{
+  "metaTitle": "About {brand}",
+  "metaDescription": "What {brand} sells, what it doesn't, and how ordering, dispatch from {dispatchFrom}, delivery and returns work.",
+  "breadcrumbHome": "Home",
+  "breadcrumb": "About",
+  "hero": {
+    "title": "A dresser full of good kitchen things",
+    "lead": "{brand} is an online shop for cookware, bakeware, tableware, glassware, cutlery, coffee and bar tools, storage and kitchen linen, sent to the {countries}."
+  },
+  "shelves": {
+    "title": "What goes on our shelves",
+    "rangeTitle": "Kitchen things, and only those",
+    "rangeBody": "Everything we list is for cooking, serving, drinking or keeping a kitchen in order. The shop is sorted into the same categories you see in the menu:",
+    "listingTitle": "What every listing has",
+    "listing": {
+      "new": "New stock only. Nothing used, refurbished or ex-display.",
+      "photo": "At least one photograph of the product and a written description.",
+      "stock": "Its stock status. A piece that has run out is marked “Sold out”.",
+      "prices": "A price you can view in {currencies}."
+    }
+  },
+  "notSold": {
+    "title": "What we don't sell",
+    "lead": "Some things are left out of the range on purpose.",
+    "items": {
+      "electric": "Electrical appliances, or anything that runs on a plug or a battery",
+      "knives": "Kitchen knives, cleavers or other blades",
+      "food": "Food or drink",
+      "used": "Used, refurbished or outlet stock"
+    }
+  },
+  "ordering": {
+    "title": "How ordering works",
+    "order": {
+      "label": "Order",
+      "body": "Add pieces to your bag and pay by card ({cardMethods}). Prices can be shown in {currencies}.",
+      "link": "Payment policy"
+    },
+    "dispatch": {
+      "label": "Dispatch",
+      "body": "Orders are packed at {dispatchFrom} and are typically processed within {processingDays} of payment.",
+      "link": "Shipping policy"
+    },
+    "delivery": {
+      "label": "Delivery & returns",
+      "delivery": "Delivery to the United Kingdom takes {uk}, and to EU member states {eu}. Standard delivery costs {cost}, and is free on orders of {threshold} or more.",
+      "returns": "You can cancel within {days} days of receiving your order, without giving a reason.",
+      "warranty": "Faults are covered by our {months}-month warranty.",
+      "deliveryLink": "Shipping policy",
+      "returnsLink": "Returns & refunds",
+      "warrantyLink": "Warranty"
+    }
+  },
+  "company": {
+    "title": "Who runs the shop"
+  },
+  "browse": "Browse the shop"
+}

@@ -1,0 +1,19 @@
+{
+  "notFound": "This shelf is empty",
+  "notFoundTitle": "Page not found",
+  "notFoundSubtitle": "The page you were looking for has moved or never existed. Search the shop or pick a category below.",
+  "searchLabel": "Search the shop",
+  "searchPlaceholder": "Search pans, plates, glasses…",
+  "searchSubmit": "Search",
+  "categoriesTitle": "Categories",
+  "helpTitle": "Help",
+  "backHome": "Back to home",
+  "serverError": "Something went wrong loading this page.",
+  "serverErrorTitle": "Something went wrong",
+  "serverErrorBody": "This is a fault on our side. Try again, or come back in a few minutes. If it keeps happening, email {email}.",
+  "errorReference": "Reference: {digest}",
+  "unauthorized": "Sign in to continue",
+  "forbidden": "You don't have access to this page",
+  "validationError": "Check the highlighted fields",
+  "networkError": "We couldn't reach the store. Check your connection and try again."
+}
