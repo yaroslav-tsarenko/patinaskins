@@ -9,12 +9,14 @@ export const generateMetadata = policyMetadata(
 );
 
 const purposes: { purpose: string; data: string; basis: string }[] = [
-  { purpose: "Taking, packing and delivering your order", data: "Name, email, phone, delivery and billing address, items ordered", basis: "Contract" },
+  { purpose: "Taking your order and delivering items to your Steam account", data: "Name, email, phone (optional), billing address, items ordered, Steam ID, trade URL and the trade token it contains", basis: "Contract" },
+  { purpose: "Signing you in with Steam and linking your Steam account", data: "Steam ID, public Steam profile name, avatar and profile link", basis: "Contract" },
   { purpose: "Running your account", data: "Name, email, phone, date of birth, address, password (stored as a hash), order history, saved items", basis: "Contract" },
+  { purpose: "Recording your request for immediate delivery", data: "The time you ticked the checkbox and the wording you agreed to", basis: "Legal obligation" },
   { purpose: `Checking you are ${F.minAge} or over`, data: "Date of birth", basis: "Contract and legitimate interests" },
   { purpose: "Answering messages and complaints", data: "Name, email, order number, the content of your message, the IP address it was sent from", basis: "Contract and legitimate interests" },
   { purpose: "Refunds, chargebacks and fraud prevention", data: "Order details, payment result and transaction reference, IP address", basis: "Legal obligation and legitimate interests" },
-  { purpose: "Not selling to restricted countries and territories", data: "Delivery and billing country, address", basis: "Legal obligation" },
+  { purpose: "Not selling to restricted countries and territories", data: "Billing country and address", basis: "Legal obligation" },
   { purpose: "Accounting and tax records", data: "Order and refund records", basis: "Legal obligation" },
   { purpose: "Newsletter, only if you sign up", data: "Email address", basis: "Consent" },
   { purpose: "Keeping the website secure and working", data: "IP address, browser and device type, pages requested, error logs", basis: "Legitimate interests" },
@@ -43,7 +45,9 @@ const sections: PolicySection[] = [
       <>
         <ul>
           <li><strong>Account details:</strong> first and last name, email, phone number, date of birth, street, city, postcode and country, and your password, which we store only as a one-way hash.</li>
-          <li><strong>Order details:</strong> the items you buy, delivery and billing addresses, contact details, the delivery method, and the payment result and transaction reference sent to us by our payment provider.</li>
+          <li><strong>Steam details:</strong> your Steam ID (SteamID64), and from your public Steam profile your display name, avatar and profile link. If you sign in with Steam, Steam confirms your Steam ID to us; we never see your Steam password.</li>
+          <li><strong>Trade URL:</strong> the Steam trade URL you save, which contains your Steam account number and a trade token. We use it only to send trade offers for items you bought.</li>
+          <li><strong>Order details:</strong> the items you buy, billing address, contact details, your request for immediate delivery, the status of each trade offer, and the payment result and transaction reference sent to us by our payment provider.</li>
           <li><strong>Messages:</strong> what you send through the contact form or by email, including any order number, and for the contact form the IP address it was sent from.</li>
           <li><strong>Saved items:</strong> products you save to your account.</li>
           <li><strong>Newsletter:</strong> your email address, if you sign up.</li>
@@ -125,9 +129,10 @@ const sections: PolicySection[] = [
     title: "International transfers",
     body: (
       <p>
-        Your order is packed and dispatched from {STORE_POLICY.shipping.dispatchCountry}, so delivery details are processed in the European Union. The UK and the EU recognise
-        each other&rsquo;s data protection as adequate. Where a service provider processes data outside the UK or the European Economic Area, we
-        use an adequacy decision or standard contractual clauses (with the UK International Data Transfer Addendum for UK data).
+        Steam is operated by Valve Corporation in the United States, and Steam sign-in and trade offers are processed there under Valve&rsquo;s
+        own privacy policy. Our item delivery partner receives your Steam ID and trade token to send the offer. Where a service provider
+        processes data outside the UK or the European Economic Area, we use an adequacy decision or standard contractual clauses (with the UK
+        International Data Transfer Addendum for UK data).
       </p>
     ),
   },
@@ -175,7 +180,7 @@ const sections: PolicySection[] = [
     body: (
       <p>
         The website is served only over HTTPS. Passwords are stored as one-way hashes. Access to customer data is limited to the people who
-        need it to fulfil orders and answer messages. Card details never reach our systems.
+        need it to fulfil orders and answer messages. Card details, Steam passwords and Steam Guard codes never reach our systems.
       </p>
     ),
   },

@@ -1,20 +1,11 @@
 import { readMotionEnv, type MotionEnv } from "./env";
-import { mountDresser } from "./scenes/dresser";
-import { mountDrawers } from "./scenes/drawers";
-import { mountHooks } from "./scenes/hooks";
-import { mountRack } from "./scenes/rack";
 
 interface Scene {
   selector: string;
   mount: (el: HTMLElement, env: MotionEnv) => () => void;
 }
 
-const SCENES: Scene[] = [
-  { selector: "[data-scene=dresser]", mount: mountDresser },
-  { selector: "[data-scene=drawers]", mount: mountDrawers },
-  { selector: "[data-pin=rack]", mount: mountRack },
-  { selector: "[data-scene=hooks]", mount: mountHooks },
-];
+const SCENES: Scene[] = [];
 
 const yieldToMain = () => new Promise<void>((resolve) => window.setTimeout(resolve, 0));
 

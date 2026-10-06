@@ -13,7 +13,7 @@ import { TotalsList } from "@/components/checkout/TotalsList";
 import { useCart } from "@/providers/CartProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { formatPrice } from "@/lib/utils/format-price";
-import { addressLines, deliveryEstimate, plateStatusFor, type OrderView } from "@/lib/orders";
+import { plateStatusFor, type OrderView } from "@/lib/orders";
 import { COMPANY } from "@/lib/company";
 import { STORE_POLICY } from "@/config/store-policy";
 
@@ -26,7 +26,7 @@ const INTERVAL_MS = 3000;
 function Doors({ number }: { number: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
-    const key = `brasmora-doors-${number}`;
+    const key = `patina-doors-${number}`;
     try {
       if (window.sessionStorage.getItem(key)) return;
       window.sessionStorage.setItem(key, "1");
@@ -57,7 +57,6 @@ function Doors({ number }: { number: string }) {
 
 function OrderSummary({ order }: { order: OrderView }) {
   const t = useTranslations("checkout.confirmed");
-  const estimate = deliveryEstimate(order.delivery?.country);
   return (
     <div className="flex flex-col gap-8 border-t border-line pt-8">
       <section aria-labelledby="confirmed-items">
@@ -70,7 +69,7 @@ function OrderSummary({ order }: { order: OrderView }) {
               <Cubby src={line.imageUrl} alt="" size="compact" sizes="64px" className="w-16 shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="m-0 line-clamp-2 text-ui-sm font-medium text-ink">{line.name}</p>
-                <p className="meta tabular m-0 text-ink-muted">{t("lineQty", { count: line.quantity, unit: formatPrice(line.unit, order.currency) })}</p>
+                {line.variantName ? <p className="meta m-0 text-ink-muted">{line.variantName}</p> : null}
               </div>
               <p className="tabular m-0 shrink-0 text-ui-sm text-ink">{formatPrice(line.total, order.currency)}</p>
             </li>
@@ -84,19 +83,13 @@ function OrderSummary({ order }: { order: OrderView }) {
           <h2 id="confirmed-delivery" className="eyebrow m-0 mb-2 text-ink-muted">
             {t("deliveryTitle")}
           </h2>
-          <p className="m-0 text-ui-sm leading-[1.6] text-ink">
-            {addressLines(order.delivery).map((line) => (
-              <span key={line} className="block">
-                {line}
-              </span>
-            ))}
-          </p>
+          <p className="tabular m-0 text-ui-sm leading-[1.6] text-ink">{order.steamId ? t("steamTo", { id: order.steamId }) : null}</p>
         </section>
         <section aria-labelledby="confirmed-when">
           <h2 id="confirmed-when" className="eyebrow m-0 mb-2 text-ink-muted">
             {t("whenTitle")}
           </h2>
-          <p className="m-0 text-ui-sm leading-[1.6] text-ink">{t("when", { processing: estimate.processing, transit: estimate.transit })}</p>
+          <p className="m-0 text-ui-sm leading-[1.6] text-ink">{t("when", { usual: STORE_POLICY.delivery.usualTime })}</p>
         </section>
       </div>
     </div>
@@ -108,25 +101,24 @@ export function ConfirmedView() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const { user } = useAuth();
-  const paymentLinkId = searchParams.get("id") || searchParams.get("paymentLinkId");
-  const checkoutId = searchParams.get("checkoutId");
-  const [state, setState] = useState<ViewState>(paymentLinkId && checkoutId ? "checking" : "missing");
+  const orderId = searchParams.get("order");
+  const [state, setState] = useState<ViewState>(orderId ? "checking" : "missing");
   const [order, setOrder] = useState<OrderView | null>(null);
   const [run, setRun] = useState(0);
   const cleared = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    if (!paymentLinkId || !checkoutId) return;
+    if (!orderId) return;
     let cancelled = false;
     let timer: number | undefined;
     let attempt = 0;
     const poll = async () => {
       attempt += 1;
       try {
-        const res = await fetch(`/api/orders/verify?paymentLinkId=${encodeURIComponent(paymentLinkId)}&checkoutId=${encodeURIComponent(checkoutId)}`, { cache: "no-store" });
+        const res = await fetch(`/api/orders/verify?order=${encodeURIComponent(orderId)}`, { cache: "no-store" });
         if (cancelled) return;
-        if (res.status === 404) return setState("notFound");
+        if (res.status === 404 || res.status === 401) return setState("notFound");
         if (!res.ok) return setState("error");
         const data = (await res.json()) as { verification: Verification; order: OrderView };
         if (cancelled) return;
@@ -146,14 +138,14 @@ export function ConfirmedView() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [paymentLinkId, checkoutId, run]);
+  }, [orderId, run]);
 
   useEffect(() => {
     if (state === "confirmed" && !cleared.current) {
       cleared.current = true;
       clearCart();
       try {
-        sessionStorage.removeItem("brasmora-checkout-draft");
+        sessionStorage.removeItem("patina-checkout-draft");
       } catch {}
     }
     if (state !== "checking") headingRef.current?.focus();
@@ -286,7 +278,7 @@ export function ConfirmedView() {
         {t("error.body", { email: COMPANY.email })}
       </Alert>
       <div className="flex flex-wrap items-center gap-4">
-        <Button onPress={recheck} isDisabled={!paymentLinkId || !checkoutId}>
+        <Button onPress={recheck} isDisabled={!orderId}>
           {t("pending.recheck")}
         </Button>
         <Button as={Link} href="/contact" variant="outline">

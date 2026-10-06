@@ -34,6 +34,11 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ code: "INVALID_REQUEST", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) }, { status: 400 });
   }
   const data = parsed.data;
+  const newEmail = !user.email && data.email ? data.email.toLowerCase() : null;
+  if (newEmail) {
+    const taken = await prisma.user.findFirst({ where: { email: { equals: newEmail, mode: "insensitive" } }, select: { id: true } });
+    if (taken) return NextResponse.json({ code: "EMAIL_TAKEN", issues: [{ path: "email", message: "emailTaken" }] }, { status: 409 });
+  }
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -42,6 +47,7 @@ export async function PATCH(request: NextRequest) {
       name: `${data.firstName} ${data.lastName}`,
       phone: composePhone(data.phoneCountry, data.phone, dialCodeFor(data.phoneCountry)),
       dateOfBirth: parseIsoDate(data.dateOfBirth),
+      ...(newEmail ? { email: newEmail } : {}),
     },
   });
   return NextResponse.json({ success: true });

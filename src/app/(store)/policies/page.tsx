@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PoliciesIndexPage() {
   const t = await getTranslations("policies");
-  const values = { brand: F.brand, company: F.company, days: F.withdrawalDays, months: F.warrantyMonths };
+  const values = { brand: F.brand, company: F.company, days: F.withdrawalDays, hours: F.deliveryDeadlineHours, method: F.deliveryMethod };
 
   return (
     <div className="mx-auto max-w-container px-gutter pb-24">

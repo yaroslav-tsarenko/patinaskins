@@ -1,11 +1,11 @@
 {
-  "siteDescription": "Cookware, bakeware, tableware, glassware and bar tools, delivered to the UK and EU.",
-  "ogFreeOver": "Free delivery from {amount}",
-  "ogReturns": "{days}-day returns",
+  "siteDescription": "Counter-Strike 2 weapon skins, knives and gloves, delivered to your Steam account by trade offer.",
   "ogFrom": "From {price}",
   "ogItems": "{count, plural, one {# item} other {# items}}",
   "ogShop": "Shop",
   "ogProductAlt": "{name} from {brand}",
   "ogCategoryAlt": "{name} at {brand}",
-  "catalogTitle": "Cookware, tableware and kitchen tools"
+  "catalogTitle": "Counter-Strike 2 skins, knives and gloves",
+  "ogDelivery": "Delivered by {method}",
+  "ogGuarantee": "Refund if not delivered within {hours} hours"
 }

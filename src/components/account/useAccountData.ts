@@ -34,5 +34,6 @@ export function useAccountData<T>(url: string) {
     setError(false);
     setTick((n) => n + 1);
   }, []);
-  return { data, error, loading, reload, setData };
+  const refresh = useCallback(() => setTick((n) => n + 1), []);
+  return { data, error, loading, reload, refresh, setData };
 }

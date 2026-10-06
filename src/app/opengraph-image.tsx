@@ -11,7 +11,7 @@ export const alt = `${BRAND.name}: ${BRAND.tagline}`;
 
 export default async function Image() {
   const t = await getTranslations({ locale: defaultLocale, namespace: "seo" });
-  const facts = [t("ogFreeOver", { amount: POLICY_FACTS.freeThreshold }), t("ogReturns", { days: POLICY_FACTS.withdrawalDays })];
+  const facts = [t("ogDelivery", { method: POLICY_FACTS.deliveryMethod }), t("ogGuarantee", { hours: POLICY_FACTS.deliveryDeadlineHours })];
 
   return ogResponse(
     <div style={{ display: "flex", width: "100%", height: "100%", background: P.paint, color: P.chalk, padding: "84px 88px 72px", flexDirection: "column", justifyContent: "space-between" }}>

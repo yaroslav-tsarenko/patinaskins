@@ -6,7 +6,7 @@ import { rateConverter, type Convert } from "@/lib/pricing";
 import { htmlToText, clampText } from "@/lib/utils/sanitize-html";
 import { hasSupplierSku, publicBrand, scrubSupplierText, stripSupplierMentions } from "@/lib/utils/supplier";
 import { getCategoryTree } from "@/components/catalog/catalog-query";
-import { EU_COUNTRY_CODES, dayRange } from "@/components/product/product-structured-data";
+import { EU_COUNTRY_CODES } from "@/components/product/product-structured-data";
 import { validGtin } from "@/lib/seo/gtin";
 import { absoluteUrl, publicImageUrls } from "@/lib/seo/url";
 
@@ -147,7 +147,7 @@ export async function loadFeedItems(): Promise<FeedItem[]> {
     const title = cleanTitle(product.name);
     if (!title) continue;
     const description = cleanDescription(product.description, product.shortDescription, title);
-    const taxonomy = googleTaxonomyFor(chain.map((c) => c.slug), product.name, product.googleCategory);
+    const taxonomy = googleTaxonomyFor();
     const brand = publicBrand(product.brand);
     const gtin = validGtin(product.gtin, product.ean);
     const mpnRaw = product.mpn?.trim() || null;
@@ -225,9 +225,9 @@ export interface ShippingRule {
 }
 
 const DEFAULT_SHIPPING_COUNTRIES: Record<SupportedCurrency, string[]> = {
+  USD: ["GB", ...EU_COUNTRY_CODES],
   GBP: ["GB"],
   EUR: EU_COUNTRY_CODES,
-  USD: ["GB"],
 };
 
 export function shippingCountries(requested: string | null, currency: SupportedCurrency): string[] {
@@ -240,24 +240,16 @@ export function shippingCountries(requested: string | null, currency: SupportedC
   return DEFAULT_SHIPPING_COUNTRIES[currency];
 }
 
-export function shippingRules(itemPriceInBase: number, countries: string[]): ShippingRule[] {
-  const { shipping } = STORE_POLICY;
-  const handling = dayRange(shipping.processingDays);
-  const uk = dayRange(shipping.deliveryTimes.uk);
-  const eu = dayRange(shipping.deliveryTimes.eu);
-  const cost = itemPriceInBase >= shipping.freeThreshold ? 0 : shipping.standardCost;
-  return countries.map((country) => {
-    const transit = country === "GB" ? uk : eu;
-    return {
-      country,
-      service: "Standard",
-      price: cost,
-      minHandling: handling?.min ?? null,
-      maxHandling: handling?.max ?? null,
-      minTransit: transit?.min ?? null,
-      maxTransit: transit?.max ?? null,
-    };
-  });
+export function shippingRules(_itemPriceInBase: number, countries: string[]): ShippingRule[] {
+  return countries.map((country) => ({
+    country,
+    service: STORE_POLICY.delivery.method,
+    price: 0,
+    minHandling: 0,
+    maxHandling: 1,
+    minTransit: 0,
+    maxTransit: 0,
+  }));
 }
 
 export function feedHeaders(contentType: string, cacheSeconds = FEED_CACHE_SECONDS, filename?: string): HeadersInit {

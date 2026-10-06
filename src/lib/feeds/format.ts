@@ -20,7 +20,6 @@ function tag(name: string, value: string | number | null | undefined): string {
 
 export interface GoogleFeedOptions {
   countries: string[];
-  freeThreshold: number;
 }
 
 function googleItem(item: FeedItem, ctx: FeedContext, options: GoogleFeedOptions): string {
@@ -50,9 +49,6 @@ function googleItem(item: FeedItem, ctx: FeedContext, options: GoogleFeedOptions
     ...shippingRules(effective, options.countries).map(
       (rule) =>
         `<g:shipping>${tag("g:country", rule.country)}${tag("g:service", rule.service)}${tag("g:price", feedMoney(rule.price, ctx))}${tag("g:min_handling_time", rule.minHandling)}${tag("g:max_handling_time", rule.maxHandling)}${tag("g:min_transit_time", rule.minTransit)}${tag("g:max_transit_time", rule.maxTransit)}</g:shipping>`,
-    ),
-    ...options.countries.map(
-      (country) => `<g:free_shipping_threshold>${tag("g:country", country)}${tag("g:price_threshold", feedMoney(options.freeThreshold, ctx))}</g:free_shipping_threshold>`,
     ),
   ];
   return `<item>${parts.join("")}</item>`;

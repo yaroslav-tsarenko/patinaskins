@@ -32,10 +32,10 @@ const sections: PolicySection[] = [
     body: (
       <ol>
         <li>We acknowledge your complaint {F.complaintsAck}, with the name of the person handling it.</li>
-        <li>We look into it, which may include checking with the warehouse or the carrier.</li>
+        <li>We look into it, which may include checking the trade offer record with our delivery partner.</li>
         <li>
           We send you our full reply within {F.complaintsDays} days, explaining what we found and what we will do. If we need longer, for
-          example while a carrier investigates a lost parcel, we tell you why and when you will hear from us.
+          example while a reversed Steam trade is being checked, we tell you why and when you will hear from us.
         </li>
       </ol>
     ),

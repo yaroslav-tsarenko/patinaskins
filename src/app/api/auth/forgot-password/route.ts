@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
     });
 
     const resetUrl = `${SITE_URL}/auth/reset-password?token=${token}`;
-    scheduleEmail(`password reset ${user.id}`, () => sendPasswordResetEmail(user.email, resetUrl, user.firstName || user.name));
+    const email = user.email;
+    if (email) scheduleEmail(`password reset ${user.id}`, () => sendPasswordResetEmail(email, resetUrl, user.firstName || user.name));
 
     return NextResponse.json({ success: true });
   } catch (error) {

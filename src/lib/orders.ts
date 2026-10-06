@@ -1,6 +1,8 @@
 import { STORE_POLICY } from "@/config/store-policy";
 import { computeTotals, rateConverter, type Totals } from "@/lib/pricing";
-import { countryName, isUkCountry } from "@/lib/countries";
+import { countryName } from "@/lib/countries";
+import { statusMeta } from "@/lib/sih/status-labels";
+import { userMessageForSih, type SihErrorCode } from "@/lib/sih/errors";
 
 export interface StoredAddress {
   firstName?: string;
@@ -96,20 +98,79 @@ export function addressLines(address: StoredAddress | null | undefined): string[
   return [name, address.address1, address.address2 ?? "", cityLine, countryName(address.country)].filter((line): line is string => Boolean(line && line.trim()));
 }
 
-export function deliveryEstimate(countryCode: string | null | undefined): { processing: string; transit: string } {
-  return {
-    processing: STORE_POLICY.shipping.processingDays,
-    transit: isUkCountry(countryCode) ? STORE_POLICY.shipping.deliveryTimes.uk : STORE_POLICY.shipping.deliveryTimes.eu,
-  };
-}
-
 export const ORDER_VIEW_INCLUDE = {
   items: {
     include: {
       product: { select: { slug: true, images: { take: 1, orderBy: { sortOrder: "asc" as const }, select: { url: true } } } },
+      sihOrder: {
+        select: {
+          status: true,
+          sihError: true,
+          senderOfferId: true,
+          senderTimeout: true,
+          finishedAt: true,
+          refundedAt: true,
+          updatedAt: true,
+        },
+      },
     },
   },
 };
+
+const SIH_ERROR_CODES = new Set([
+  "invalid_tradelink",
+  "private_inventory",
+  "steam_guard_disabled",
+  "steam_guard_hold",
+  "steam_trade_ban",
+  "insufficient_balance",
+  "duplicate_custom_id",
+  "price_changed",
+  "item_unavailable",
+  "network",
+  "timeout",
+  "bad_response",
+  "unknown",
+]);
+
+export interface ItemDelivery {
+  status: string;
+  inFlight: boolean;
+  tone: string;
+  offerUrl: string | null;
+  expiresAt: string | null;
+  finishedAt: string | null;
+  refundedAt: string | null;
+  note: string | null;
+}
+
+export function itemDelivery(source: {
+  status: string;
+  sihError?: string | null;
+  senderOfferId?: string | null;
+  senderTimeout?: Date | null;
+  finishedAt?: Date | null;
+  refundedAt?: Date | null;
+} | null | undefined): ItemDelivery | null {
+  if (!source) return null;
+  const meta = statusMeta(source.status);
+  const errorCode = source.sihError && SIH_ERROR_CODES.has(source.sihError) ? (source.sihError as SihErrorCode) : null;
+  const fallback = userMessageForSih("unknown");
+  const reason = errorCode ? userMessageForSih(errorCode) : fallback;
+  const attention = source.status === "refund_pending" || source.status === "failed" || source.status === "rolled_back";
+  const note = attention ? (reason === fallback ? fallback : `${reason} ${fallback.replace("We could not deliver this item. ", "")}`) : null;
+  const offerId = source.senderOfferId && /^\d+$/.test(source.senderOfferId) ? source.senderOfferId : null;
+  return {
+    status: source.status,
+    inFlight: meta.inFlight,
+    tone: meta.color,
+    offerUrl: source.status === "sent" && offerId ? `https://steamcommunity.com/tradeoffer/${offerId}/` : null,
+    expiresAt: source.senderTimeout ? source.senderTimeout.toISOString() : null,
+    finishedAt: source.finishedAt ? source.finishedAt.toISOString() : null,
+    refundedAt: source.refundedAt ? source.refundedAt.toISOString() : null,
+    note: source.sihError?.startsWith("payment_") ? null : note,
+  };
+}
 
 interface OrderViewSource extends OrderAmountsSource {
   id: string;
@@ -126,6 +187,9 @@ interface OrderViewSource extends OrderAmountsSource {
   createdAt: Date;
   updatedAt: Date;
   paidAt?: Date | null;
+  steamId?: string | null;
+  waiverAcceptedAt?: Date | null;
+  waiverText?: string | null;
   items: {
     id: string;
     productName: string;
@@ -133,6 +197,7 @@ interface OrderViewSource extends OrderAmountsSource {
     quantity: number;
     price: Numeric;
     product?: { slug: string; images: { url: string }[] } | null;
+    sihOrder?: Parameters<typeof itemDelivery>[0];
   }[];
 }
 
@@ -159,6 +224,7 @@ export function orderView(order: OrderViewSource) {
       total: totals.lines[index]?.total ?? 0,
       slug: item.product?.slug ?? null,
       imageUrl: item.product?.images[0]?.url ?? null,
+      delivery: itemDelivery(item.sihOrder),
     })),
     delivery,
     billing,
@@ -169,6 +235,10 @@ export function orderView(order: OrderViewSource) {
     updatedAt: order.updatedAt.toISOString(),
     paidAt: order.paidAt ? order.paidAt.toISOString() : null,
     invoiceAvailable: invoiceAvailable(order),
+    steamId: order.steamId ?? null,
+    waiverAcceptedAt: order.waiverAcceptedAt ? order.waiverAcceptedAt.toISOString() : null,
+    waiverText: order.waiverText ?? null,
+    inFlight: order.items.some((item) => itemDelivery(item.sihOrder)?.inFlight),
   };
 }
 

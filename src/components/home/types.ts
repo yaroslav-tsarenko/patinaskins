@@ -1,30 +1,24 @@
-import type { HomepageProduct } from "@/lib/homepage-products";
+import type { ShelfProduct } from "@/components/product/ShelfTile/ShelfTile";
 
-export type HomeProduct = HomepageProduct;
-
-export interface HomeCategory {
+export interface HomeWeaponType {
+  key: string;
   name: string;
-  slug: string;
+  count: number;
+  minPrice: number | null;
+  weapons: { name: string; slug: string; count: number }[];
+}
+
+export interface HomeRarity {
+  key: string;
+  label: string;
+  color: string;
   count: number;
 }
 
-export interface HomeDrawer extends HomeCategory {
-  products: HomeProduct[];
-}
-
-export interface HomeHero {
-  shelves: { category: HomeCategory; products: HomeProduct[] }[];
-  cupboards: { category: HomeCategory; products: HomeProduct[] }[];
-  drawers: HomeCategory[];
-}
-
 export interface HomeData {
-  hero: HomeHero;
-  drawers: HomeDrawer[];
-  topShelf: { ranked: boolean; products: HomeProduct[] };
-  rack: { category: HomeCategory | null; products: HomeProduct[] };
-  hooks: { categories: HomeCategory[]; products: HomeProduct[] };
-  reduced: HomeProduct[];
-  newest: HomeProduct[];
   totalProducts: number;
+  types: HomeWeaponType[];
+  featured: ShelfProduct[];
+  rarities: HomeRarity[];
+  newest: ShelfProduct[];
 }

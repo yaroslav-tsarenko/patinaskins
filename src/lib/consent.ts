@@ -2,12 +2,12 @@
 
 import { useSyncExternalStore } from "react";
 
-export const CONSENT_KEY = "brasmora-consent";
+export const CONSENT_KEY = "patina-consent";
 export const CONSENT_VERSION = 1;
 export const CONSENT_MAX_AGE_DAYS = 365;
 
-const CHANGE_EVENT = "brasmora:consent-change";
-const OPEN_EVENT = "brasmora:cookie-settings";
+const CHANGE_EVENT = "patina:consent-change";
+const OPEN_EVENT = "patina:cookie-settings";
 
 export type OptionalConsent = "analytics" | "marketing";
 

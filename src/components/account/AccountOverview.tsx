@@ -27,7 +27,7 @@ export function AccountOverview() {
   return (
     <div>
       <AccountPageHeader title={firstName ? t("title", { name: firstName }) : t("titleNoName")}>
-        <p className="m-0 text-ink-muted">{t("signedInAs", { email: user?.email ?? "" })}</p>
+        <p className="m-0 text-ink-muted">{user?.email ? t("signedInAs", { email: user.email }) : t("signedInSteam")}</p>
       </AccountPageHeader>
 
       {welcome ? <Alert tone="success" title={t("welcomeTitle")} className="mb-8">{t("welcomeBody")}</Alert> : null}
@@ -75,7 +75,7 @@ export function AccountOverview() {
           {t("linksTitle")}
         </h2>
         <ul className="m-0 grid list-none grid-cols-1 border-t border-line p-0 sm:grid-cols-2 sm:gap-x-10">
-          {(["addresses", "profile", "saved", "orders"] as const).map((key) => (
+          {(["steam", "orders", "addresses", "profile", "saved"] as const).map((key) => (
             <li key={key} className="border-b border-line">
               <Link href={key === "saved" ? "/account/wishlist" : `/account/${key}`} className="flex min-h-14 flex-col justify-center py-3 hover-device:hover:[&>span:first-child]:underline">
                 <span className="text-step-0 font-medium text-ink underline-offset-4">{t(`links.${key}.title`)}</span>

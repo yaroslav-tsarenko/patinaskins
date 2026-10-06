@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { getSessionUser } from "@/lib/auth";
-import { buildQuote, CheckoutError, publicQuote } from "@/lib/checkout";
+import { buildSkinQuote, publicSkinQuote, SkinCheckoutError } from "@/lib/sih/checkout";
 import { checkoutQuoteSchema } from "@/lib/validators/checkout";
 
 export async function POST(request: NextRequest) {
   try {
     const body = checkoutQuoteSchema.parse(await request.json());
-    const user = await getSessionUser();
-    const quote = await buildQuote({ ...body, userId: user?.id ?? null, email: user?.email ?? null });
-    return NextResponse.json(publicQuote(quote));
+    const quote = await buildSkinQuote(body);
+    return NextResponse.json(publicSkinQuote(quote));
   } catch (error) {
-    if (error instanceof CheckoutError) {
+    if (error instanceof SkinCheckoutError) {
       return NextResponse.json({ code: error.code, ...error.details }, { status: error.status });
     }
     if (error instanceof ZodError) {

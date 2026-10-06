@@ -43,7 +43,7 @@ export interface MegaMenuProps {
 
 export function MegaMenu({ id, open, categories, activeSlug = null, activeRoot = null, onClose, onPointerEnter, onPointerLeave }: MegaMenuProps) {
   const [pointed, setPointed] = useState<string | null>(null);
-  const hovered = pointed ?? activeRoot ?? "cookware";
+  const hovered = pointed ?? activeRoot ?? "knives";
   const featured = useFeaturedProduct(open ? hovered : null);
   const hoveredName = navCategory(hovered)?.name ?? findCategory(categories, hovered)?.name ?? "";
 

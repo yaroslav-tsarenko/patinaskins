@@ -1,5 +1,5 @@
 {
-  "name": "brasmora",
+  "name": "patinaskins",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,10 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "catalog:preview": "NODE_OPTIONS=--max-old-space-size=8192 tsx scripts/import-bigbuy.ts --dry-run",
-    "catalog:import": "NODE_OPTIONS=--max-old-space-size=8192 tsx scripts/import-bigbuy.ts",
-    "local:setup": "node scripts/setup-local.mjs"
+    "local:setup": "node scripts/setup-local.mjs",
+    "catalog:sync": "tsx scripts/catalog-sync.ts",
+    "sih:smoke": "tsx scripts/sih-smoke.ts",
+    "sih:webhook": "tsx scripts/sih-webhook.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1054.0",

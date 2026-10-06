@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Your bag",
-    "description": "Check the cookware, tableware and glassware in your bag before you check out."
+    "description": "Check the Counter-Strike 2 skins in your bag before you check out."
   },
   "title": "Your bag",
   "itemCount": "{count, plural, one {# item} other {# items}}",
@@ -9,23 +9,20 @@
   "summary": "Order summary",
   "checkout": "Checkout",
   "checkoutWithTotal": "Checkout · {total}",
-  "continueShopping": "Continue shopping",
+  "continueShopping": "Continue browsing",
   "saveForLater": "Save for later",
   "removed": "Removed from your bag",
-  "limitPerItem": "You can add up to {max} of each item to one order.",
   "limitPerOrder": "One order can hold up to {max} items.",
-  "limits": "Up to {perItem} of each item and {perOrder} items per order.",
-  "freeDeliveryRemaining": "Spend {amount} more for free delivery (orders of {threshold} or more).",
-  "freeDeliveryReached": "Your order qualifies for free delivery.",
-  "discountNote": "Discount codes can be added at checkout.",
+  "limits": "One order can hold up to {perOrder} items. Each skin is a single item.",
   "empty": {
     "title": "Your bag is empty",
-    "subtitle": "Pans, plates and glasses you add will wait here until you check out.",
-    "action": "Browse the shop",
+    "subtitle": "Skins you add will wait here until you check out. Prices are confirmed again before payment.",
+    "action": "Browse skins",
     "links": {
-      "cookware": "Cookware",
-      "tableware": "Tableware",
-      "glassware": "Glassware & drinkware"
+      "knives": "Knives",
+      "gloves": "Gloves",
+      "rifles": "Rifles"
     }
-  }
+  },
+  "deliveryNote": "No delivery charge. Each item is delivered by {method} to the Steam account you confirm at checkout."
 }

@@ -157,9 +157,12 @@ function StoreFooter() {
           </div>
 
           <div className="mt-10 flex flex-col items-center gap-5 border-t border-on-paint-line py-6 lg:flex-row lg:justify-between">
-            <p className="meta order-last text-on-paint-muted lg:order-first">
-              © {year} {BRAND.name}. All rights reserved.
-            </p>
+            <div className="order-last flex flex-col gap-1 lg:order-first">
+              <p className="meta m-0 text-on-paint-muted">
+                © {year} {BRAND.name}. All rights reserved.
+              </p>
+              <p className="meta m-0 text-on-paint-muted">{BRAND.name} is not affiliated with Valve Corporation. Counter-Strike 2 and Steam are trademarks of Valve Corporation.</p>
+            </div>
             {SOCIAL.length > 0 ? (
               <ul className="m-0 flex list-none gap-6 p-0">
                 {SOCIAL.map((s) => (

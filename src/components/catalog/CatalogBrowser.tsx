@@ -14,7 +14,7 @@ import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { ProductSort, CATALOG_SORTS } from "@/components/product/ProductSort/ProductSort";
 import { FilterSummary, ProductFilters, ProductFiltersDrawer, useDisplayPrice, type FilterSelection } from "@/components/product/ProductFilters/ProductFilters";
 import type { ShelfProduct } from "@/components/product/ShelfTile/ShelfTile";
-import { CATALOG_PAGE_SIZE, buildCatalogHref, clearedParams, hasActiveFilters, type CatalogFacets, type CatalogParams, type SortKey } from "./catalog-url";
+import { CATALOG_PAGE_SIZE, LIST_FILTERS, buildCatalogHref, clearedParams, hasActiveFilters, type CatalogFacets, type CatalogParams, type SortKey } from "./catalog-url";
 
 export interface CatalogBrowserProps {
   basePath: string;
@@ -79,11 +79,42 @@ export function CatalogBrowser({
   if (activeCategoryName) chips.push({ key: "category", label: activeCategoryName, onRemove: () => apply({ category: null }) });
   if (params.brand) chips.push({ key: "brand", label: params.brand, onRemove: () => apply({ brand: null }) });
   if (priceLabel) chips.push({ key: "price", label: priceLabel, onRemove: () => apply({ minPrice: null, maxPrice: null }) });
+  for (const filter of LIST_FILTERS) {
+    for (const key of params[filter]) {
+      const option = facets[filter].find((o) => o.key === key);
+      const label =
+        filter === "qualities"
+          ? t(key === "stattrak" ? "qualityStattrak" : key === "souvenir" ? "qualitySouvenir" : "qualityNormal")
+          : option?.label ?? key;
+      chips.push({ key: `${filter}:${key}`, label, onRemove: () => apply({ [filter]: params[filter].filter((v) => v !== key) }) });
+    }
+  }
+  if (params.floatMin !== null || params.floatMax !== null) {
+    chips.push({
+      key: "float",
+      label: t("chipFloatRange", { min: (params.floatMin ?? 0).toFixed(2), max: (params.floatMax ?? 1).toFixed(2) }),
+      onRemove: () => apply({ floatMin: null, floatMax: null }),
+    });
+  }
   if (params.inStock) chips.push({ key: "inStock", label: t("chipInStock"), onRemove: () => apply({ inStock: false }) });
   if (params.onSale) chips.push({ key: "onSale", label: t("chipReduced"), onRemove: () => apply({ onSale: false }) });
 
   const parts = [contextLabel, ...chips.map((c) => c.label)].filter((p): p is string => Boolean(p));
-  const selection: FilterSelection = { brand: params.brand, minPrice: params.minPrice, maxPrice: params.maxPrice, inStock: params.inStock, onSale: params.onSale };
+  const selection: FilterSelection = {
+    brand: params.brand,
+    minPrice: params.minPrice,
+    maxPrice: params.maxPrice,
+    inStock: params.inStock,
+    onSale: params.onSale,
+    types: params.types,
+    weapons: params.weapons,
+    rarities: params.rarities,
+    exteriors: params.exteriors,
+    qualities: params.qualities,
+    collections: params.collections,
+    floatMin: params.floatMin,
+    floatMax: params.floatMax,
+  };
   const filtering = hasActiveFilters(params);
   const filterCount = chips.length;
 

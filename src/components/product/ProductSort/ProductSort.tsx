@@ -4,16 +4,18 @@ import { useTranslations } from "next-intl";
 import { Select } from "@/components/ui/Select";
 import type { SortKey } from "@/components/catalog/catalog-url";
 
-const LABEL_KEY: Record<SortKey, "sortNewest" | "sortPriceAsc" | "sortPriceDesc" | "sortPopular" | "sortName" | "sortRelevance"> = {
+const LABEL_KEY: Record<SortKey, "sortNewest" | "sortPriceAsc" | "sortPriceDesc" | "sortPopular" | "sortName" | "sortRelevance" | "sortRarity" | "sortFloat"> = {
   relevance: "sortRelevance",
   newest: "sortNewest",
   "price-asc": "sortPriceAsc",
   "price-desc": "sortPriceDesc",
   popular: "sortPopular",
   "name-asc": "sortName",
+  "rarity-desc": "sortRarity",
+  "float-asc": "sortFloat",
 };
 
-export const CATALOG_SORTS: SortKey[] = ["newest", "price-asc", "price-desc", "popular", "name-asc"];
+export const CATALOG_SORTS: SortKey[] = ["newest", "price-asc", "price-desc", "rarity-desc", "float-asc", "popular", "name-asc"];
 
 interface ProductSortProps {
   value: string;

@@ -33,31 +33,11 @@ const CONDITION: Record<string, string> = {
   used: "https://schema.org/UsedCondition",
 };
 
-function shippingDetails(price: number, countries: string[], transit: string) {
-  const handling = dayRange(STORE_POLICY.shipping.processingDays);
-  const transitDays = dayRange(transit);
-  const free = price >= STORE_POLICY.shipping.freeThreshold;
-  return {
-    "@type": "OfferShippingDetails",
-    shippingRate: { "@type": "MonetaryAmount", value: free ? 0 : STORE_POLICY.shipping.standardCost, currency: STORE_POLICY.currency },
-    shippingDestination: countries.map((code) => ({ "@type": "DefinedRegion", addressCountry: code })),
-    deliveryTime: {
-      "@type": "ShippingDeliveryTime",
-      ...(handling ? { handlingTime: { "@type": "QuantitativeValue", minValue: handling.min, maxValue: handling.max, unitCode: "DAY" } } : {}),
-      ...(transitDays ? { transitTime: { "@type": "QuantitativeValue", minValue: transitDays.min, maxValue: transitDays.max, unitCode: "DAY" } } : {}),
-    },
-  };
-}
-
 export function merchantReturnPolicy() {
-  const { returns } = STORE_POLICY;
   return {
     "@type": "MerchantReturnPolicy",
     applicableCountry: ["GB", ...EU_COUNTRY_CODES],
-    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-    merchantReturnDays: returns.withdrawalDays,
-    returnMethod: "https://schema.org/ReturnByMail",
-    returnFees: returns.returnShippingPaidBy === "customer" ? "https://schema.org/ReturnFeesCustomerResponsibility" : "https://schema.org/FreeReturn",
+    returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
     merchantReturnLink: absoluteUrl("/policies/returns"),
   };
 }
@@ -103,10 +83,6 @@ export function productJsonLd(input: ProductLdInput): Record<string, unknown> {
       availability: input.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       itemCondition: CONDITION[input.condition.toLowerCase()] ?? CONDITION.new,
       seller: { "@type": "Organization", name: COMPANY.name, alternateName: BRAND.name },
-      shippingDetails: [
-        shippingDetails(input.price, ["GB"], STORE_POLICY.shipping.deliveryTimes.uk),
-        shippingDetails(input.price, EU_COUNTRY_CODES, STORE_POLICY.shipping.deliveryTimes.eu),
-      ],
       hasMerchantReturnPolicy: merchantReturnPolicy(),
     },
     ...(reviewCount

@@ -1,30 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { orderView } from "@/lib/orders";
-import { loadOrder, PaymentStatusUnavailableError, settleOrderPayment } from "@/lib/payment-settlement";
+import { prisma } from "@/lib/prisma";
+import { getSessionUser } from "@/lib/auth";
+import { ORDER_VIEW_INCLUDE, orderView } from "@/lib/orders";
+import { refreshOrdersFor } from "@/lib/sih/poll";
+import { hasEnv } from "@/lib/env";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const paymentLinkId = searchParams.get("paymentLinkId") || searchParams.get("id");
-    const checkoutId = searchParams.get("checkoutId");
+    const user = await getSessionUser();
+    if (!user) return NextResponse.json({ code: "UNAUTHORISED" }, { status: 401 });
+    const id = new URL(request.url).searchParams.get("order");
+    if (!id) return NextResponse.json({ code: "MISSING_REFERENCE" }, { status: 400 });
 
-    if (!paymentLinkId || !checkoutId) {
-      return NextResponse.json({ code: "MISSING_REFERENCE" }, { status: 400 });
-    }
+    const exists = await prisma.order.findFirst({ where: { id, userId: user.id }, select: { id: true, paymentStatus: true } });
+    if (!exists) return NextResponse.json({ code: "ORDER_NOT_FOUND" }, { status: 404 });
+    if (exists.paymentStatus === "PAID" && hasEnv("SIH_API_KEY")) await refreshOrdersFor({ orderId: id }).catch(() => 0);
 
-    const order = await loadOrder({ paymentId: paymentLinkId });
-    if (!order) {
-      return NextResponse.json({ code: "ORDER_NOT_FOUND" }, { status: 404 });
-    }
-
-    try {
-      const result = await settleOrderPayment(order, paymentLinkId, checkoutId);
-      return NextResponse.json({ verification: result.verification, order: orderView(result.order) });
-    } catch (error) {
-      if (!(error instanceof PaymentStatusUnavailableError)) throw error;
-      console.error("Payment status check failed:", error);
-      return NextResponse.json({ verification: "pending", order: orderView(order) });
-    }
+    const order = await prisma.order.findFirst({ where: { id, userId: user.id }, include: ORDER_VIEW_INCLUDE });
+    if (!order) return NextResponse.json({ code: "ORDER_NOT_FOUND" }, { status: 404 });
+    const verification = order.paymentStatus === "PAID" || order.paymentStatus === "REFUNDED" ? "confirmed" : order.paymentStatus === "FAILED" ? "failed" : order.notes?.includes("Held for review") ? "review" : "pending";
+    return NextResponse.json({ verification, order: orderView(order) });
   } catch (error) {
     console.error("Error verifying order payment:", error);
     return NextResponse.json({ code: "SERVER_ERROR" }, { status: 500 });

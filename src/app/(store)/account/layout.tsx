@@ -10,6 +10,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 
 const CRUMB: Record<string, string> = {
   "/account/orders": "orders",
+  "/account/steam": "steam",
   "/account/wishlist": "saved",
   "/account/addresses": "addresses",
   "/account/profile": "profile",

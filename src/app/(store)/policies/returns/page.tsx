@@ -4,7 +4,7 @@ import { POLICY_FACTS as F } from "@/lib/policy-facts";
 
 export const generateMetadata = policyMetadata(
   "returns",
-  `Cancel within ${F.withdrawalDays} days of delivery, return within ${F.returnShipDays} days, refund within ${F.refundDays} days to the card you paid with. Faulty items are returned at our cost.`,
+  `When ${F.brand} refunds ${F.game} items: undelivered items, Steam trade reversals and cancellations before delivery begins. Refunds within ${F.refundDays} days to ${F.refundMethod}.`,
 );
 
 const sections: PolicySection[] = [
@@ -13,126 +13,95 @@ const sections: PolicySection[] = [
     title: "In short",
     body: (
       <ul>
-        <li>You can cancel within {F.withdrawalDays} days of receiving your order, without giving a reason.</li>
-        <li>Send the items back within {F.returnShipDays} days of telling us.</li>
-        <li>You pay for the return unless the item is faulty, damaged or not what you ordered.</li>
-        <li>We refund within {F.refundDays} days of receiving the items, or of your proof of return if that comes first, to the card you paid with.</li>
+        <li>If we cannot deliver an item within {F.deliveryDeadlineHours} hours of payment confirmation, we refund the price you paid for it.</li>
+        <li>If Steam reverses the trade while the item is under trade protection, we refund the item.</li>
+        <li>You can cancel free of charge before {F.cancelBefore}.</li>
+        <li>Once delivery has begun, the {F.withdrawalDays}-day right of withdrawal no longer applies, because you asked us at checkout to start delivery straight away.</li>
+        <li>Refunds are made within {F.refundDays} days to {F.refundMethod}, in the currency you paid in.</li>
       </ul>
     ),
   },
   {
-    id: "right-to-cancel",
-    title: "Your right to cancel",
+    id: "withdrawal",
+    title: "Right of withdrawal and immediate delivery",
     body: (
       <>
         <p>
-          The Consumer Contracts Regulations 2013 (UK) and the Consumer Rights Directive (EU) give you {F.withdrawalDays} days to cancel an
-          online order. The period starts the day after you, or someone you name, receive the goods. If an order arrives in more than one
-          parcel, it starts the day after the last one arrives.
+          The Consumer Contracts Regulations 2013 (UK) and the Consumer Rights Directive (EU) give consumers {F.withdrawalDays} days to
+          withdraw from a contract for digital content, unless delivery has begun with their express consent and acknowledgement that the
+          right is lost.
         </p>
         <p>
-          The right covers everything we sell. We do not make an exception for hygiene-sealed goods: none of our products is sold sealed for
-          health reasons.
-        </p>
-        <p>You can also cancel an order before it is dispatched. If it has not left the warehouse, we cancel it and refund the full amount.</p>
-      </>
-    ),
-  },
-  {
-    id: "how-to-return",
-    title: "How to return an item",
-    body: (
-      <ol>
-        <li>
-          Email {F.email} or use the <Link href="/contact">contact form</Link> within {F.withdrawalDays} days of delivery. Give your order
-          number and the items you are returning. A reason is optional.
-        </li>
-        <li>We reply {F.replyTime} with the return address and what to write on the parcel.</li>
-        <li>
-          Pack the items securely, in the original packaging if you still have it, and send them within {F.returnShipDays} days of your
-          message. Use a tracked service and keep the receipt: it is your proof of return.
-        </li>
-        <li>We inspect the items when they arrive and email you to confirm the refund.</li>
-      </ol>
-    ),
-  },
-  {
-    id: "return-costs",
-    title: "Return costs",
-    body: (
-      <>
-        <p>
-          If you change your mind, you pay the cost of sending the items back. Returns go to the address we give you, which may be in Spain,
-          so the cost depends on where you send from and the service you choose.
+          Our items are delivered straight after payment. At checkout you tick a separate box, which is not ticked in advance: &ldquo;
+          {F.waiverText}&rdquo; Without it the order cannot be placed. We store the time and the wording with your order and repeat it in your
+          confirmation email.
         </p>
         <p>
-          If an item is faulty, damaged in transit or not what you ordered, we pay the return cost. Tell us first and we will arrange the
-          return or refund your postage.
+          Delivery begins when we request the Steam trade offer for an item. Until then you can cancel without charge: email {F.email} or use
+          the <Link href="/contact">contact form</Link> with your order number.
         </p>
       </>
     ),
   },
   {
-    id: "condition",
-    title: "Condition of returned items",
+    id: "when-we-refund",
+    title: "When we refund",
     body: (
       <>
+        <ul>
+          <li>The item could not be sourced or the trade offer could not be sent within {F.deliveryDeadlineHours} hours of payment confirmation.</li>
+          <li>The trade offer failed or expired before you could accept it, for a reason on our side.</li>
+          <li>Steam reversed the trade while the item was under trade protection and the item left your inventory.</li>
+          <li>The item delivered is not the item named in your order (a different market name, exterior or quality).</li>
+          <li>You cancelled before {F.cancelBefore}.</li>
+        </ul>
         <p>
-          You may handle an item as you would in a shop to check what it is like. Please do not cook with, bake in, wash in a dishwasher or
-          store food in an item you might return.
-        </p>
-        <p>
-          If an item comes back used, or damaged because it was handled more than necessary, we may reduce the refund by the loss in value.
-          We tell you the amount and the reason before we refund. We never reduce a refund for a faulty item.
+          If an offer cannot be completed because of the receiving Steam account, for example an invalid trade URL, a private inventory, a
+          trade ban or cooldown, or a Steam Guard restriction, we refund the item and tell you what to change before buying again.
         </p>
       </>
     ),
   },
   {
-    id: "refunds",
-    title: "Refunds",
+    id: "not-refundable",
+    title: "When we do not refund",
     body: (
       <>
         <p>
-          We refund within {F.refundDays} days of the day we receive the items back or, if earlier, the day you send us proof that you have
-          returned them. For an order cancelled before dispatch, we refund within {F.refundDays} days of your cancellation.
+          Once an item is in your Steam inventory and the trade is not reversed by Steam, we do not take it back or refund it because you
+          changed your mind, found a lower price elsewhere, or wanted a different float or pattern within the stated range.
         </p>
         <p>
-          The refund includes the price of the items and the standard delivery charge you paid for them. If you return only part of an
-          order, the delivery charge is not refunded unless the whole order is returned.
-        </p>
-        <p>
-          Refunds go to the same card you paid with, in the same currency. We do not charge any fee. Your bank may take a few working days
-          to show the refund on your statement.
+          Changes Valve makes to {F.game} or to Steam, such as changes to how an item looks or to trading rules, are outside our control and
+          are not grounds for a refund.
         </p>
       </>
     ),
   },
   {
-    id: "faulty",
-    title: "Faulty, damaged or wrong items",
+    id: "how-refunds",
+    title: "How refunds are paid",
     body: (
       <>
         <p>
-          If an item arrives damaged, has a fault, or is not what you ordered, email us with your order number and photographs of the item
-          and its packaging. Please do so as soon as you can after delivery.
+          We refund within {F.refundDays} days of the day we confirm the refund to you. The money goes to {F.refundMethod}, in the currency you
+          paid in. Where an order had several items, we refund only the items affected. We do not charge a fee for refunds. Your bank may take
+          a few further working days to show it on your statement.
         </p>
         <p>
-          You can choose a replacement or a refund. We pay the return cost. These rights come from the law and are not limited by the{" "}
-          {F.withdrawalDays}-day period. Defects that show up later are covered by our{" "}
-          <Link href="/policies/warranty">{F.warrantyMonths}-month warranty</Link> and your statutory rights.
+          Each item on your <Link href="/account/orders">order page</Link> shows its status, including &ldquo;Refund pending&rdquo; and
+          &ldquo;Refunded&rdquo;. We also email you when a refund is issued.
         </p>
       </>
     ),
   },
   {
-    id: "refused",
-    title: "Refused or undelivered parcels",
+    id: "contact",
+    title: "Asking about a refund",
     body: (
       <p>
-        If you refuse a delivery or a parcel comes back to us because it could not be delivered, we treat it as a cancellation once it reaches
-        the warehouse. We refund the items and the delivery charge, less the actual cost of the return shipment charged to us by the carrier.
-        See our <Link href="/policies/shipping">Delivery policy</Link>.
+        Email {F.email} or use the <Link href="/contact">contact form</Link> with your order number. We reply {F.replyTime}. If you are not
+        satisfied with our answer, see our <Link href="/policies/complaints">Complaints policy</Link>.
       </p>
     ),
   },

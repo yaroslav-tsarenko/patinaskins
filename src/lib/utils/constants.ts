@@ -17,4 +17,4 @@ export const PAYMENT_STATUSES = [
   "REFUNDED",
 ] as const;
 
-export const CURRENCIES = ["GBP", "EUR", "USD"] as const;
+export const CURRENCIES = ["USD", "EUR", "GBP"] as const;

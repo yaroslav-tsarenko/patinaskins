@@ -1,46 +1,51 @@
 import { COMPANY } from "@/lib/company";
 
-const DISPATCH_COUNTRY = "Spain";
-const DELIVERY_DEADLINE_DAYS = 30;
+const POLICY_DATE = "2026-10-06";
 
 export const STORE_POLICY = {
-  currency: "GBP",
-  supportedCurrencies: ["GBP", "EUR", "USD"],
+  currency: "USD",
+  supportedCurrencies: ["USD", "EUR", "GBP"],
   vatRegistered: COMPANY.vatRegistered,
   tax: {
     vatRatePercent: 20,
     pricesIncludeVat: true,
   },
-  shipping: {
-    standardCost: 5.99,
-    freeThreshold: 75,
-    processingDays: "1–2 business days",
-    dispatchCountry: DISPATCH_COUNTRY,
-    dispatchFrom: `our fulfilment warehouse in ${DISPATCH_COUNTRY}`,
-    deliveryTimes: {
-      eu: "3–6 business days after dispatch",
-      uk: "4–8 business days after dispatch",
-    },
-    ukImportNote:
-      "Orders to the United Kingdom are shipped from the EU. The carrier may charge import VAT, duty or a handling fee on delivery; these charges are not included in our prices and are payable by the recipient.",
+  markets: {
     countries: ["United Kingdom", "European Union member states"],
+  },
+  delivery: {
+    method: "Steam trade offer",
+    game: "Counter-Strike 2",
+    usualTime: "usually within minutes of payment confirmation",
+    deadlineHours: 24,
+    offerExpiryNote: "Each trade offer has an expiry time. It is shown on the offer in Steam and on your order page.",
+    tradeProtectionDays: 7,
+    tradeHoldMaxDays: 15,
+    requirements: [
+      "a Steam account in good standing, with no trade ban or trade cooldown",
+      "Steam Guard Mobile Authenticator turned on for at least 7 days",
+      "a public Steam inventory",
+      "a current Steam trade URL saved in your account",
+    ],
   },
   returns: {
     withdrawalDays: 14,
-    returnShipDays: 14,
     refundDays: 14,
-    returnShippingPaidBy: "customer",
-    faultyReturnShippingPaidBy: "us",
+    refundMethod: "the original payment method",
   },
-  warranty: {
-    months: 24,
+  guarantee: {
+    summary: "If we cannot deliver an item you paid for, or Steam reverses the trade while the item is under Steam trade protection, we refund the full price you paid for that item.",
   },
   limits: {
-    maxQtyPerItem: 10,
-    maxItemsPerOrder: 40,
+    maxQtyPerItem: 1,
+    maxItemsPerOrder: 10,
   },
   minAge: 18,
-  policiesLastUpdated: "2026-10-06",
+  policiesLastUpdated: POLICY_DATE,
+  waiver: {
+    version: POLICY_DATE,
+    text: "I request immediate delivery of the digital item and acknowledge I lose my right of withdrawal once delivery begins.",
+  },
   support: {
     replyTime: "within 1 business day",
     channels: ["email", "contact form"],
@@ -48,12 +53,10 @@ export const STORE_POLICY = {
   payment: {
     methods: ["Visa", "Mastercard"],
     providerName: null as string | null,
-    chargeCurrencies: ["GBP", "EUR", "USD"],
+    chargeCurrencies: ["USD", "EUR", "GBP"],
   },
   orders: {
-    cancelBefore: "dispatch",
-    deliveryDeadlineDays: DELIVERY_DEADLINE_DAYS,
-    lateDeliveryNote: `If your order is late, contact us and we trace the parcel with the carrier. If it has not been delivered within ${DELIVERY_DEADLINE_DAYS} days of the estimated delivery date, you can cancel the order for a full refund, or choose a replacement.`,
+    cancelBefore: "we send the Steam trade offer",
   },
   complaints: {
     acknowledgeTime: "within 1 business day",
@@ -61,11 +64,10 @@ export const STORE_POLICY = {
   },
   processors: [
     { role: "Card payments", purpose: "Takes card payments on its own hosted page and runs 3-D Secure checks", name: null as string | null },
-    { role: "Fulfilment warehouse", purpose: `Picks, packs and hands your order to the carrier in ${DISPATCH_COUNTRY}`, name: null as string | null },
-    { role: "Delivery carriers", purpose: "Deliver parcels and send tracking updates", name: null as string | null },
+    { role: "Item delivery partner", purpose: "Sources the item you bought and sends the Steam trade offer to your account, using your Steam ID and trade URL", name: null as string | null },
+    { role: "Steam (Valve Corporation)", purpose: "Signs you in when you choose Steam sign-in and carries the trade offer to your account", name: "Valve Corporation" as string | null },
     { role: "Website hosting and database", purpose: "Runs the store and stores account and order records", name: null as string | null },
     { role: "Email delivery", purpose: "Sends order, account and support emails", name: null as string | null },
-    { role: "Image storage", purpose: "Stores and serves product photographs", name: null as string | null },
   ],
   retention: {
     orderRecordsYears: 6,

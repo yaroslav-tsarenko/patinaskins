@@ -7,9 +7,10 @@
   "register": "Create account",
   "logout": "Sign out",
   "admin": "Admin",
-  "search": "Search pans, plates, glasses…",
-  "allCategories": "All categories",
+  "search": "Search AK-47, Karambit, Asiimov…",
+  "allCategories": "All skins",
   "contact": "Contact us",
   "faq": "Questions",
-  "policies": "Policies"
+  "policies": "Policies",
+  "steam": "Steam account"
 }

@@ -4,7 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { mentionsSupplier, publicBrand } from "@/lib/utils/supplier";
 import { isNewArrival, newArrivalCutoff } from "@/lib/new-arrivals";
 import type { ShelfProduct } from "@/components/product/ShelfTile/ShelfTile";
-import { CATALOG_PAGE_SIZE, buildCatalogHref, type CatalogFacets, type CatalogParams, type CategoryOption, type SortKey } from "./catalog-url";
+import { slugify } from "@/lib/utils/slugify";
+import { EXTERIORS, RARITIES, WEAPON_TYPES, rarityRank, weaponSlug, type SkinSummary } from "@/lib/skins/cs2";
+import {
+  CATALOG_PAGE_SIZE,
+  LIST_FILTERS,
+  QUALITY_KEYS,
+  buildCatalogHref,
+  type CatalogFacets,
+  type CatalogParams,
+  type CategoryOption,
+  type FacetOption,
+  type ListFilter,
+  type SortKey,
+} from "./catalog-url";
 
 export interface CategoryRecord {
   id: string;
@@ -64,9 +77,52 @@ interface Row {
   orders: number;
   cats: Set<string>;
   score: number;
+  type: string | null;
+  weapon: string | null;
+  weaponKey: string | null;
+  rarity: string | null;
+  exterior: string | null;
+  quality: string | null;
+  collection: string | null;
+  collectionKey: string | null;
+  floatMin: number | null;
+  floatMax: number | null;
 }
 
-type Facet = "category" | "brand" | "price" | "inStock" | "onSale";
+type Facet = "category" | "brand" | "price" | "inStock" | "onSale" | "float" | ListFilter;
+
+export const SKIN_SELECT = {
+  weaponType: true,
+  weapon: true,
+  skinName: true,
+  rarity: true,
+  rarityColor: true,
+  exterior: true,
+  floatMin: true,
+  floatMax: true,
+  isStatTrak: true,
+  isSouvenir: true,
+  collection: true,
+  phase: true,
+} as const;
+
+export function skinSummary(skin: SkinSummary | null | undefined): SkinSummary | null {
+  if (!skin) return null;
+  return {
+    weaponType: skin.weaponType,
+    weapon: skin.weapon,
+    skinName: skin.skinName,
+    rarity: skin.rarity,
+    rarityColor: skin.rarityColor,
+    exterior: skin.exterior,
+    floatMin: skin.floatMin,
+    floatMax: skin.floatMax,
+    isStatTrak: skin.isStatTrak,
+    isSouvenir: skin.isSouvenir,
+    collection: skin.collection,
+    phase: skin.phase,
+  };
+}
 
 export type CatalogScope =
   | { kind: "all" }
@@ -123,6 +179,7 @@ async function loadRows(scope: CatalogScope, tree: CategoryTree): Promise<Row[]>
       createdAt: true,
       categories: { select: { categoryId: true } },
       _count: { select: { orderItems: true } },
+      skin: { select: SKIN_SELECT },
     },
   });
   return rows.map((r) => ({
@@ -137,8 +194,27 @@ async function loadRows(scope: CatalogScope, tree: CategoryTree): Promise<Row[]>
     orders: r._count.orderItems,
     cats: new Set(r.categories.map((c) => c.categoryId)),
     score: scope.kind === "search" ? scoreFor(r.name, scope.query) : 0,
+    type: r.skin?.weaponType ?? null,
+    weapon: r.skin?.weapon ?? null,
+    weaponKey: r.skin ? weaponSlug(r.skin.weapon) : null,
+    rarity: r.skin?.rarity ?? null,
+    exterior: r.skin?.exterior ? r.skin.exterior.toLowerCase() : null,
+    quality: r.skin ? (r.skin.isStatTrak ? "stattrak" : r.skin.isSouvenir ? "souvenir" : "normal") : null,
+    collection: r.skin?.collection ?? null,
+    collectionKey: r.skin?.collection ? slugify(r.skin.collection) : null,
+    floatMin: r.skin?.floatMin ?? null,
+    floatMax: r.skin?.floatMax ?? null,
   }));
 }
+
+const LIST_VALUE: Record<ListFilter, (row: Row) => string | null> = {
+  types: (r) => r.type,
+  weapons: (r) => r.weaponKey,
+  rarities: (r) => r.rarity,
+  exteriors: (r) => r.exterior,
+  qualities: (r) => r.quality,
+  collections: (r) => r.collectionKey,
+};
 
 const available = (r: Row) => !r.tracked || r.quantity > 0;
 const reduced = (r: Row) => r.compare !== null && r.compare > r.price;
@@ -153,6 +229,17 @@ function matcher(params: CatalogParams, categoryIds: Set<string> | null) {
     }
     if (except !== "inStock" && params.inStock && !available(row)) return false;
     if (except !== "onSale" && params.onSale && !reduced(row)) return false;
+    for (const filter of LIST_FILTERS) {
+      if (except === filter || params[filter].length === 0) continue;
+      const value = LIST_VALUE[filter](row);
+      if (!value || !params[filter].includes(value)) return false;
+    }
+    if (except !== "float" && (params.floatMin !== null || params.floatMax !== null)) {
+      if (row.floatMin === null || row.floatMax === null) return false;
+      const lo = params.floatMin ?? 0;
+      const hi = params.floatMax ?? 1;
+      if (row.floatMax <= lo || row.floatMin >= hi) return false;
+    }
     return true;
   };
 }
@@ -168,6 +255,10 @@ function sorter(sort: SortKey) {
       return (a: Row, b: Row) => a.name.localeCompare(b.name, "en-GB");
     case "popular":
       return (a: Row, b: Row) => b.orders - a.orders || byNewest(a, b);
+    case "rarity-desc":
+      return (a: Row, b: Row) => rarityRank(b.rarity) - rarityRank(a.rarity) || b.price - a.price || a.name.localeCompare(b.name, "en-GB");
+    case "float-asc":
+      return (a: Row, b: Row) => (a.floatMin ?? 2) - (b.floatMin ?? 2) || (a.floatMax ?? 2) - (b.floatMax ?? 2) || a.price - b.price;
     case "relevance":
       return (a: Row, b: Row) => b.score - a.score || Number(available(b)) - Number(available(a)) || a.name.localeCompare(b.name, "en-GB");
     default:
@@ -197,6 +288,7 @@ export async function loadShelfProducts(ids: string[]): Promise<ShelfProduct[]> 
         createdAt: true,
         images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true, alt: true } },
         categories: { select: { category: { select: { name: true, slug: true, parentId: true } } } },
+        skin: { select: SKIN_SELECT },
       },
     }),
     newArrivalCutoff(),
@@ -219,6 +311,7 @@ export async function loadShelfProducts(ids: string[]): Promise<ShelfProduct[]> 
         category: leaf?.name ?? null,
         createdAt: r.createdAt.toISOString(),
         isNew: isNewArrival(r.createdAt, newSince),
+        skin: skinSummary(r.skin),
       };
     });
 }
@@ -245,16 +338,7 @@ export async function queryCatalog(
   let categoryTitle: CatalogFacets["categoryTitle"] = "category";
   let categories: CategoryOption[] = [];
   if (scope.kind === "all") {
-    categories = tree.roots
-      .map((c) => ({
-        key: c.slug,
-        name: c.name,
-        count: countIn(c.id),
-        href: buildCatalogHref(`/catalog/${c.slug}`, params, { category: null }, hrefOpts),
-        active: false,
-        depth: 0 as const,
-      }))
-      .filter((o) => o.count > 0);
+    categories = [];
   } else if (scope.kind === "category") {
     const current = scope.category;
     const parent = current.parentId ? tree.byId.get(current.parentId) ?? null : null;
@@ -311,6 +395,55 @@ export async function queryCatalog(
   const inStockCount = stockBase.filter(available).length;
   const onSaleCount = rows.filter((r) => passes(r, "onSale") && reduced(r)).length;
 
+  const listFacet = (filter: ListFilter, label: (key: string, sample: Row) => string, order: (key: string) => number, color?: (key: string) => string | null): FacetOption[] => {
+    const counts = new Map<string, { count: number; sample: Row }>();
+    for (const r of rows) {
+      const value = LIST_VALUE[filter](r);
+      if (!value || !passes(r, filter)) continue;
+      const entry = counts.get(value);
+      if (entry) entry.count += 1;
+      else counts.set(value, { count: 1, sample: r });
+    }
+    const options: FacetOption[] = [...counts.entries()].map(([key, { count, sample }]) => ({
+      key,
+      label: label(key, sample),
+      count,
+      selected: params[filter].includes(key),
+      color: color ? color(key) : null,
+    }));
+    for (const key of params[filter]) {
+      if (!counts.has(key)) options.push({ key, label: key, count: 0, selected: true, color: null });
+    }
+    return options.sort((a, b) => order(a.key) - order(b.key) || a.label.localeCompare(b.label, "en-GB"));
+  };
+  const typeOrder = (key: string) => WEAPON_TYPES.findIndex((t) => t.key === key);
+  const weaponOrder = (key: string) => {
+    for (const [ti, t] of WEAPON_TYPES.entries()) {
+      const wi = t.weapons.findIndex((w) => weaponSlug(w) === key);
+      if (wi !== -1) return ti * 100 + wi;
+    }
+    return 9999;
+  };
+  const types = listFacet("types", (key) => WEAPON_TYPES.find((t) => t.key === key)?.label ?? key, typeOrder);
+  const weapons = listFacet("weapons", (_key, sample) => sample.weapon ?? _key, weaponOrder);
+  const rarities = listFacet(
+    "rarities",
+    (key) => RARITIES.find((r) => r.key === key)?.label ?? key,
+    (key) => -rarityRank(key),
+    (key) => RARITIES.find((r) => r.key === key)?.color ?? null,
+  );
+  const exteriors = listFacet(
+    "exteriors",
+    (key) => EXTERIORS.find((e) => e.code.toLowerCase() === key)?.label ?? key,
+    (key) => EXTERIORS.findIndex((e) => e.code.toLowerCase() === key),
+  );
+  const qualities = listFacet("qualities", (key) => key, (key) => (QUALITY_KEYS as readonly string[]).indexOf(key));
+  const collections = listFacet("collections", (_key, sample) => sample.collection ?? _key, () => 0);
+  const floatRows = rows.filter((r) => r.floatMin !== null && r.floatMax !== null && passes(r, "float"));
+  const float = floatRows.length
+    ? { min: Math.min(...floatRows.map((r) => r.floatMin!)), max: Math.max(...floatRows.map((r) => r.floatMax!)) }
+    : null;
+
   const matched = rows.filter((r) => passes(r)).sort(sorter(params.sort));
   const total = matched.length;
   const totalPages = Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE));
@@ -334,6 +467,13 @@ export async function queryCatalog(
       inStockCount,
       onSaleCount,
       narrowingInStock: inStockCount > 0 && inStockCount < stockBase.length,
+      types,
+      weapons,
+      rarities,
+      exteriors,
+      qualities,
+      collections,
+      float,
     },
   };
 }

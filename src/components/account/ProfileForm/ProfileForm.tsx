@@ -21,7 +21,7 @@ import { useAccountData } from "../useAccountData";
 import { LoadError } from "../LoadError";
 
 interface ProfileResponse {
-  profile: { email: string; firstName: string | null; lastName: string | null; phoneCountry: string; phoneNational: string; dateOfBirth: string };
+  profile: { email: string | null; firstName: string | null; lastName: string | null; phoneCountry: string; phoneNational: string; dateOfBirth: string };
 }
 
 function PersonalForm({ initial }: { initial: ProfileResponse["profile"] }) {
@@ -34,6 +34,7 @@ function PersonalForm({ initial }: { initial: ProfileResponse["profile"] }) {
     resolver: zodResolver(profileSchema),
     mode: "onTouched",
     defaultValues: {
+      email: "",
       firstName: initial.firstName ?? "",
       lastName: initial.lastName ?? "",
       phoneCountry: initial.phoneCountry || DEFAULT_COUNTRY_CODE,
@@ -56,7 +57,11 @@ function PersonalForm({ initial }: { initial: ProfileResponse["profile"] }) {
 
   return (
     <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
-      <Input id="pf-email" label={tf("email")} value={initial.email} readOnly hint={t("emailHint")} />
+      {initial.email ? (
+        <Input id="pf-email" label={tf("email")} value={initial.email} readOnly hint={t("emailHint")} />
+      ) : (
+        <Input id="pf-email" type="email" label={tf("email")} autoComplete="email" hint={t("emailAdd")} error={fe(formState.errors.email?.message)} {...register("email")} />
+      )}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Input id="pf-first" label={tf("firstName")} required autoComplete="given-name" error={fe(formState.errors.firstName?.message)} {...register("firstName")} />
         <Input id="pf-last" label={tf("lastName")} required autoComplete="family-name" error={fe(formState.errors.lastName?.message)} {...register("lastName")} />

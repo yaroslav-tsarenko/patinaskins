@@ -8,13 +8,12 @@ import type { Totals } from "@/lib/pricing";
 interface TotalsListProps {
   totals: Totals;
   currency: string;
-  deliveryPending?: boolean;
   showCurrencyCode?: boolean;
   totalSize?: "md" | "lg";
   className?: string;
 }
 
-export function TotalsList({ totals, currency, deliveryPending = false, showCurrencyCode = false, totalSize = "lg", className }: TotalsListProps) {
+export function TotalsList({ totals, currency, showCurrencyCode = false, totalSize = "lg", className }: TotalsListProps) {
   const t = useTranslations("checkout.totals");
   const money = (amount: number) => formatPrice(amount, currency);
   const row = "flex items-baseline justify-between gap-4";
@@ -31,12 +30,12 @@ export function TotalsList({ totals, currency, deliveryPending = false, showCurr
           <dd className="tabular m-0 text-ui-sm text-ink">−{money(totals.discount)}</dd>
         </div>
       ) : null}
-      <div className={row}>
-        <dt className="text-ui-sm text-ink-muted">{t("delivery")}</dt>
-        <dd className="tabular m-0 text-ui-sm text-ink">
-          {deliveryPending ? <span className="text-ink-muted">{t("deliveryNextStep")}</span> : totals.shipping === 0 && totals.itemCount > 0 ? t("free") : money(totals.shipping)}
-        </dd>
-      </div>
+      {totals.shipping > 0 ? (
+        <div className={row}>
+          <dt className="text-ui-sm text-ink-muted">{t("delivery")}</dt>
+          <dd className="tabular m-0 text-ui-sm text-ink">{money(totals.shipping)}</dd>
+        </div>
+      ) : null}
       {totals.vatRegistered && !totals.vatIncluded ? (
         <div className={row}>
           <dt className="text-ui-sm text-ink-muted">{t("vat", { rate: totals.vatRatePercent })}</dt>

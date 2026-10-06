@@ -53,11 +53,19 @@ export function LoginView() {
       <div className="flex flex-col gap-6 lg:col-span-6 lg:pr-10">
         <h1 className="m-0 text-step-4 leading-[1.05] text-ink">{t("title")}</h1>
         {searchParams.get("next") === "/checkout" ? <p className="m-0 text-ink-muted">{t("checkoutHint")}</p> : null}
+        {searchParams.get("error") === "steam" ? <Alert tone="danger" title={t("steamFailed")} /> : null}
         {problem ? (
           <div ref={alertRef} tabIndex={-1} className="outline-none">
             <Alert tone="danger" title={problem} />
           </div>
         ) : null}
+        <div className="flex flex-col gap-2">
+          <Button as="a" href={`/api/auth/steam?next=${encodeURIComponent(next)}`} size="lg" variant="outline" className="max-sm:w-full sm:self-start">
+            {t("steam")}
+          </Button>
+          <p className="meta m-0 text-ink-muted">{t("steamNote")}</p>
+        </div>
+        <p className="eyebrow m-0 border-t border-line pt-6 text-ink-muted">{t("or")}</p>
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
           <Input id="login-email" type="email" label={tf("email")} autoComplete="email" required error={fe(formState.errors.email?.message)} {...register("email")} />
           <PasswordInput id="login-password" label={tf("password")} autoComplete="current-password" required error={fe(formState.errors.password?.message)} {...register("password")} />

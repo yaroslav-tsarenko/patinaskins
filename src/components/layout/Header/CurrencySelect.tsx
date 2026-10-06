@@ -6,7 +6,7 @@ import { useCurrency, type Currency } from "@/providers/CurrencyProvider";
 import { CURRENCIES } from "@/lib/utils/constants";
 import { cn } from "@/lib/utils/cn";
 
-const SYMBOL: Record<Currency, string> = { GBP: "£", EUR: "€", USD: "$" };
+const SYMBOL: Record<Currency, string> = { USD: "$", EUR: "€", GBP: "£" };
 
 export function CurrencySelect({ size = "xs", className, showLabel = false }: { size?: "xs" | "md"; className?: string; showLabel?: boolean }) {
   const { currency, setCurrency } = useCurrency();

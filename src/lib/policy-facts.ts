@@ -21,7 +21,7 @@ function longDate(iso: string) {
   return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
 }
 
-const s = STORE_POLICY.shipping;
+const d = STORE_POLICY.delivery;
 const r = STORE_POLICY.returns;
 
 export const POLICY_FACTS = {
@@ -42,20 +42,21 @@ export const POLICY_FACTS = {
   cardMethods: listJoin(STORE_POLICY.payment.methods),
   paymentProvider: STORE_POLICY.payment.providerName ?? "our payment provider",
   paymentProviderNamed: STORE_POLICY.payment.providerName,
-  deliveryCost: money(s.standardCost),
-  freeThreshold: money(s.freeThreshold),
-  processingDays: s.processingDays,
-  dispatchFrom: s.dispatchFrom,
-  deliveryEu: s.deliveryTimes.eu,
-  deliveryUk: s.deliveryTimes.uk,
-  ukImportNote: s.ukImportNote,
-  deliveryDeadlineDays: STORE_POLICY.orders.deliveryDeadlineDays,
-  lateDeliveryNote: STORE_POLICY.orders.lateDeliveryNote,
-  deliveryCountries: listJoin(s.countries),
+  deliveryMethod: d.method,
+  game: d.game,
+  deliveryUsual: d.usualTime,
+  deliveryDeadlineHours: d.deadlineHours,
+  offerExpiryNote: d.offerExpiryNote,
+  tradeProtectionDays: d.tradeProtectionDays,
+  tradeHoldMaxDays: d.tradeHoldMaxDays,
+  buyerRequirements: d.requirements,
+  marketCountries: listJoin(STORE_POLICY.markets.countries),
   withdrawalDays: r.withdrawalDays,
-  returnShipDays: r.returnShipDays,
   refundDays: r.refundDays,
-  warrantyMonths: STORE_POLICY.warranty.months,
+  refundMethod: r.refundMethod,
+  guarantee: STORE_POLICY.guarantee.summary,
+  waiverText: STORE_POLICY.waiver.text,
+  cancelBefore: STORE_POLICY.orders.cancelBefore,
   maxQtyPerItem: STORE_POLICY.limits.maxQtyPerItem,
   maxItemsPerOrder: STORE_POLICY.limits.maxItemsPerOrder,
   complaintsAck: STORE_POLICY.complaints.acknowledgeTime,

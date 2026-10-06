@@ -1,58 +1,57 @@
 {
   "metaTitle": "About {brand}",
-  "metaDescription": "What {brand} sells, what it doesn't, and how ordering, dispatch from {dispatchFrom}, delivery and returns work.",
+  "metaDescription": "What {brand} sells, what it doesn't, and how payment, delivery by {method}, refunds and the item guarantee work.",
   "breadcrumbHome": "Home",
   "breadcrumb": "About",
   "hero": {
-    "title": "A dresser full of good kitchen things",
-    "lead": "{brand} is an online shop for cookware, bakeware, tableware, glassware, cutlery, coffee and bar tools, storage and kitchen linen, sent to the {countries}."
+    "title": "A store for Counter-Strike 2 skins",
+    "lead": "{brand} sells weapon skins, knives and gloves for {game} to customers in the {countries}. We are a store, not a marketplace: you buy items from us, and each one is delivered to your Steam account by trade offer."
   },
-  "shelves": {
-    "title": "What goes on our shelves",
-    "rangeTitle": "Kitchen things, and only those",
-    "rangeBody": "Everything we list is for cooking, serving, drinking or keeping a kitchen in order. The shop is sorted into the same categories you see in the menu:",
-    "listingTitle": "What every listing has",
-    "listing": {
-      "new": "New stock only. Nothing used, refurbished or ex-display.",
-      "photo": "At least one photograph of the product and a written description.",
-      "stock": "Its stock status. A piece that has run out is marked “Sold out”.",
-      "prices": "A price you can view in {currencies}."
-    }
+  "range": {
+    "title": "What we sell",
+    "body": "Cosmetic items for weapons, knives and gloves, sorted by weapon type and then by weapon:"
+  },
+  "listing": {
+    "title": "What every listing shows",
+    "single": "One item in one condition. Each listing can be bought once.",
+    "exterior": "Rarity, exterior and quality, with the float range that exterior allows for the finish.",
+    "image": "The standard Steam image of the item.",
+    "prices": "A price you can view in {currencies}, confirmed again before you pay."
   },
   "notSold": {
-    "title": "What we don't sell",
-    "lead": "Some things are left out of the range on purpose.",
+    "title": "What we don't do",
     "items": {
-      "electric": "Electrical appliances, or anything that runs on a plug or a battery",
-      "knives": "Kitchen knives, cleavers or other blades",
-      "food": "Food or drink",
-      "used": "Used, refurbished or outlet stock"
+      "marketplace": "Buy, list or exchange items from users. {brand} does not take items in.",
+      "cases": "Sell cases, keys, stickers or agents.",
+      "accounts": "Sell Steam accounts, or ask for your Steam password or Steam Guard codes.",
+      "other": "Offer gambling, case openings or anything with a random outcome."
     }
   },
   "ordering": {
     "title": "How ordering works",
     "order": {
-      "label": "Order",
-      "body": "Add pieces to your bag and pay by card ({cardMethods}). Prices can be shown in {currencies}.",
+      "label": "Payment",
+      "body": "Pay by card ({cardMethods}) on our payment provider's secure page. Prices can be shown in {currencies}.",
       "link": "Payment policy"
     },
-    "dispatch": {
-      "label": "Dispatch",
-      "body": "Orders are packed at {dispatchFrom} and are typically processed within {processingDays} of payment.",
-      "link": "Shipping policy"
-    },
     "delivery": {
-      "label": "Delivery & returns",
-      "delivery": "Delivery to the United Kingdom takes {uk}, and to EU member states {eu}. Standard delivery costs {cost}, and is free on orders of {threshold} or more.",
-      "returns": "You can cancel within {days} days of receiving your order, without giving a reason.",
-      "warranty": "Faults are covered by our {months}-month warranty.",
-      "deliveryLink": "Shipping policy",
-      "returnsLink": "Returns & refunds",
-      "warrantyLink": "Warranty"
+      "label": "Delivery",
+      "body": "Each item arrives as a {method}, {usual}. Steam may keep received items under trade protection for up to {days} days.",
+      "link": "Delivery via Steam"
+    },
+    "guarantee": {
+      "label": "Item guarantee",
+      "body": "If we cannot deliver an item within {hours} hours, or Steam reverses the trade, we refund it within {refundDays} days.",
+      "link": "Item guarantee"
+    },
+    "withdrawal": {
+      "label": "Withdrawal",
+      "body": "You can cancel for free until delivery begins. The {days}-day right of withdrawal ends once delivery has begun at your request.",
+      "link": "Refund policy"
     }
   },
   "company": {
-    "title": "Who runs the shop"
+    "title": "Who runs the store"
   },
-  "browse": "Browse the shop"
+  "browse": "Browse skins"
 }

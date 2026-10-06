@@ -6,8 +6,6 @@ import type { Totals } from "@/lib/pricing";
 
 export interface ClientQuote {
   currency: string;
-  discount: { type: "welcome" | "newsletter"; percent: number; code: string; source: "auto" | "code" } | null;
-  codeRejected: boolean;
   lines: { productId: string; name: string; variantName: string | null; quantity: number; unit: number; total: number }[];
   totals: Totals;
 }
@@ -20,19 +18,19 @@ export interface QuoteProblem {
 }
 
 export function quotePayloadItems(items: CartItem[]) {
-  return items.map((item) => ({ productId: item.productId, quantity: item.quantity, variantName: item.variantName ?? null }));
+  return items.map((item) => ({ productId: item.productId }));
 }
 
-export function useCheckoutQuote(items: CartItem[], currency: string, discountCode: string | null, enabled: boolean) {
+export function useCheckoutQuote(items: CartItem[], currency: string, enabled: boolean) {
   const [quote, setQuote] = useState<ClientQuote | null>(null);
   const [problem, setProblem] = useState<QuoteProblem | null>(null);
   const [loading, setLoading] = useState(false);
   const [tick, setTick] = useState(0);
   const controller = useRef<AbortController | null>(null);
-  const signature = JSON.stringify([quotePayloadItems(items), currency, discountCode]);
+  const signature = JSON.stringify([quotePayloadItems(items), currency]);
 
   useEffect(() => {
-    const [payloadItems, payloadCurrency, payloadCode] = JSON.parse(signature) as [ReturnType<typeof quotePayloadItems>, string, string | null];
+    const [payloadItems, payloadCurrency] = JSON.parse(signature) as [ReturnType<typeof quotePayloadItems>, string];
     if (!enabled || payloadItems.length === 0) return;
     const timer = window.setTimeout(() => {
       controller.current?.abort();
@@ -42,7 +40,7 @@ export function useCheckoutQuote(items: CartItem[], currency: string, discountCo
       fetch("/api/checkout/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: payloadItems, currency: payloadCurrency, discountCode: payloadCode }),
+        body: JSON.stringify({ items: payloadItems, currency: payloadCurrency }),
         signal: ctrl.signal,
       })
         .then(async (res) => {

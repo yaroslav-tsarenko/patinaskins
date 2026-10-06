@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { addressFields, dateOfBirthField, dialCountryField, nameField, passwordField, phoneNumberField } from "./fields";
+import { addressFields, dateOfBirthField, dialCountryField, emailField, nameField, passwordField, phoneNumberField } from "./fields";
 
 export const profileSchema = z.object({
+  email: z.union([emailField, z.literal("")]).optional(),
   firstName: nameField("firstNameRequired"),
   lastName: nameField("lastNameRequired"),
   phoneCountry: dialCountryField,

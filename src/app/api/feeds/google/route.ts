@@ -1,5 +1,4 @@
 import type { NextRequest } from "next/server";
-import { STORE_POLICY } from "@/config/store-policy";
 import { feedContext, feedHeaders, loadFeedItems, shippingCountries } from "@/lib/feeds/catalog";
 import { googleFeedXml } from "@/lib/feeds/format";
 
@@ -9,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const params = request.nextUrl.searchParams;
     const [ctx, items] = await Promise.all([feedContext(params.get("currency")), loadFeedItems()]);
-    const xml = googleFeedXml(items, ctx, { countries: shippingCountries(params.get("country"), ctx.currency), freeThreshold: STORE_POLICY.shipping.freeThreshold });
+    const xml = googleFeedXml(items, ctx, { countries: shippingCountries(params.get("country"), ctx.currency) });
     return new Response(xml, { headers: feedHeaders("application/xml; charset=utf-8") });
   } catch (error) {
     console.error("Error generating Google feed:", error);

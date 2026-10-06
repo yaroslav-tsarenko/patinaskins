@@ -4,7 +4,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage, type RGB }
 import fontkit from "@pdf-lib/fontkit";
 import { COMPANY } from "@/lib/company";
 import { BRAND } from "@/lib/brand";
-import { PAYMENT_METHOD_LABEL } from "@/lib/paybylink";
+import { PAYMENT_METHOD_LABEL } from "@/lib/payments/transfermit";
 import { addressLines, displayOrderNumber, orderCurrency, orderTotals, type Numeric, type OrderAmountsSource, type StoredAddress } from "@/lib/orders";
 
 export interface InvoiceSource extends OrderAmountsSource {
@@ -16,6 +16,7 @@ export interface InvoiceSource extends OrderAmountsSource {
   paymentMethod?: string | null;
   createdAt?: Date | string;
   paidAt?: Date | string | null;
+  steamId?: string | null;
   items: { productName: string; variantName?: string | null; quantity: number; price: Numeric }[];
 }
 
@@ -300,7 +301,7 @@ export async function renderInvoicePdf(order: InvoiceSource): Promise<Uint8Array
   const billedLines = addressLines(billing);
   const billedTo = [...(billedLines.length ? billedLines : [order.customerName]), order.customerEmail];
   const billedBottom = addressColumn(w, "Billed to", billedTo, PAGE.margin, w.y);
-  const deliveredBottom = addressColumn(w, "Delivery address", addressLines(delivery), rightX, w.y);
+  const deliveredBottom = addressColumn(w, "Delivered by", ["Steam trade offer", ...(order.steamId ? [`Steam ID ${order.steamId}`] : [])], rightX, w.y);
   w.y = Math.min(billedBottom, deliveredBottom) - 22;
 
   tableHeader(w);
@@ -327,7 +328,6 @@ export async function renderInvoicePdf(order: InvoiceSource): Promise<Uint8Array
 
   const summary: [string, string][] = [["Subtotal", money(totals.subtotal, currency)]];
   if (totals.discount > 0) summary.push([`Discount (${totals.discountPercent}%)`, `-${money(totals.discount, currency)}`]);
-  summary.push(["Delivery", totals.shipping === 0 ? "Free" : money(totals.shipping, currency)]);
   if (totals.vatRegistered && !totals.vatIncluded) summary.push([`VAT (${totals.vatRatePercent}%)`, money(totals.vat, currency)]);
 
   const summaryHeight = summary.length * 16 + 60 + (totals.vatRegistered && totals.vatIncluded ? 16 : 0);

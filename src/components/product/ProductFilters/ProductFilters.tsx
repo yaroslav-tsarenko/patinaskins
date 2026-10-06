@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Dialog";
 import { FilterChip, FilterChipRow } from "@/components/ui/Chip";
-import type { CatalogFacets } from "@/components/catalog/catalog-url";
+import { toggleValue, type CatalogFacets, type FacetOption, type ListFilter } from "@/components/catalog/catalog-url";
 
 export interface FilterSelection {
   brand: string | null;
@@ -20,6 +20,14 @@ export interface FilterSelection {
   maxPrice: number | null;
   inStock: boolean;
   onSale: boolean;
+  types: string[];
+  weapons: string[];
+  rarities: string[];
+  exteriors: string[];
+  qualities: string[];
+  collections: string[];
+  floatMin: number | null;
+  floatMax: number | null;
 }
 
 export function FilterDrawer({
@@ -267,6 +275,118 @@ function PriceGroup({
   );
 }
 
+function OptionGroup({
+  options,
+  selected,
+  onToggle,
+  label,
+}: {
+  options: FacetOption[];
+  selected: string[];
+  onToggle: (key: string) => void;
+  label: (option: FacetOption) => string;
+}) {
+  return (
+    <div className="max-h-[320px] overflow-y-auto">
+      {options.map((option) => (
+        <Checkbox
+          key={option.key}
+          dense
+          label={
+            <span className="flex items-center gap-2">
+              {option.color ? <span aria-hidden="true" data-swatch="" className="inline-block size-2.5 shrink-0" style={{ background: option.color }} /> : null}
+              {label(option)}
+            </span>
+          }
+          count={option.count}
+          checked={selected.includes(option.key)}
+          disabled={option.count === 0 && !selected.includes(option.key)}
+          onChange={() => onToggle(option.key)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FloatGroup({
+  bounds,
+  floatMin,
+  floatMax,
+  onChange,
+}: {
+  bounds: { min: number; max: number };
+  floatMin: number | null;
+  floatMax: number | null;
+  onChange: (next: { floatMin: number | null; floatMax: number | null }) => void;
+}) {
+  const t = useTranslations("catalog");
+  const signature = `${floatMin}|${floatMax}`;
+  const show = (v: number | null) => (v === null ? "" : String(v));
+  const [draft, setDraft] = useState({ signature, min: show(floatMin), max: show(floatMax) });
+  if (draft.signature !== signature) setDraft({ signature, min: show(floatMin), max: show(floatMax) });
+  const parse = (v: string) => {
+    if (v.trim() === "") return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.min(1, Math.max(0, Math.round(n * 10000) / 10000)) : null;
+  };
+  const commit = () => {
+    let nextMin = parse(draft.min);
+    let nextMax = parse(draft.max);
+    if (nextMin !== null && nextMax !== null && nextMin > nextMax) [nextMin, nextMax] = [nextMax, nextMin];
+    if (nextMin === 0) nextMin = null;
+    if (nextMax === 1) nextMax = null;
+    if (nextMin === floatMin && nextMax === floatMax) return;
+    onChange({ floatMin: nextMin, floatMax: nextMax });
+  };
+  return (
+    <form
+      className="grid grid-cols-2 gap-3 pt-1"
+      onSubmit={(e) => {
+        e.preventDefault();
+        commit();
+      }}
+    >
+      <Input
+        label={t("floatMin")}
+        size="sm"
+        inputMode="decimal"
+        placeholder={bounds.min.toFixed(2)}
+        value={draft.min}
+        onChange={(e) => setDraft((d) => ({ ...d, min: e.target.value.replace(/[^0-9.]/g, "") }))}
+        onBlur={commit}
+      />
+      <Input
+        label={t("floatMax")}
+        size="sm"
+        inputMode="decimal"
+        placeholder={bounds.max.toFixed(2)}
+        value={draft.max}
+        onChange={(e) => setDraft((d) => ({ ...d, max: e.target.value.replace(/[^0-9.]/g, "") }))}
+        onBlur={commit}
+      />
+      <p className="meta col-span-2 m-0 text-ink-muted">{t("floatHint")}</p>
+      <button type="submit" className="sr-only">
+        {t("applyFloat")}
+      </button>
+    </form>
+  );
+}
+
+const QUALITY_LABEL: Record<string, "qualityNormal" | "qualityStattrak" | "qualitySouvenir"> = {
+  normal: "qualityNormal",
+  stattrak: "qualityStattrak",
+  souvenir: "qualitySouvenir",
+};
+
+const SKIN_GROUPS: { filter: ListFilter; title: "groupType" | "groupWeapon" | "groupRarity" | "groupExterior" | "groupQuality" | "groupCollection"; minOptions: number }[] = [
+  { filter: "types", title: "groupType", minOptions: 2 },
+  { filter: "weapons", title: "groupWeapon", minOptions: 2 },
+  { filter: "rarities", title: "groupRarity", minOptions: 1 },
+  { filter: "exteriors", title: "groupExterior", minOptions: 1 },
+  { filter: "qualities", title: "groupQuality", minOptions: 2 },
+  { filter: "collections", title: "groupCollection", minOptions: 1 },
+];
+
 export interface ProductFiltersProps {
   facets: CatalogFacets;
   selection: FilterSelection;
@@ -311,6 +431,28 @@ export function ProductFilters({ facets, selection, onChange, onNavigate, classN
               </li>
             ))}
           </ul>
+        </FilterDrawer>
+      ) : null}
+
+      {SKIN_GROUPS.map(({ filter, title, minOptions }) => {
+        const options = facets[filter].filter((o) => o.count > 0 || o.selected);
+        const chosen = selection[filter];
+        if (options.length < minOptions && chosen.length === 0) return null;
+        return (
+          <FilterDrawer key={filter} title={t(title)} selectedCount={chosen.length} defaultOpen={chosen.length > 0 || filter === "types" || filter === "rarities"}>
+            <OptionGroup
+              options={options}
+              selected={chosen}
+              onToggle={(key) => onChange({ [filter]: toggleValue(chosen, key) } as Partial<FilterSelection>)}
+              label={(o) => (filter === "qualities" ? t(QUALITY_LABEL[o.key] ?? "qualityNormal") : o.label)}
+            />
+          </FilterDrawer>
+        );
+      })}
+
+      {facets.float || selection.floatMin !== null || selection.floatMax !== null ? (
+        <FilterDrawer title={t("groupFloat")} selectedCount={(selection.floatMin !== null ? 1 : 0) + (selection.floatMax !== null ? 1 : 0)} defaultOpen={selection.floatMin !== null || selection.floatMax !== null}>
+          <FloatGroup bounds={facets.float ?? { min: 0, max: 1 }} floatMin={selection.floatMin} floatMax={selection.floatMax} onChange={onChange} />
         </FilterDrawer>
       ) : null}
 

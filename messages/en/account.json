@@ -6,7 +6,8 @@
     "saved": "Saved items",
     "addresses": "Your addresses",
     "profile": "Your details",
-    "description": "Your Brasmora account: orders, saved items, addresses and details."
+    "description": "Your Patinaskins account: orders, Steam delivery, saved items and details.",
+    "steam": "Steam account"
   },
   "nav": {
     "label": "Account",
@@ -14,10 +15,11 @@
     "overview": "Overview",
     "orders": "Orders",
     "saved": "Saved",
-    "addresses": "Addresses",
+    "addresses": "Billing addresses",
     "profile": "Profile",
     "signOut": "Sign out",
-    "loading": "Loading your account"
+    "loading": "Loading your account",
+    "steam": "Steam account"
   },
   "loadError": "Something went wrong loading this page.",
   "retry": "Try again",
@@ -25,8 +27,8 @@
     "awaitingPayment": "Awaiting payment",
     "paymentFailed": "Payment failed",
     "paid": "Paid",
-    "processing": "Processing",
-    "shipped": "Shipped",
+    "processing": "Delivering",
+    "shipped": "Trade offer sent",
     "delivered": "Delivered",
     "cancelled": "Cancelled",
     "refunded": "Refunded"
@@ -36,21 +38,38 @@
     "titleNoName": "Hello",
     "signedInAs": "Signed in as {email}",
     "welcomeTitle": "Your account is ready",
-    "welcomeBody": "We've saved your address for checkout and sent a welcome email.",
+    "welcomeBody": "We've saved your billing address for checkout and sent a welcome email. Link your Steam account next.",
     "latestTitle": "Latest order",
     "placed": "{date} · {count, plural, one {# item} other {# items}}",
     "view": "View",
     "allOrders": "See all {count} orders",
     "noOrdersTitle": "No orders yet",
-    "noOrdersBody": "When you place an order, you can follow it here.",
-    "browse": "Browse the shop",
+    "noOrdersBody": "When you place an order, you can follow each item's Steam delivery here.",
+    "browse": "Browse skins",
     "linksTitle": "Your account",
     "links": {
-      "addresses": { "title": "Addresses", "body": "Delivery addresses for checkout" },
-      "profile": { "title": "Profile", "body": "Name, phone, date of birth and password" },
-      "saved": { "title": "Saved", "body": "Pieces you saved for later" },
-      "orders": { "title": "Orders", "body": "Every order and its status" }
-    }
+      "steam": {
+        "title": "Steam account",
+        "body": "Linked Steam account and trade URL"
+      },
+      "addresses": {
+        "title": "Billing addresses",
+        "body": "Billing addresses for checkout"
+      },
+      "profile": {
+        "title": "Profile",
+        "body": "Name, email, phone, date of birth and password"
+      },
+      "saved": {
+        "title": "Saved",
+        "body": "Skins you saved for later"
+      },
+      "orders": {
+        "title": "Orders",
+        "body": "Every order and each item's delivery"
+      }
+    },
+    "signedInSteam": "Signed in through Steam"
   },
   "orders": {
     "title": "Orders",
@@ -66,8 +85,8 @@
     "view": "View",
     "mobileMeta": "{date} · {count, plural, one {# item} other {# items}}",
     "emptyTitle": "No orders yet",
-    "emptyBody": "When you place an order, you can follow it here.",
-    "browse": "Browse the shop"
+    "emptyBody": "When you place an order, you can follow each item's Steam delivery here.",
+    "browse": "Browse skins"
   },
   "order": {
     "loading": "Loading the order",
@@ -77,7 +96,7 @@
     "steps": {
       "placed": "Placed",
       "paid": "Paid",
-      "shipped": "Shipped",
+      "shipped": "Trade offer sent",
       "delivered": "Delivered",
       "cancelled": "Cancelled",
       "refunded": "Refunded",
@@ -85,30 +104,32 @@
       "notYet": "Not yet",
       "notReached": "Not reached yet"
     },
-    "tracking": "Tracking number:",
     "itemsTitle": "Items",
-    "lineQty": "{count} × {unit}",
-    "deliveryTitle": "Delivery address",
+    "deliveryTitle": "Delivery",
     "billingTitle": "Billing address",
     "paymentMethod": "Paid by card on our payment provider's secure page.",
     "totalsTitle": "Totals",
     "invoiceDownload": "Download invoice (PDF)",
     "helpTitle": "Need help with this order?",
-    "helpBody": "Questions about delivery, returns or anything else. Your order number will be filled in for you.",
+    "helpBody": "Questions about a trade offer, a refund or anything else. Your order number will be filled in for you.",
     "helpAction": "Contact us about this order",
     "notFoundTitle": "Order not found",
-    "notFoundBody": "This order isn't in your account. It may have been placed with a different email address.",
-    "backToOrders": "Back to your orders"
+    "notFoundBody": "This order isn't in your account. It may have been placed from a different account.",
+    "backToOrders": "Back to your orders",
+    "deliveryMethod": "Steam trade offer",
+    "steamId": "Steam ID {id}",
+    "waiver": "You asked for immediate delivery on {date} and acknowledged that the right of withdrawal ends once delivery begins.",
+    "liveUpdates": "This page updates while your items are being delivered."
   },
   "saved": {
     "title": "Saved",
     "emptyTitle": "Nothing saved yet",
-    "emptyBody": "Tap Save on any product to keep it here.",
-    "browse": "Browse the shop"
+    "emptyBody": "Select Save on any skin to keep it here.",
+    "browse": "Browse skins"
   },
   "addresses": {
-    "title": "Addresses",
-    "lead": "The default address is filled in at checkout. You can still change it for each order.",
+    "title": "Billing addresses",
+    "lead": "The default address is filled in at checkout as your billing address. You can still change it for each order.",
     "add": "Add an address",
     "addTitle": "New address",
     "editTitle": "Edit address",
@@ -126,7 +147,7 @@
     "defaultSet": "Default address updated",
     "saveFailed": "We couldn't save this. Please try again.",
     "removeTitle": "Remove this address?",
-    "removeBody": "{address} will be removed from your address book. Past orders keep their delivery address.",
+    "removeBody": "{address} will be removed from your address book. Past orders keep their billing address.",
     "emptyTitle": "No saved addresses",
     "emptyBody": "Add an address to fill in checkout faster."
   },
@@ -140,6 +161,66 @@
     "savePassword": "Change password",
     "saved": "Your details are saved",
     "passwordSaved": "Your password has been changed",
-    "saveFailed": "We couldn't save this. Please try again."
+    "saveFailed": "We couldn't save this. Please try again.",
+    "emailAdd": "Add an email address so we can send order confirmations and invoices."
+  },
+  "steam": {
+    "title": "Steam account",
+    "lead": "Items you buy are sent as a Steam trade offer to this account, using the trade URL saved here.",
+    "accountTitle": "Linked Steam account",
+    "unnamed": "Steam user",
+    "steamId": "Steam ID {id}",
+    "linkLead": "Link the Steam account that should receive your items. You sign in on Steam's own page; we only receive your Steam ID and public profile.",
+    "link": "Link Steam account",
+    "linkNote": "We never see your Steam password or Steam Guard codes.",
+    "tradeTitle": "Trade URL",
+    "tradeSaved": "Saved and checked against your Steam account",
+    "tradeChange": "Change trade URL",
+    "tradeLabel": "Steam trade URL",
+    "tradeHint": "Find it in Steam under Inventory, Trade Offers, <link>Who can send me Trade Offers?</link>",
+    "tradeSave": "Save trade URL",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "requirementsTitle": "Your Steam account needs",
+    "flags": {
+      "linked": "Your Steam account is linked.",
+      "taken": "That Steam account is already linked to another account here. Sign in with it instead, or contact us.",
+      "other": "Your account is already linked to a different Steam account. Contact us if you need to change it."
+    },
+    "errors": {
+      "invalid": "This doesn't look like a Steam trade URL. Copy the full link that starts with https://steamcommunity.com/tradeoffer/new/",
+      "otherAccount": "This trade URL belongs to a different Steam account. Use the trade URL of the account you linked.",
+      "generic": "We couldn't save the trade URL. Please try again.",
+      "loadTitle": "We couldn't load your Steam details",
+      "load": "Check your connection and try again."
+    }
+  },
+  "delivery": {
+    "openOffer": "Open the trade offer in Steam",
+    "expires": "Offer expires {date}",
+    "status": {
+      "awaiting_payment": "Awaiting payment",
+      "paid": "Payment confirmed",
+      "submitted": "Preparing trade offer",
+      "processing": "Preparing trade offer",
+      "sent": "Trade offer sent",
+      "finished": "Delivered",
+      "failed": "Not delivered",
+      "refund_pending": "Refund pending",
+      "refunded": "Refunded",
+      "rolled_back": "Trade reversed, refund pending"
+    },
+    "help": {
+      "awaiting_payment": "We start delivery once your payment is confirmed.",
+      "paid": "Your payment is confirmed. We are requesting the trade offer.",
+      "submitted": "The trade offer is being prepared.",
+      "processing": "The trade offer is being prepared.",
+      "sent": "Accept the offer in Steam before it expires. Check it gives you only this item.",
+      "finished": "The item is in your Steam inventory. Steam may keep it under trade protection for a few days.",
+      "failed": "This item could not be delivered.",
+      "refund_pending": "We are refunding the price you paid for this item.",
+      "refunded": "The price of this item has been refunded.",
+      "rolled_back": "Steam reversed the trade. We are refunding this item."
+    }
   }
 }

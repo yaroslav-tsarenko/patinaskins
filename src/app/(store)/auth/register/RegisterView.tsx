@@ -43,6 +43,8 @@ const IDS: Record<string, string> = {
   acceptedTerms: "rg-terms",
 };
 
+const STEAM_SIGN_IN = "/api/auth/steam?next=/account/steam";
+
 export function RegisterView() {
   const t = useTranslations("auth.register");
   const tf = useTranslations("forms");
@@ -236,6 +238,15 @@ export function RegisterView() {
         <div className="flex flex-col gap-3">
           <h1 className="m-0 text-step-4 leading-[1.05] text-ink">{t("title")}</h1>
           <p className="m-0 text-ink-muted">{t("lead")}</p>
+          <p className="meta m-0 text-ink-muted">
+            {t.rich("steamAlternative", {
+              link: (chunks) => (
+                <Link href={STEAM_SIGN_IN} prefetch={false} className="font-semibold text-ink underline underline-offset-4">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
         </div>
         <form noValidate onSubmit={onSubmit}>
           <DrawerStepper

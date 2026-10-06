@@ -47,9 +47,8 @@ export function rateConverter(rate: number): Convert {
 
 const identity: Convert = (amount) => amount;
 
-export function shippingCostInBase(discountedBaseSubtotal: number, itemCount: number): number {
-  if (itemCount <= 0) return 0;
-  return discountedBaseSubtotal >= STORE_POLICY.shipping.freeThreshold ? 0 : STORE_POLICY.shipping.standardCost;
+export function shippingCostInBase(): number {
+  return 0;
 }
 
 export function itemQuantityCap(stock?: number | null): number {
@@ -72,15 +71,10 @@ export function computeTotals(lines: PricingLine[], options: TotalsOptions = {})
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
   const subtotal = roundMoney(priced.reduce((sum, line) => sum + line.total, 0));
   const discount = roundMoney((subtotal * discountPercent) / 100);
-  const baseSubtotal = roundMoney(lines.reduce((sum, line) => sum + line.price * line.quantity, 0));
-  const baseDiscounted = roundMoney(baseSubtotal - roundMoney((baseSubtotal * discountPercent) / 100));
-  const shippingBase = options.shippingBase ?? shippingCostInBase(baseDiscounted, itemCount);
+  const shippingBase = options.shippingBase ?? shippingCostInBase();
   const shipping = shippingBase === 0 ? 0 : convert(shippingBase);
   const freeShipping = itemCount > 0 && shippingBase === 0;
-  const amountToFreeShipping =
-    itemCount > 0 && !freeShipping && options.shippingBase === undefined
-      ? convert(roundMoney(STORE_POLICY.shipping.freeThreshold - baseDiscounted))
-      : 0;
+  const amountToFreeShipping = 0;
   const net = roundMoney(subtotal - discount + shipping);
   const rate = STORE_POLICY.tax.vatRatePercent;
   const vatIncluded = VAT_REGISTERED && STORE_POLICY.tax.pricesIncludeVat;

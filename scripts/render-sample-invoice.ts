@@ -8,17 +8,18 @@ const sample: InvoiceSource = {
   customerEmail: "zofia@example.com",
   currency: "EUR",
   exchangeRate: 1.17,
-  discountPercent: 10,
-  shippingCost: 5.99,
+  discountPercent: 0,
+  shippingCost: 0,
   paymentMethod: "card",
   createdAt: new Date("2026-10-04T09:12:00Z"),
   paidAt: new Date("2026-10-04T09:15:00Z"),
+  steamId: "76561198000000000",
   shippingAddress: { firstName: "Zofia", lastName: "Łukasiewicz", address1: "ul. Długa 14/3", city: "Kraków", postalCode: "31-147", country: "PL" },
   billingAddress: { firstName: "Zofia", lastName: "Łukasiewicz", address1: "ul. Długa 14/3", city: "Kraków", postalCode: "31-147", country: "PL" },
   items: [
-    { productName: "Enamelled cast iron casserole, 24 cm, with self-basting lid and stainless steel knob", variantName: "Colour: Cream", quantity: 1, price: 64.95 },
-    { productName: "Stoneware dinner plate, 27 cm", variantName: null, quantity: 4, price: 8.5 },
-    { productName: "Borosilicate glass tumbler set (6 pieces)", variantName: "Capacity: 350 ml", quantity: 2, price: 14.99 },
+    { productName: "StatTrak™ AK-47 | Redline (Field-Tested)", variantName: "Field-Tested · Float 0.15–0.38 · StatTrak™", quantity: 1, price: 64.95 },
+    { productName: "★ Karambit | Doppler (Factory New)", variantName: "Factory New · Float 0.00–0.07", quantity: 1, price: 812.4 },
+    { productName: "Glock-18 | Water Elemental (Minimal Wear)", variantName: "Minimal Wear · Float 0.07–0.15", quantity: 1, price: 7.84 },
   ],
 };
 

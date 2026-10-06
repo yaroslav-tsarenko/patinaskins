@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 interface AuthUser {
   id: string;
-  email: string;
+  email: string | null;
   name: string | null;
   firstName?: string | null;
   lastName?: string | null;

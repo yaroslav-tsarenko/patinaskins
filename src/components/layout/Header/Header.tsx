@@ -12,6 +12,7 @@ import { catalogSlugFromPath, findRootSlug, useCategoryTree } from "@/lib/hooks/
 import { CORNICE_LINKS, navCategory } from "@/config/navigation";
 import { SHIPPING } from "@/config/shipping";
 import { cn } from "@/lib/utils/cn";
+import { BRAND } from "@/lib/brand";
 import { ThemeToggle } from "./ThemeToggle";
 import { CurrencySelect } from "./CurrencySelect";
 import { MegaMenu } from "./MegaMenu";
@@ -158,7 +159,7 @@ function StoreHeader() {
               <span className="text-ui-md font-medium max-[389px]:sr-only">Menu</span>
             </button>
 
-            <Link href="/" aria-label="Brasmora, home" className="flex shrink-0 items-center justify-self-center text-on-paint">
+            <Link href="/" aria-label={`${BRAND.name}, home`} className="flex shrink-0 items-center justify-self-center text-on-paint">
               <Wordmark className={cn("w-auto transition-[height] duration-[320ms] ease-[var(--ease-furniture)]", "h-[25px]", compact ? "lg:h-[25px]" : "lg:h-[33px]")} />
             </Link>
 

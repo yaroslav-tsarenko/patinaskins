@@ -19,9 +19,9 @@ import { formatPrice } from "@/lib/utils/format-price";
 import { STORE_POLICY } from "@/config/store-policy";
 
 const EMPTY_LINKS = [
-  { href: "/catalog/cookware", key: "cookware" },
-  { href: "/catalog/tableware", key: "tableware" },
-  { href: "/catalog/glassware-drinkware", key: "glassware" },
+  { href: "/catalog/knives", key: "knives" },
+  { href: "/catalog/gloves", key: "gloves" },
+  { href: "/catalog/rifles", key: "rifles" },
 ] as const;
 
 export function CartView() {
@@ -109,17 +109,8 @@ export function CartView() {
               ))}
             </ul>
             <span aria-hidden="true" className="shelf-rule" />
-            {displayTotals.amountToFreeShipping > 0 ? (
-              <p className="meta m-0 mt-5 text-ink-muted">
-                {t("freeDeliveryRemaining", {
-                  amount: formatPrice(displayTotals.amountToFreeShipping, currency),
-                  threshold: formatPrice(STORE_POLICY.shipping.freeThreshold, STORE_POLICY.currency),
-                })}
-              </p>
-            ) : (
-              <p className="meta m-0 mt-5 text-ink-muted">{t("freeDeliveryReached")}</p>
-            )}
-            <p className="meta m-0 mt-1 text-ink-muted">{t("limits", { perItem: STORE_POLICY.limits.maxQtyPerItem, perOrder: STORE_POLICY.limits.maxItemsPerOrder })}</p>
+            <p className="meta m-0 mt-5 text-ink-muted">{t("deliveryNote", { method: STORE_POLICY.delivery.method })}</p>
+            <p className="meta m-0 mt-1 text-ink-muted">{t("limits", { perOrder: STORE_POLICY.limits.maxItemsPerOrder })}</p>
           </section>
 
           <aside aria-labelledby="cart-counter-title" className="lg:sticky lg:top-28 lg:col-span-4">
@@ -128,7 +119,6 @@ export function CartView() {
                 {t("summary")}
               </h2>
               <TotalsList totals={displayTotals} currency={currency} />
-              <p className="meta m-0 mt-3 text-ink-muted">{t("discountNote")}</p>
               <Button as={Link} href="/checkout" size="lg" fullWidth className="mt-6">
                 {t("checkout")}
               </Button>

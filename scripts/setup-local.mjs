@@ -6,7 +6,7 @@ import pg from "pg";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const ENV_FILE = path.join(ROOT, ".env");
-const DB_NAME = process.env.LOCAL_DB_NAME || "brasmora";
+const DB_NAME = process.env.LOCAL_DB_NAME || "patinaskins";
 
 function readEnv() {
   if (!fs.existsSync(ENV_FILE)) return {};
@@ -63,10 +63,8 @@ async function ensureDatabase(adminUrl) {
 
 async function main() {
   const env = readEnv();
-  if (!env.BIGBUY_API_PRODUCTION) {
-    console.error("✗ BIGBUY_API_PRODUCTION is empty in .env");
-    process.exit(1);
-  }
+  const fixture = process.env.SIH_FIXTURE_FILE || env.SIH_FIXTURE_FILE || "";
+  const hasSupplierKey = Boolean(process.env.SIH_API_KEY || env.SIH_API_KEY);
 
   let dbUrl = env.DIRECT_URL || env.DATABASE_URL;
   if (!dbUrl) {
@@ -83,7 +81,12 @@ async function main() {
   const dbEnv = { DATABASE_URL: dbUrl, DIRECT_URL: dbUrl };
   run("npx", ["prisma", "db", "push"], dbEnv);
   run("npx", ["prisma", "db", "seed"], dbEnv);
-  run("npx", ["tsx", "scripts/import-bigbuy.ts", ...process.argv.slice(2)], { ...dbEnv, NODE_OPTIONS: "--max-old-space-size=8192" });
+
+  if (hasSupplierKey || fixture) {
+    run("npx", ["tsx", "scripts/catalog-sync.ts", ...(fixture && !hasSupplierKey ? ["--fixture", fixture] : []), ...process.argv.slice(2)], dbEnv);
+  } else {
+    console.log("\n! Catalogue not synced: set SIH_API_KEY in .env (or SIH_FIXTURE_FILE for a local test file), then run: npm run catalog:sync");
+  }
 
   console.log("\n✓ Done. Start the store with: npm run dev  →  http://localhost:3000");
 }

@@ -60,7 +60,7 @@ const sections: PolicySection[] = [
     ) : (
       <p>
         {F.company} is not registered for VAT. We do not charge VAT, and no VAT is shown at checkout or on your order confirmation or
-        invoice. For UK deliveries, see the note on import charges in our <Link href="/policies/shipping">Delivery policy</Link>.
+        invoice.
       </p>
     ),
   },
@@ -70,8 +70,9 @@ const sections: PolicySection[] = [
     body: (
       <>
         <p>
-          Your card is charged when you complete payment on the provider&rsquo;s page. We create your order and send a confirmation email only
-          after the provider confirms the payment to us. If the payment is declined or cancelled, no order is created and nothing is charged.
+          Your card is charged when you complete payment on the provider&rsquo;s page. We confirm your order, send a confirmation email and
+          request delivery of your items only after the provider confirms the payment to us. If the payment is declined or cancelled, nothing
+          is charged and no item is delivered.
         </p>
         <p>
           If a payment fails, check the card details and that your bank has approved the payment, then try again. If it still fails, contact
@@ -86,7 +87,7 @@ const sections: PolicySection[] = [
     body: (
       <p>
         Refunds go back to the card used for the order, in the same currency, within {F.refundDays} days as described in our{" "}
-        <Link href="/policies/returns">Returns and refunds policy</Link>. We cannot refund to a different card or account.
+        <Link href="/policies/returns">Refund policy</Link>. We cannot refund to a different card or account.
       </p>
     ),
   },

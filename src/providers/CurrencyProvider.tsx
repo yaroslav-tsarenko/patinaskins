@@ -2,28 +2,26 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 
-export type Currency = "GBP" | "EUR" | "USD";
+export type Currency = "USD" | "EUR" | "GBP";
 
-/** The store's base currency: what the numbers in the database mean. Every
- *  other currency is derived from it at display time, so this is the one value
- *  that must agree with how prices were imported. */
-export const BASE_CURRENCY: Currency = "GBP";
+export const BASE_CURRENCY: Currency = "USD";
+
+const CURRENCY_LIST: Currency[] = ["USD", "EUR", "GBP"];
 
 interface Rates {
-  GBP: number;
-  EUR: number;
   USD: number;
+  EUR: number;
+  GBP: number;
 }
 
 interface CurrencyContextType {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
-  /** Takes an amount in BASE_CURRENCY and returns it in the selected one. */
   convert: (amountInBase: number) => number;
   rates: Rates;
 }
 
-const DEFAULT_RATES: Rates = { GBP: 1, EUR: 1.17, USD: 1.27 };
+const DEFAULT_RATES: Rates = { USD: 1, EUR: 0.86, GBP: 0.75 };
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
@@ -32,26 +30,26 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [rates, setRates] = useState<Rates>(DEFAULT_RATES);
 
   useEffect(() => {
-    const stored = localStorage.getItem("currency") as Currency | null;
-    if (stored && ["GBP", "EUR", "USD"].includes(stored)) {
-      setCurrencyState(stored);
-    }
+    try {
+      const stored = localStorage.getItem("currency") as Currency | null;
+      if (stored && CURRENCY_LIST.includes(stored)) setCurrencyState(stored);
+    } catch {}
   }, []);
 
   useEffect(() => {
     fetch("/api/exchange-rates")
       .then((r) => r.json())
       .then((data) => {
-        if (data.rates) {
-          setRates({ GBP: 1, EUR: data.rates.EUR, USD: data.rates.USD });
-        }
+        if (data.rates?.EUR && data.rates?.GBP) setRates({ USD: 1, EUR: data.rates.EUR, GBP: data.rates.GBP });
       })
       .catch(() => {});
   }, []);
 
   const setCurrency = (c: Currency) => {
     setCurrencyState(c);
-    localStorage.setItem("currency", c);
+    try {
+      localStorage.setItem("currency", c);
+    } catch {}
   };
 
   const convert = useCallback(
@@ -59,14 +57,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       if (currency === BASE_CURRENCY) return amountInBase;
       return Math.round(amountInBase * rates[currency] * 100) / 100;
     },
-    [currency, rates]
+    [currency, rates],
   );
 
-  return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, convert, rates }}>
-      {children}
-    </CurrencyContext.Provider>
-  );
+  return <CurrencyContext.Provider value={{ currency, setCurrency, convert, rates }}>{children}</CurrencyContext.Provider>;
 }
 
 export function useCurrency() {

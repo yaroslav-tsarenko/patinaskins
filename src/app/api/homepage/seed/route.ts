@@ -24,18 +24,17 @@ export async function POST() {
     const stocked = categories.filter((c) => c._count.products > 0);
 
     const utilityLinks = [
-      { label: "Delivery", linkUrl: "/policies/shipping", icon: "Truck", position: "left" },
-      { label: "Returns & refunds", linkUrl: "/policies/returns", icon: "RotateCcw", position: "left" },
-      { label: "Warranty", linkUrl: "/policies/warranty", icon: "ShieldCheck", position: "left" },
+      { label: "Delivery via Steam", linkUrl: "/policies/shipping", icon: "Send", position: "left" },
+      { label: "Refunds", linkUrl: "/policies/returns", icon: "RotateCcw", position: "left" },
+      { label: "Item guarantee", linkUrl: "/policies/warranty", icon: "ShieldCheck", position: "left" },
       { label: "FAQ", linkUrl: "/faq", icon: "CircleHelp", position: "left" },
       { label: "About", linkUrl: "/about", icon: "Info", position: "right" },
       { label: "Contact us", linkUrl: "/contact", icon: "Mail", position: "right" },
     ].map((link, sortOrder) => ({ id: `seed-utility-${sortOrder}`, ...link, sortOrder }));
 
     const promoStripItems = [
-      { icon: "Truck", title: "Delivery to the UK and EU", subtitle: `Free on orders of ${POLICY_FACTS.freeThreshold} or more`, linkUrl: "/policies/shipping" },
-      { icon: "RotateCcw", title: `${POLICY_FACTS.withdrawalDays}-day cancellation`, subtitle: "From the day you receive your order", linkUrl: "/policies/returns" },
-      { icon: "ShieldCheck", title: `${POLICY_FACTS.warrantyMonths}-month warranty`, subtitle: "Covers faults under our Warranty Policy", linkUrl: "/policies/warranty" },
+      { icon: "Send", title: `Delivered by ${POLICY_FACTS.deliveryMethod}`, subtitle: `To your Steam account, ${POLICY_FACTS.deliveryUsual}`, linkUrl: "/policies/shipping" },
+      { icon: "ShieldCheck", title: "Item guarantee", subtitle: `Refund if we cannot deliver within ${POLICY_FACTS.deliveryDeadlineHours} hours`, linkUrl: "/policies/warranty" },
       { icon: "CreditCard", title: "Card payments", subtitle: POLICY_FACTS.cardMethods, linkUrl: "/policies/payment" },
     ].map((item, sortOrder) => ({ id: `seed-promo-${sortOrder}`, ...item, sortOrder }));
 

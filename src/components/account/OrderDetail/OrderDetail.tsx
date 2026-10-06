@@ -1,15 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Check, FileDown } from "lucide-react";
+import { Check, ExternalLink, FileDown } from "lucide-react";
+import { Plate } from "@/components/ui/Plate";
 import { ShelfLoader } from "@/components/ui/ShelfLoader";
 import { Button } from "@/components/ui/Button";
 import { Cubby } from "@/components/product/ShelfTile/ShelfTile";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
 import { TotalsList } from "@/components/checkout/TotalsList";
 import { formatPrice } from "@/lib/utils/format-price";
-import { addressLines, type OrderView } from "@/lib/orders";
+import { addressLines, type ItemDelivery, type OrderView } from "@/lib/orders";
 import { cn } from "@/lib/utils/cn";
 import { AccountPageHeader } from "../AccountSidebar/AccountSidebar";
 import { OrderStatus } from "../OrderHistory/OrderStatus";
@@ -19,9 +21,12 @@ import { formatOrderDate } from "../format";
 
 type Milestone = { key: "placed" | "paid" | "shipped" | "delivered" | "cancelled" | "refunded"; reached: boolean; date: string | null };
 
+const POLL_MS = 15_000;
+const OFFER_REACHED = new Set(["sent", "finished"]);
+
 function milestones(order: OrderView): Milestone[] {
   const paid = order.paymentStatus === "PAID" || order.state === "refunded" || Boolean(order.paidAt);
-  const shipped = order.state === "shipped" || order.state === "delivered";
+  const shipped = order.state === "delivered" || order.lines.some((line) => line.delivery && OFFER_REACHED.has(line.delivery.status));
   const list: Milestone[] = [
     { key: "placed", reached: true, date: order.createdAt },
     { key: "paid", reached: paid, date: order.paidAt },
@@ -31,10 +36,38 @@ function milestones(order: OrderView): Milestone[] {
   return [...list, { key: "shipped", reached: shipped, date: null }, { key: "delivered", reached: order.state === "delivered", date: null }];
 }
 
+function DeliveryLine({ delivery }: { delivery: ItemDelivery }) {
+  const t = useTranslations("account.delivery");
+  const expires = delivery.expiresAt ? formatOrderDate(delivery.expiresAt, true) : null;
+  return (
+    <div data-delivery-status={delivery.status} className="mt-1 flex flex-col gap-1.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <Plate variant={delivery.tone === "success" ? "brass" : "neutral"}>{t(`status.${delivery.status}`)}</Plate>
+        {delivery.offerUrl ? (
+          <a href={delivery.offerUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-ui-sm font-semibold text-ink underline underline-offset-4">
+            {t("openOffer")}
+            <ExternalLink size={14} aria-hidden="true" />
+          </a>
+        ) : null}
+      </div>
+      <p className="meta m-0 text-ink-muted">{t(`help.${delivery.status}`, { expires: expires ?? "" })}</p>
+      {delivery.status === "sent" && expires ? <p className="meta m-0 text-ink-muted">{t("expires", { date: expires })}</p> : null}
+      {delivery.note ? <p className="meta m-0 text-ink">{delivery.note}</p> : null}
+    </div>
+  );
+}
+
 export function OrderDetail({ id }: { id: string }) {
   const t = useTranslations("account.order");
-  const { data, error, loading, reload } = useAccountData<{ order: OrderView }>(`/api/account/orders/${encodeURIComponent(id)}`);
+  const { data, error, loading, reload, refresh } = useAccountData<{ order: OrderView }>(`/api/account/orders/${encodeURIComponent(id)}`);
   const order = data?.order;
+  const polling = Boolean(order?.inFlight);
+
+  useEffect(() => {
+    if (!polling) return;
+    const timer = window.setInterval(refresh, POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [polling, refresh]);
 
   if (loading) return <ShelfLoader block label={t("loading")} />;
   if (error || !order) {
@@ -79,11 +112,7 @@ export function OrderDetail({ id }: { id: string }) {
           ))}
         </ol>
         <span aria-hidden="true" className="shelf-rule" />
-        {order.trackingNumber ? (
-          <p className="m-0 mt-4 text-ui-sm text-ink">
-            {t("tracking")} <span className="font-mono">{order.trackingNumber}</span>
-          </p>
-        ) : null}
+        {polling ? <p className="meta m-0 mt-4 text-ink-muted" aria-live="polite">{t("liveUpdates")}</p> : null}
       </section>
 
       <section aria-labelledby="order-items" className="mb-12">
@@ -103,7 +132,7 @@ export function OrderDetail({ id }: { id: string }) {
                   <p className="m-0 line-clamp-2 text-ui-sm font-medium text-ink">{line.name}</p>
                 )}
                 {line.variantName ? <p className="meta m-0 text-ink-muted">{line.variantName}</p> : null}
-                <p className="meta tabular m-0 text-ink-muted">{t("lineQty", { count: line.quantity, unit: formatPrice(line.unit, order.currency) })}</p>
+                {line.delivery ? <DeliveryLine delivery={line.delivery} /> : null}
               </div>
               <p className="tabular m-0 shrink-0 font-display text-step-1 text-ink">{formatPrice(line.total, order.currency)}</p>
             </li>
@@ -119,12 +148,10 @@ export function OrderDetail({ id }: { id: string }) {
               {t("deliveryTitle")}
             </h2>
             <p className="m-0 text-ui-sm leading-[1.6] text-ink">
-              {addressLines(order.delivery).map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
+              {t("deliveryMethod")}
+              {order.steamId ? <span className="tabular block">{t("steamId", { id: order.steamId })}</span> : null}
             </p>
+            {order.waiverAcceptedAt ? <p className="meta m-0 mt-3 text-ink-muted">{t("waiver", { date: formatOrderDate(order.waiverAcceptedAt, true) })}</p> : null}
           </section>
           <section aria-labelledby="order-billing">
             <h2 id="order-billing" className="eyebrow m-0 mb-2 text-ink-muted">

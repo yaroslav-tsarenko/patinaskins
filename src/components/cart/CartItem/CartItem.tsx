@@ -57,14 +57,18 @@ export function CartItem({ item, size = "compact", onNavigate, actions }: CartIt
               </p>
             ) : null}
             <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-              <QuantitySelector
-                quantity={item.quantity}
-                maxQuantity={cartItemCap(item, itemCount)}
-                showStockHint={cartItemCap(item, itemCount) >= item.maxQuantity}
-                size={full ? "md" : "compact"}
-                label={`Quantity of ${item.name}`}
-                onChange={(qty) => updateQuantity(item.productId, qty, item.variantId)}
-              />
+              {cartItemCap(item, itemCount) > 1 ? (
+                <QuantitySelector
+                  quantity={item.quantity}
+                  maxQuantity={cartItemCap(item, itemCount)}
+                  showStockHint={cartItemCap(item, itemCount) >= item.maxQuantity}
+                  size={full ? "md" : "compact"}
+                  label={`Quantity of ${item.name}`}
+                  onChange={(qty) => updateQuantity(item.productId, qty, item.variantId)}
+                />
+              ) : (
+                <span className="meta text-ink-muted">One unique item</span>
+              )}
               <span className="flex flex-wrap items-center gap-x-5 gap-y-1">
               {actions}
               <button

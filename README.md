@@ -1,236 +1,76 @@
-# Brasmora
+# Patinaskins
 
-Storefront and admin for Brasmora (brasmora.com), a kitchen, cookware and tableware store, built with Next.js 16. Includes product catalog, shopping cart, checkout, order management and analytics.
+Storefront and admin for Patinaskins (patinaskins.com), a Counter-Strike 2 skins store built with Next.js 16. The store sells weapon skins, knives and gloves it sources from an item supplier and delivers each item to the buyer's Steam account as a trade offer. It is a store, not a marketplace: customers cannot sell or list items.
 
-## Tech Stack
+## Tech stack
 
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Database:** PostgreSQL with Prisma ORM 7
-- **UI:** HeroUI + Tailwind CSS 4
-- **Auth:** JWT-based sessions (HTTP-only cookies)
-- **Animations:** Framer Motion
-- **Forms:** React Hook Form + Zod
-- **Email:** SMTP via Nodemailer (Spacemail mailbox)
-- **i18n:** next-intl
-- **Charts:** Recharts
-- **Rich Text:** Tiptap
+- Next.js 16 (App Router), TypeScript, Tailwind CSS 4
+- PostgreSQL with Prisma ORM 7 (`@prisma/adapter-pg`)
+- JWT session cookie plus Steam OpenID sign-in and account linking
+- Transfermit hosted card payments
+- Item supplier: api.sih.market (catalogue, live price, purchase and delivery)
+- next-intl (messages in `messages/en/*.json`), Nodemailer, pdf-lib invoices
 
-## Features
+## How it works
 
-### Storefront
+### Catalogue
 
-- Product catalog with category filtering and search
-- Product detail pages with image gallery, variants, and reviews
-- Shopping cart with validation
-- Checkout flow with address management
-- Order history and tracking
-- User registration and authentication
-- Wishlist
-- Responsive design with page transitions
-- Multi-language support
+`src/lib/sih/sync.ts` pulls the supplier catalogue, parses each `market_hash_name` (`src/lib/sih/parse.ts`) and builds one storefront product per unique market hash name, which already encodes weapon, finish, exterior and StatTrak/Souvenir. When the supplier has several offers for the same name, the cheapest in-stock offer is kept (lowest float on a price tie) and its details are stored server-side only in `SihItem.offer`.
 
-### Admin Dashboard
+`src/lib/sih/catalog-select.ts` then picks a balanced set across weapon types, weapons, rarities, exteriors and price bands. Caps, price limits, margin defaults and price bands live in `src/config/catalog.ts`. Products already listed are preferred on re-sync, and every write is an upsert keyed by the market hash name (deterministic product ids), so re-running the sync never duplicates products. Items that drop out are archived, never deleted.
 
-- Product management (CRUD, bulk CSV/Excel import)
-- Order management with status tracking
-- Customer and user management
-- Category management
-- Banner and CMS page management
-- Store settings (branding, tax, shipping, social links)
-- Product feed generation (Google Shopping, Facebook)
-- Analytics dashboard with KPIs and revenue charts
-- Review moderation
+Data model: `Product` (storefront) ↔ `Skin` (public filter attributes: weapon type, weapon, rarity, exterior, float range, StatTrak, Souvenir, collection, phase) ↔ `SihItem` (supplier cost, stock and offer metadata). Categories are weapon type → weapon.
 
-## Getting Started
+### Steam
 
-### Prerequisites
+- `/api/auth/steam` starts Steam OpenID sign-in or, with `link=1`, links Steam to the signed-in account. Return URLs always use `APP_URL`.
+- `/account/steam` saves the trade URL; it is accepted only when its partner id matches the linked SteamID64.
+- Checkout requires a linked Steam account with a saved trade URL.
 
-- Node.js 18+
-- npm or pnpm
+### Money flow
 
-### Installation
+1. `POST /api/checkout` re-confirms each item's live supplier price. If a price rose beyond `SIH_PRICE_TOLERANCE`, the product is re-priced and the buyer sees the new total before paying (`TOTAL_CHANGED`).
+2. One `Order` is created with one `OrderItem` and one `SihOrder` (status `awaiting_payment`) per skin, plus the buyer's consent to immediate delivery (timestamp, text and version).
+3. The buyer pays on Transfermit's hosted page.
+4. `POST /api/webhooks/transfermit` (HMAC-verified) claims the order as paid once, checks the amount and currency, emails the confirmation and invoice, and submits each `SihOrder` to the supplier with a single-flight `paid → submitted` claim. Supplier failures park the item as `refund_pending` and raise a critical alert.
+5. `POST /api/webhooks/sih?secret=…` re-fetches the authoritative supplier state and moves items through `processing → sent → finished`, or `failed`/`rolled_back` → `refund_pending`.
+6. Refunds are operator-driven: `/admin/sih` lists the refund backlog with "Mark refunded".
+
+A bag can hold several skins; they are paid together and delivered item by item. Each item's status is visible on `/account/orders/[id]`, which also triggers a rate-limited refresh from the supplier while items are in flight.
+
+### Crons
+
+`vercel.json` runs four daily jobs (Vercel Hobby allows daily schedules only): catalogue sync, in-flight order poll, deep reconcile, and balance/stuck-order monitor. Webhooks remain the primary path; the daily poll and the on-view refresh are backstops. On a plan that allows it, change the poll schedule to every few minutes. All cron routes require `Authorization: Bearer $CRON_SECRET`.
+
+## Local setup
 
 ```bash
-cd brasmora
 npm install
-```
-
-The repository has its own history and no remote. Create a new **private** GitHub repository for it before pushing.
-
-### Environment Variables
-
-Copy the example file and fill in your values:
-
-```bash
-cp .env.example .env
-```
-
-| Variable | Description | Required |
-|---|---|---|
-| `DATABASE_URL` | Prisma Postgres protocol URL | Yes |
-| `DIRECT_URL` | Direct PostgreSQL connection URL | Yes |
-| `JWT_SECRET` | Secret key for JWT tokens | Yes |
-| `NEXT_PUBLIC_SITE_URL` | Public site URL | Yes |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | SMTP server for transactional email (emails are skipped when unset) | Yes, for email |
-| `SMTP_USER`, `SMTP_PASSWORD` | Mailbox credentials on the brasmora.com domain | Yes, for email |
-| `SMTP_FROM`, `SMTP_REPLY_TO` | Sender and reply-to addresses on the brasmora.com domain | Yes, for email |
-| `PAYBYLINK_BASE_URL` | OPPWA host (`https://eu-test.oppwa.com` sandbox, `https://eu-prod.oppwa.com` live) | Yes, for checkout |
-| `PAYBYLINK_ENTITY_ID` | OPPWA entity id | Yes, for checkout |
-| `PAYBYLINK_AUTH_TOKEN` | OPPWA bearer token | Yes, for checkout |
-| `PAYBYLINK_WEBHOOK_SECRET` | 64-character hex decryption key of the OPPWA webhook | Yes, for the payment webhook |
-
-### Database Setup
-
-```bash
-npx prisma generate
-npx prisma db push
-npx prisma db seed
-```
-
-The seed script writes the store settings (name, contact email, currency, VAT rate and free-delivery threshold) from `src/lib/brand.ts`, `src/lib/company.ts` and `src/config/store-policy.ts`. It creates an admin only when `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` (12+ characters) are set. Categories and products come from `npm run catalog:import`.
-
-### Development
-
-```bash
+cp .env.example .env        # fill in values, at least JWT_SECRET
+npm run local:setup         # creates the patinaskins database, pushes the schema, seeds, syncs the catalogue
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the storefront and [http://localhost:3000/admin](http://localhost:3000/admin) for the admin dashboard.
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── (store)/           # Storefront routes (route group, no URL prefix)
-│   │   ├── auth/          # Login, register
-│   │   ├── catalog/       # Product catalog
-│   │   ├── product/[slug] # Product detail
-│   │   ├── cart/          # Shopping cart
-│   │   ├── checkout/      # Checkout
-│   │   └── account/       # Profile, orders, wishlist, addresses
-│   ├── admin/             # Admin dashboard
-│   └── api/               # 30+ REST API endpoints
-├── components/
-│   ├── admin/             # Admin-specific components
-│   ├── home/              # Homepage components
-│   ├── product/           # Product display
-│   ├── catalog/           # Catalog components
-│   ├── cart/              # Cart components
-│   ├── checkout/          # Checkout components
-│   ├── layout/            # Header, footer, navigation
-│   └── shared/            # Reusable UI components
-├── lib/                   # Utilities, API clients, auth, Prisma client
-├── providers/             # React context (Auth, Cart, Theme, Toast)
-├── types/                 # TypeScript type definitions
-├── validators/            # Zod validation schemas
-└── i18n/                  # Locale config, request config, client locale helpers
-prisma/
-├── schema.prisma          # Database schema (14 models)
-└── seed.ts                # Seed data
-scripts/                   # Dev server orchestration, data generation
-```
-
-## Localization
-
-URLs carry no locale segment. The active locale is kept in `localStorage` (`brasmora.locale`) and mirrored into the `NEXT_LOCALE` cookie, which `src/i18n/request.ts` reads on the server. English is the only locale today. To add one, append its code to `locales` (and a label to `localeLabels`) in `src/i18n/config.ts` and add a `messages/<code>/` folder with one JSON file per namespace listed in `src/i18n/messages.ts` (copy `messages/en/` and translate); the language switcher appears automatically once more than one locale exists.
-
-Brand values live in `src/lib/brand.ts` and legal entity details in `src/lib/company.ts`.
+`local:setup` needs a local PostgreSQL. It writes `DATABASE_URL`/`DIRECT_URL` into `.env` if they are empty (override the server with `LOCAL_PG_URL`). The catalogue sync runs against the live supplier when `SIH_API_KEY` is set, or against a JSON file in the supplier's `get-items` shape when `SIH_FIXTURE_FILE` is set.
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start development server (Prisma + Next.js) |
-| `npm run build` | Build for production |
-| `npm start` | Start production server |
-| `npm run lint` | Run ESLint |
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Local dev server |
+| `npm run build` | `prisma generate` + production build |
+| `npm run local:setup` | Local database, schema, seed and first catalogue sync |
+| `npm run catalog:sync` | Sync the catalogue now (`-- --fixture <file>` to use a local file) |
+| `npm run sih:smoke` | Read-only supplier check: auth, balance, catalogue, one live price. Buys nothing |
+| `npm run sih:webhook` | Register the supplier webhook at `$APP_URL/api/webhooks/sih?secret=…` (`-- clear` removes it) |
 
-## API Overview
+## Configuration
 
-The API provides endpoints for:
-
-- **Auth** — register, login, logout, session management
-- **Products** — CRUD, search, filtering, bulk operations
-- **Categories** — hierarchy management
-- **Orders** — creation, status updates, history
-- **Cart** — add, update, remove, validate
-- **Checkout** — process orders with address selection
-- **Customers & Users** — management endpoints
-- **Reviews** — submission and moderation
-- **Wishlist** — add/remove items
-- **Settings** — store configuration
-- **Feeds** — Google Shopping, Facebook product feeds
-- **Import** — CSV/Excel product import with preview
-- **Analytics** — KPIs and revenue data
-- **Upload** — Image upload
-- **Payments** — PayByLink server-to-server notifications
-
-Admin endpoints (product, category, settings, homepage, import, upload, orders, customers, users, analytics and review moderation) require a session whose user role is `ADMIN` or `SUPER_ADMIN`; they answer `401` without a session and `403` for other roles. Contact, newsletter, login, registration and password-reset requests are rate limited per client IP and answer `429` with a `Retry-After` header.
-
-### Payment webhook
-
-Configure the webhook in the OPPWA (PayByLink) back office:
-
-- URL: `https://<your-domain>/api/payments/webhook` (POST, notification type Payments)
-- Decryption key: copy it into `PAYBYLINK_WEBHOOK_SECRET`
-
-Notifications are AES-256-GCM encrypted; requests that do not decrypt with the key are rejected with `401`. The notification body is only used to find the order (`merchantTransactionId` is the order number) and the checkout id (`ndc`). The payment status, amount and currency are always re-queried from OPPWA and the order is settled through the same idempotent function as `/api/orders/verify` (the shopper return page), so a notification and a returning shopper can arrive in any order without double fulfilment. When OPPWA cannot be reached the endpoint answers `503` so the notification is retried.
-
-## Product images
-
-Product photos are served straight from Cloudflare R2 in sizes made at import time. Vercel image optimisation is switched off (`images.loader: "custom"` in `next.config.ts`), so it uses none of Vercel's image quota.
-
-**At import.** `npm run catalog:import` copies each product image to R2 as `brasmora/products/<slug>/<n>.<ext>`, unchanged, and keeps it as the fallback. It also uses sharp to make WebP copies named `brasmora/products/<slug>/<n>-w<width>.webp`:
-
-- **Widths:** 320, 480, 640, 960 and 1280.
-- **No upscaling:** a photo narrower than 1280px gets one more copy at its own width. An 800px photo becomes 320, 480, 640 and 800.
-- **Settings:** quality 78. Photos are rotated to their EXIF orientation and keep their aspect ratio.
-
-The widths and quality are set in `catalogConfig.images.variants` (`src/config/catalog.ts`). The width list is `IMAGE_VARIANT_WIDTHS` in `src/lib/image-loader.ts`.
-
-**How the site finds the copies.** `ProductImage.url` stays the original URL plus a `vw` query parameter that lists the widths uploaded for that photo, for example:
-
-```
-https://img.example.com/brasmora/products/cast-iron-casserole-24/1.jpg?vw=320-480-640-960-1280
-```
-
-R2 ignores the query string, so the URL still opens the original photo. That keeps feeds, the sitemap, JSON-LD, emails and the OG image routes working unchanged. The schema does not change.
-
-**How pages pick a size.** `src/lib/image-loader.ts` is the `next/image` loader:
-
-- A URL with a valid `vw` gets the smallest copy at least as wide as the requested width, or the largest copy if none is wide enough.
-- Every other `src` is returned unchanged: local files (`/_dev`, `/payments`, SVGs, `/_next/static`), URLs without `vw` and other remote URLs.
-- `deviceSizes` match the widths above, so each `srcset` entry points to a real file.
-
-The marker is written only after every copy for that photo has been uploaded, so an image without it simply loads the original.
-
-**Running the import**
-
-| Command | Effect |
-|---|---|
-| `npm run catalog:import` | Uploads new or changed photos with their WebP copies. Photos already in R2 without copies are read back from the bucket (not the supplier), get their copies, and are re-saved with the marker. |
-| `npm run catalog:import -- --skip-variants` | Quick run: originals only. Photos that already have copies keep their marker; new photos load the original. |
-| `npm run catalog:import -- --skip-images` | Local testing only. Keeps the remote source URLs. |
-
-Runs are idempotent and can be resumed. `data/r2-image-manifest.json` records each photo's source hash, widths and settings. The original object in R2 also stores `variant-sig` and `variant-widths` metadata, so a run with no manifest skips finished photos. Changing the widths or quality regenerates every copy on the next run; copies at widths no longer listed stay in the bucket.
-
-A photo that sharp cannot decode keeps its original, with no marker, and is retried on the next run. Deleting an image in the admin also deletes its WebP copies.
-
-**`sizes`.** Pass a `sizes` prop to every `next/image` or `Cubby` that does not fill the screen width; without it the browser assumes `100vw`.
+- `src/config/catalog.ts` — catalogue quotas per weapon type, price limits, margin defaults, price bands.
+- `src/config/store-policy.ts` — currencies, delivery wording, refund timeframes, order limits, the withdrawal waiver text. Policy pages, FAQ, emails and checkout read from here.
+- `src/lib/company.ts` — company particulars (placeholders until provided).
+- `.env.example` — every environment variable, grouped by service.
 
 ## Deployment
 
-Deploy to Vercel:
-
-```bash
-npm i -g vercel
-vercel
-```
-
-Set the required environment variables in your Vercel project settings before deploying.
-
-## License
-
-MIT
+Deploy on Vercel with the variables from `.env.example`. Set `APP_URL` and `NEXT_PUBLIC_SITE_URL` to the main domain; the `*.vercel.app` address should redirect there so Steam sign-in and payment returns never show the technical URL. After the first deploy run `npm run sih:webhook` once with production variables.

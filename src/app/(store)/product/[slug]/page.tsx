@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { publicBrand } from "@/lib/utils/supplier";
 import { clampText, extractLabelledSpecs, htmlToText, sanitizeHtml } from "@/lib/utils/sanitize-html";
-import { careFor } from "@/config/care";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { JsonLd } from "@/components/shared/SEO/JsonLd";
 import { ProductGallery } from "@/components/product/ProductGallery/ProductGallery";
@@ -15,7 +14,7 @@ import { ProductTabs, type SpecRow } from "@/components/product/ProductTabs/Prod
 import { ProductReviews } from "@/components/product/ProductReviews/ProductReviews";
 import { RelatedProducts } from "@/components/product/RelatedProducts/RelatedProducts";
 import { productJsonLd, validGtin13 } from "@/components/product/product-structured-data";
-import { getCategoryTree, loadShelfProducts } from "@/components/catalog/catalog-query";
+import { SKIN_SELECT, getCategoryTree, loadShelfProducts, skinSummary } from "@/components/catalog/catalog-query";
 import type { ProductVariantOption } from "@/components/product/VariantSelector/VariantSelector";
 
 export const revalidate = 60;
@@ -48,6 +47,7 @@ const getProduct = cache(async (slug: string) => {
       ean: true,
       condition: true,
       characteristics: true,
+      skin: { select: { ...SKIN_SELECT, marketHashName: true } },
       images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true, alt: true } },
       categories: { select: { category: { select: { id: true, name: true, slug: true, parentId: true, isActive: true } } } },
       variants: { select: { id: true, name: true, sku: true, price: true, quantity: true, options: true } },
@@ -153,8 +153,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   });
   if (product.weight != null && Number(product.weight) > 0 && !seen.has("weight")) dedupedSpecs.push({ label: t("specWeight"), value: formatWeight(Number(product.weight)) });
 
-  const careMatch = careFor(root?.slug, product.name, `${labelled.map((s) => `${s.label} ${s.value}`).join(" ")} ${descriptionText}`);
-  const care = { guide: careMatch.guide, materials: careMatch.materials.map((m) => ({ id: m.id, title: m.title, steps: m.steps })) };
+  if (product.skin) dedupedSpecs.unshift({ label: t("specMarketName"), value: product.skin.marketHashName });
 
   const variants: ProductVariantOption[] = product.variants.map((v) => ({
     id: v.id,
@@ -242,13 +241,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
               imageUrl={product.images[0]?.url ?? null}
               variants={variants}
               breadcrumbs={<Breadcrumbs items={breadcrumbItems} className="hidden pt-0 lg:block" />}
+              skin={skinSummary(product.skin)}
             />
           </div>
         </div>
       </div>
 
       <div className="mt-16 lg:mt-24">
-        <ProductTabs descriptionHtml={sanitizeHtml(product.description)} specs={dedupedSpecs} care={care} />
+        <ProductTabs descriptionHtml={sanitizeHtml(product.description)} specs={dedupedSpecs} />
       </div>
 
       {reviews.length ? <ProductReviews reviews={reviews} /> : null}

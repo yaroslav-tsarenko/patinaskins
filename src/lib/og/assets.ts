@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { SITE_URL } from "@/lib/brand";
-import { catalogConfig } from "@/config/catalog";
 import { isBlockedImageHost } from "@/lib/utils/supplier";
 
 export const OG_SIZE = { width: 1200, height: 630 };
@@ -111,7 +110,7 @@ async function toPng(buf: Buffer, max: number): Promise<Buffer | null> {
 }
 
 export async function ogImageSource(url: string | null | undefined, max = 900): Promise<string | null> {
-  if (!url || isBlockedImageHost(url, catalogConfig.images.hosting === "supplier")) return null;
+  if (!url || isBlockedImageHost(url)) return null;
   const bytes = await readBytes(url);
   if (!bytes) return null;
   const type = sniff(bytes);

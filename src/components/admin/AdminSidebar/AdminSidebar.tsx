@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutGrid, Package, Handbag, Users, ListTree, Upload, ChartColumn, Rss, FileText, Settings, Star, Image, LogOut, Store, House, Mail } from "lucide-react";
+import { LayoutGrid, Package, Handbag, Users, ListTree, RefreshCw, Send, ChartColumn, Rss, FileText, Settings, Star, Image, LogOut, Store, House, Mail } from "lucide-react";
+import { BRAND } from "@/lib/brand";
 import { useAuth } from "@/providers/AuthProvider";
 
 const navItems = [
@@ -11,9 +12,10 @@ const navItems = [
   { section: "Catalog" },
   { href: "/admin/products", icon: Package, label: "Products" },
   { href: "/admin/categories", icon: ListTree, label: "Categories" },
-  { href: "/admin/import", icon: Upload, label: "Import" },
+  { href: "/admin/sih", icon: RefreshCw, label: "Catalogue sync" },
   { section: "Sales" },
   { href: "/admin/orders", icon: Handbag, label: "Orders" },
+  { href: "/admin/sih#deliveries", icon: Send, label: "Steam delivery" },
   { href: "/admin/customers", icon: Users, label: "Customers" },
   { href: "/admin/users", icon: Users, label: "Users" },
   { href: "/admin/reviews", icon: Star, label: "Reviews" },
@@ -44,7 +46,7 @@ export function AdminSidebar() {
           <Store size={16} />
         </div>
         <div>
-          <div className="admin-sidebar-brand">My Store</div>
+          <div className="admin-sidebar-brand">{BRAND.name}</div>
           <div className="admin-sidebar-brand-sub">Admin Panel</div>
         </div>
       </div>

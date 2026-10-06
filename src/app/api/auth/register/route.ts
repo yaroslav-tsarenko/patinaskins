@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
     });
 
     await setSessionCookie(user.id);
-    scheduleEmail(`welcome ${user.id}`, () => sendWelcomeEmail(user.email, user.name));
+    const welcomeTo = user.email;
+    if (welcomeTo) scheduleEmail(`welcome ${user.id}`, () => sendWelcomeEmail(welcomeTo, user.name));
 
     return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name, role: user.role } }, { status: 201 });
   } catch (error) {

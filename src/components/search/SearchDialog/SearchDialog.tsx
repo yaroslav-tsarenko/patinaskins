@@ -12,9 +12,9 @@ import { subtreeCount, type CategoryNode } from "@/lib/hooks/useCategoryTree";
 import { cn } from "@/lib/utils/cn";
 
 const SUGGESTED = [
-  { slug: "cookware", name: "Cookware" },
-  { slug: "tableware", name: "Tableware" },
-  { slug: "glassware-drinkware", name: "Glassware & drinkware" },
+  { slug: "knives", name: "Knives" },
+  { slug: "gloves", name: "Gloves" },
+  { slug: "rifles", name: "Rifles" },
 ];
 
 function flatten(categories: CategoryNode[]): CategoryNode[] {
@@ -126,7 +126,7 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
             aria-autocomplete="list"
             aria-activedescendant={activeIndex >= 0 ? options[activeIndex]?.id : undefined}
             aria-label="Search the shop"
-            placeholder="Search pans, plates, glasses…"
+            placeholder="Search AK-47, Karambit, Asiimov…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}

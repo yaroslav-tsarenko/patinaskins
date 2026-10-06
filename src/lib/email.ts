@@ -3,8 +3,8 @@ import { COMPANY } from "@/lib/company";
 import { BRAND, SITE_URL } from "@/lib/brand";
 import { STORE_POLICY } from "@/config/store-policy";
 import { computeTotals, rateConverter } from "@/lib/pricing";
-import { addressLines, deliveryEstimate, displayOrderNumber, type StoredAddress } from "@/lib/orders";
-import { PAYMENT_METHOD_LABEL } from "@/lib/paybylink";
+import { addressLines, displayOrderNumber, type StoredAddress } from "@/lib/orders";
+import { PAYMENT_METHOD_LABEL } from "@/lib/payments/transfermit";
 import { PASSWORD_RESET_TTL_MINUTES } from "@/lib/validators/auth";
 import { invoiceAttachment, type InvoiceFile } from "@/lib/invoice";
 
@@ -212,6 +212,9 @@ interface OrderEmailData {
   trackingNumber?: string | null;
   createdAt?: Date | string;
   paidAt?: Date | string | null;
+  steamId?: string | null;
+  waiverText?: string | null;
+  waiverAcceptedAt?: Date | string | null;
 }
 
 function toNum(v: Num): number {
@@ -329,18 +332,25 @@ function addressesBlock(data: OrderEmailData): string {
   const billing = data.billingAddress ?? data.shippingAddress;
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
 <tr>
-  <td width="50%" style="vertical-align:top;padding-right:12px;">${label("Delivery address")}<p style="margin:0;font-size:14px;line-height:1.6;color:${C.ink};">${addressHtml(data.shippingAddress)}</p></td>
-  <td width="50%" style="vertical-align:top;padding-left:12px;">${label("Billing address")}<p style="margin:0;font-size:14px;line-height:1.6;color:${C.ink};">${addressHtml(billing)}</p></td>
+  <td width="50%" style="vertical-align:top;padding-right:12px;">${label("Billing address")}<p style="margin:0;font-size:14px;line-height:1.6;color:${C.ink};">${addressHtml(billing)}</p></td>
+  <td width="50%" style="vertical-align:top;padding-left:12px;">${label("Delivered by")}<p style="margin:0;font-size:14px;line-height:1.6;color:${C.ink};">Steam trade offer${data.steamId ? `<br>Steam ID ${escape(data.steamId)}` : ""}</p></td>
 </tr>
 </table>`;
 }
 
-function deliveryNote(data: OrderEmailData): string {
-  const estimate = deliveryEstimate(data.shippingAddress?.country);
+function deliveryNote(): string {
+  const d = STORE_POLICY.delivery;
   return paragraph(
-    `We pack orders within ${estimate.processing} and ship from ${STORE_POLICY.shipping.dispatchFrom}. Delivery usually takes ${estimate.transit}. We will email you when your parcel is on its way.`,
+    `We send each item to your Steam account as a ${d.method}, ${d.usualTime}. Open Steam and accept the offer before it expires. Steam may place received items under trade protection for up to ${d.tradeProtectionDays} days, during which they cannot be traded or sold. If we cannot deliver an item within ${d.deadlineHours} hours, we refund the price you paid for it.`,
     "font-size:14px;",
   );
+}
+
+function waiverNote(data: OrderEmailData): string {
+  const text = data.waiverText || STORE_POLICY.waiver.text;
+  const when = data.waiverAcceptedAt ? ` on ${formatDate(data.waiverAcceptedAt)}` : "";
+  return `${label("Your consent at checkout")}
+${paragraph(`You confirmed${when}: &ldquo;${escape(text)}&rdquo; Delivery begins when we request the trade offer for your item, so the ${STORE_POLICY.returns.withdrawalDays}-day right of withdrawal no longer applies from that point. Our <a href="${SITE_URL}/policies/warranty" style="color:${C.ink};">item guarantee</a> still covers items we cannot deliver.`, "font-size:13px;")}`;
 }
 
 export async function sendWelcomeEmail(email: string, name?: string | null): Promise<boolean> {
@@ -352,13 +362,12 @@ export async function sendWelcomeEmail(email: string, name?: string | null): Pro
       `${heading(firstName ? `Welcome, ${firstName}` : `Welcome to ${BRAND.name}`)}
 ${paragraph(`Your account is set up. Sign in with <strong style="color:${C.ink};">${escape(email)}</strong> to:`)}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid ${C.line};margin:0 0 8px;">
-  <tr><td style="padding:12px 0;border-bottom:1px solid ${C.line};font-size:15px;color:${C.ink};">Follow each order from payment to delivery</td></tr>
-  <tr><td style="padding:12px 0;border-bottom:1px solid ${C.line};font-size:15px;color:${C.ink};">Keep your delivery addresses for a quicker checkout</td></tr>
-  <tr><td style="padding:12px 0;border-bottom:1px solid ${C.line};font-size:15px;color:${C.ink};">Save cookware, tableware and glassware for later</td></tr>
+  <tr><td style="padding:12px 0;border-bottom:1px solid ${C.line};font-size:15px;color:${C.ink};">Link your Steam account and save your trade URL</td></tr>
+  <tr><td style="padding:12px 0;border-bottom:1px solid ${C.line};font-size:15px;color:${C.ink};">Follow each order from payment to the Steam trade offer</td></tr>
+  <tr><td style="padding:12px 0;border-bottom:1px solid ${C.line};font-size:15px;color:${C.ink};">Save skins to look at later</td></tr>
 </table>
-${button(`${SITE_URL}/catalog`, "Browse the shop")}
-${paragraph(`Delivery is ${money(STORE_POLICY.shipping.standardCost, STORE_POLICY.currency)} to the UK and EU, and free on orders of ${money(STORE_POLICY.shipping.freeThreshold, STORE_POLICY.currency)} or more.`, "font-size:13px;margin:16px 0 0;")}
-${paragraph(`If you did not create this account, reply to this email and we will close it.`, "font-size:13px;margin:8px 0 0;")}`,
+${button(`${SITE_URL}/account/steam`, "Link your Steam account")}
+${paragraph(`If you did not create this account, reply to this email and we will close it.`, "font-size:13px;margin:16px 0 0;")}`,
       { preheader: `Your ${BRAND.name} account is ready.` },
     ),
   });
@@ -376,14 +385,15 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     html: emailWrapper(
       `${heading(`Thank you, ${escape(data.customerName.split(" ")[0] || data.customerName)}`)}
 <p style="margin:0 0 20px;">${plate(`Order ${ref}`)}</p>
-${paragraph(`Your payment of <strong style="color:${C.ink};">${money(totals.total, currency)}</strong> has been confirmed and your order is now with us.${attachments.length ? " Your invoice is attached as a PDF." : ""}`)}
+${paragraph(`Your payment of <strong style="color:${C.ink};">${money(totals.total, currency)}</strong> has been confirmed and we are preparing your Steam trade offer.${attachments.length ? " Your invoice is attached as a PDF." : ""}`)}
 ${orderFacts(data)}
 ${itemsTable(data)}
 ${addressesBlock(data)}
-${deliveryNote(data)}
+${deliveryNote()}
+${waiverNote(data)}
 ${sellerBlock()}
-${button(`${SITE_URL}/account/orders/${data.orderId}`, "View your order")}
-${paragraph(`You can return unused items within ${STORE_POLICY.returns.withdrawalDays} days of delivery. See our <a href="${SITE_URL}/policies/returns" style="color:${C.ink};">Returns &amp; refunds policy</a>.`, "font-size:13px;margin:16px 0 0;")}`,
+${button(`${SITE_URL}/account/orders/${data.orderId}`, "Follow your delivery")}
+${paragraph(`See our <a href="${SITE_URL}/policies/returns" style="color:${C.ink};">Refund policy</a> and <a href="${SITE_URL}/policies/shipping" style="color:${C.ink};">Delivery via Steam</a>.`, "font-size:13px;margin:16px 0 0;")}`,
       { preheader: `Order ${ref} is confirmed. Total ${money(totals.total, currency)}.` },
     ),
   });
@@ -416,50 +426,47 @@ ${paragraph(`${attachments.length ? "The PDF invoice is attached. " : ""}Keep th
   });
 }
 
-export async function sendOrderShippedEmail(data: OrderEmailData): Promise<boolean> {
+export async function sendTradeOfferEmail(data: OrderEmailData, item: { name: string; expiresAt?: Date | string | null }): Promise<boolean> {
   const ref = orderRef(data);
-  const tracking = data.trackingNumber;
-  const estimate = deliveryEstimate(data.shippingAddress?.country);
+  const expiry = item.expiresAt ? ` It expires on ${new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(new Date(item.expiresAt))} (UTC).` : "";
   return send({
     to: data.customerEmail,
-    subject: `Order ${ref} is on its way — ${BRAND.name}`,
+    subject: `Trade offer sent for order ${ref} — ${BRAND.name}`,
     html: emailWrapper(
-      `${heading("Your order is on its way")}
+      `${heading("Your trade offer is waiting in Steam")}
 <p style="margin:0 0 20px;">${plate(`Order ${ref}`)}</p>
-${paragraph(`Hi ${escape(data.customerName.split(" ")[0] || data.customerName)}, your parcel has left ${STORE_POLICY.shipping.dispatchFrom}. Delivery usually takes ${estimate.transit}.`)}
-${tracking ? `${label("Tracking number")}<p style="margin:0 0 24px;font-family:${MONO};font-size:18px;color:${C.ink};">${escape(tracking)}</p>` : ""}
-${label("Delivering to")}
-<p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:${C.ink};">${addressHtml(data.shippingAddress)}</p>
+${paragraph(`Hi ${escape(data.customerName.split(" ")[0] || data.customerName)}, a Steam trade offer for <strong style="color:${C.ink};">${escape(item.name)}</strong> has been sent to your Steam account.${expiry} Accept it in the Steam app or at steamcommunity.com under Inventory &rarr; Trade offers. Check that the offer gives you only this item and asks for nothing from your inventory.`)}
 ${button(`${SITE_URL}/account/orders/${data.orderId}`, "View your order")}`,
-      { preheader: `Order ${ref} has shipped${tracking ? ` — tracking ${tracking}` : ""}` },
+      { preheader: `Accept the Steam trade offer for ${item.name}` },
     ),
   });
 }
 
-export async function sendOrderStatusEmail(data: OrderEmailData, status: "DELIVERED" | "CANCELLED" | "REFUNDED"): Promise<boolean> {
+export async function sendOrderStatusEmail(data: OrderEmailData, status: "DELIVERED" | "CANCELLED" | "REFUNDED", amount?: number): Promise<boolean> {
   const ref = orderRef(data);
   const totals = chargeTotals(data);
   const currency = currencyOf(data);
   const refundDays = STORE_POLICY.returns.refundDays;
+  const refunded = money(amount ?? totals.total, currency);
   const variants = {
     DELIVERED: {
       subject: `Order ${ref} has been delivered`,
-      title: "Your order has been delivered",
-      message: `If anything arrived damaged, faulty or not what you ordered, reply to this email with photographs and we will replace it or refund you. If you change your mind, you can cancel within ${STORE_POLICY.returns.withdrawalDays} days of delivery.`,
+      title: "Your items are in your Steam inventory",
+      message: `the trade offer for your order has been accepted. Steam may keep received items under trade protection for up to ${STORE_POLICY.delivery.tradeProtectionDays} days. If Steam reverses the trade during that time, contact us and we refund the item.`,
       cta: "View your order",
       href: `${SITE_URL}/account/orders/${data.orderId}`,
     },
     CANCELLED: {
       subject: `Order ${ref} has been cancelled`,
       title: "Your order has been cancelled",
-      message: `If you were charged, we refund ${money(totals.total, currency)} to your original payment method within ${refundDays} days.`,
-      cta: "Browse the shop",
+      message: `if you were charged, we refund ${refunded} to ${STORE_POLICY.returns.refundMethod} within ${refundDays} days.`,
+      cta: "Browse skins",
       href: `${SITE_URL}/catalog`,
     },
     REFUNDED: {
       subject: `Refund issued for order ${ref}`,
       title: "Your refund has been issued",
-      message: `We have refunded ${money(totals.total, currency)} to your original payment method. Your bank may take a few days to show it on your statement.`,
+      message: `we have refunded ${refunded} to ${STORE_POLICY.returns.refundMethod}. Your bank may take a few days to show it on your statement.`,
       cta: "View your order",
       href: `${SITE_URL}/account/orders/${data.orderId}`,
     },

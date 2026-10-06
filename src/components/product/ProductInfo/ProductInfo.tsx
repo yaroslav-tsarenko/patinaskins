@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Heart, Lock, RotateCcw, ShieldCheck, Truck } from "lucide-react";
+import { Heart, Lock, RotateCcw, ShieldCheck, Send } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { Plate } from "@/components/ui/Plate";
@@ -11,11 +11,10 @@ import { PriceDisplay, discountPercent } from "@/components/shared/PriceDisplay/
 import { QuantitySelector } from "@/components/shared/QuantitySelector/QuantitySelector";
 import { PaymentLogos } from "@/components/shared/PaymentLogos/PaymentLogos";
 import { useCart } from "@/providers/CartProvider";
-import { useCurrency } from "@/providers/CurrencyProvider";
 import { useWishlist } from "@/providers/WishlistProvider";
-import { formatPrice } from "@/lib/utils/format-price";
 import { STORE_POLICY } from "@/config/store-policy";
 import { VariantSelector, matchVariant, variantAxes, type ProductVariantOption } from "@/components/product/VariantSelector/VariantSelector";
+import { exteriorDef, floatRangeLabel, rarityDef, weaponTypeDef, type SkinSummary } from "@/lib/skins/cs2";
 
 export interface ProductInfoProps {
   id: string;
@@ -32,6 +31,46 @@ export interface ProductInfoProps {
   imageUrl: string | null;
   variants: ProductVariantOption[];
   breadcrumbs?: ReactNode;
+  skin?: SkinSummary | null;
+}
+
+function SkinFacts({ skin }: { skin: SkinSummary }) {
+  const t = useTranslations("product.skin");
+  const rarity = rarityDef(skin.rarity);
+  const exterior = exteriorDef(skin.exterior);
+  const range = floatRangeLabel(skin.floatMin, skin.floatMax);
+  const rows: { key: string; label: string; value: ReactNode }[] = [
+    {
+      key: "rarity",
+      label: t("rarity"),
+      value: (
+        <span className="inline-flex items-center gap-2">
+          <span aria-hidden="true" className="inline-block size-2.5" style={{ background: rarity?.color ?? skin.rarityColor ?? undefined }} />
+          {rarity?.label ?? skin.rarity}
+        </span>
+      ),
+    },
+    { key: "exterior", label: t("exterior"), value: exterior ? exterior.label : t("noExterior") },
+    ...(range ? [{ key: "float", label: t("float"), value: <span className="tabular">{range}</span> }] : []),
+    { key: "quality", label: t("quality"), value: skin.isStatTrak ? "StatTrak™" : skin.isSouvenir ? t("souvenir") : t("normal") },
+    { key: "type", label: t("type"), value: weaponTypeDef(skin.weaponType)?.singular ?? skin.weaponType },
+    { key: "weapon", label: t("weapon"), value: skin.weapon },
+    ...(skin.phase ? [{ key: "phase", label: t("phase"), value: skin.phase }] : []),
+    ...(skin.collection ? [{ key: "collection", label: t("collection"), value: skin.collection }] : []),
+  ];
+  return (
+    <div data-skin-facts="" className="mt-6">
+      <dl className="m-0 grid grid-cols-2 gap-x-6 gap-y-3 border-y border-line py-4">
+        {rows.map((row) => (
+          <div key={row.key} data-fact={row.key} className="flex min-w-0 flex-col gap-0.5">
+            <dt className="eyebrow text-ink-muted">{row.label}</dt>
+            <dd className="m-0 text-ui-sm text-ink">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {range ? <p className="meta m-0 mt-2 text-ink-muted">{t("floatNote")}</p> : null}
+    </div>
+  );
 }
 
 function InfoRow({ icon, children, aside }: { icon: ReactNode; children: ReactNode; aside?: ReactNode }) {
@@ -63,10 +102,10 @@ export function ProductInfo({
   imageUrl,
   variants,
   breadcrumbs,
+  skin,
 }: ProductInfoProps) {
   const t = useTranslations("product");
   const { addItem } = useCart();
-  const { currency, convert } = useCurrency();
   const { isSaved, toggle, pending } = useWishlist();
   const [chosen, setChosen] = useState<Record<string, string>>(() => {
     const axes = variantAxes(variants);
@@ -118,13 +157,12 @@ export function ProductInfo({
       variantName: variant?.name,
       maxQuantity: max,
     });
-    window.dispatchEvent(new CustomEvent("brasmora:bag-add", { detail: { productId: id, source: source ?? document.querySelector("[data-gallery]") } }));
+    window.dispatchEvent(new CustomEvent("patina:bag-add", { detail: { productId: id, source: source ?? document.querySelector("[data-gallery]") } }));
   };
 
-  const availability = soldOut ? t("soldOut") : !tracked ? t("available") : lowStock ? t("onlyLeft", { count: stock }) : t("inStock");
+  const availability = soldOut ? t("soldOut") : skin ? t("available") : !tracked ? t("available") : lowStock ? t("onlyLeft", { count: stock }) : t("inStock");
   const addLabel = soldOut ? t("soldOut") : needsChoice ? t("chooseOption", { option: (firstMissing ?? "").toLowerCase() }) : t("addToBag");
-  const money = (n: number) => formatPrice(convert(n), currency);
-  const { shipping, returns, warranty } = STORE_POLICY;
+  const { delivery, returns } = STORE_POLICY;
 
   return (
     <div className="flex flex-col">
@@ -141,7 +179,7 @@ export function ProductInfo({
         {pct > 0 ? <Plate>{t("reducedBy", { percent: pct })}</Plate> : null}
       </div>
 
-      {summary ? <p className="measure mt-5 text-step-0 leading-[1.65] text-ink-muted">{summary}</p> : null}
+      {skin ? <SkinFacts skin={skin} /> : summary ? <p className="measure mt-5 text-step-0 leading-[1.65] text-ink-muted">{summary}</p> : null}
 
       {hasVariants ? (
         <div className="mt-6">
@@ -164,10 +202,12 @@ export function ProductInfo({
           </div>
         ) : (
           <div className="flex flex-wrap items-start gap-3">
-            <div className="w-[148px] shrink-0">
-              <QuantitySelector quantity={qty} maxQuantity={max} onChange={setQty} showStockHint={stockLimited} label={t("quantity")} />
-              {!stockLimited && qty >= max ? <p className="meta mt-1.5 text-ink-muted">{t("maxPerOrder", { count: policyMax })}</p> : null}
-            </div>
+            {max > 1 ? (
+              <div className="w-[148px] shrink-0">
+                <QuantitySelector quantity={qty} maxQuantity={max} onChange={setQty} showStockHint={stockLimited} label={t("quantity")} />
+                {!stockLimited && qty >= max ? <p className="meta mt-1.5 text-ink-muted">{t("maxPerOrder", { count: policyMax })}</p> : null}
+              </div>
+            ) : null}
             <Button size="lg" className="min-w-[12rem] flex-1" isDisabled={needsChoice} onPress={() => add(null)}>
               {addLabel}
             </Button>
@@ -186,13 +226,20 @@ export function ProductInfo({
       </div>
 
       <ul className="m-0 mt-6 list-none border-t border-line p-0">
-        <InfoRow icon={<Truck size={18} />}>
-          <p>{t("deliveryLine", { days: shipping.processingDays })}</p>
-          <p className="text-ink-muted">{t("deliveryRegions", { uk: shipping.deliveryTimes.uk, eu: shipping.deliveryTimes.eu })}</p>
+        <InfoRow icon={<Send size={18} />}>
+          <p>{t("deliveryLine", { method: delivery.method, usual: delivery.usualTime })}</p>
           <p className="text-ink-muted">
-            {t("deliveryCost", { cost: money(shipping.standardCost), threshold: money(shipping.freeThreshold) })}{" "}
+            {t("deliveryProtection", { days: delivery.tradeProtectionDays })}{" "}
             <Link href="/policies/shipping" className={linkCls}>
               {t("deliveryLink")}
+            </Link>
+          </p>
+        </InfoRow>
+        <InfoRow icon={<ShieldCheck size={18} />}>
+          <p>
+            {t("guaranteeLine", { hours: delivery.deadlineHours })}{" "}
+            <Link href="/policies/warranty" className={linkCls}>
+              {t("guaranteeLink")}
             </Link>
           </p>
         </InfoRow>
@@ -201,14 +248,6 @@ export function ProductInfo({
             {t("returnsLine", { days: returns.withdrawalDays })}{" "}
             <Link href="/policies/returns" className={linkCls}>
               {t("returnsLink")}
-            </Link>
-          </p>
-        </InfoRow>
-        <InfoRow icon={<ShieldCheck size={18} />}>
-          <p>
-            {t("warrantyLine", { months: warranty.months })}{" "}
-            <Link href="/policies/warranty" className={linkCls}>
-              {t("warrantyLink")}
             </Link>
           </p>
         </InfoRow>

@@ -12,6 +12,7 @@ import { Plate } from "@/components/ui/Plate";
 import { Button } from "@/components/ui/Button";
 import { SkeletonBar } from "@/components/ui/ShelfLoader";
 import { itemQuantityCap } from "@/lib/pricing";
+import { rarityDef, skinSpecText, type SkinSummary } from "@/lib/skins/cs2";
 
 export interface ShelfProduct {
   id: string;
@@ -27,6 +28,11 @@ export interface ShelfProduct {
   category?: string | null;
   createdAt?: string | Date | null;
   isNew?: boolean;
+  skin?: SkinSummary | null;
+}
+
+export function skinSpecLine(skin: SkinSummary | null | undefined): string | null {
+  return skinSpecText(skin);
 }
 
 type CubbySize = "tile" | "featured" | "compact" | "toast" | "thumb";
@@ -124,6 +130,11 @@ export function tilePlate(product: ShelfProduct): { variant: "brass" | "neutral"
   if (product.quantity !== undefined && product.quantity <= 0) return { variant: "neutral", label: "Sold out" };
   const pct = discountPercent(price, compare);
   if (pct > 0) return { variant: "brass", label: `Reduced −${pct}%` };
+  if (product.skin) {
+    const rarity = rarityDef(product.skin.rarity);
+    const quality = product.skin.isStatTrak ? "StatTrak™ " : product.skin.isSouvenir ? "Souvenir " : "";
+    if (rarity) return { variant: "neutral", label: `${quality}${rarity.label}` };
+  }
   if (product.isNew) return { variant: "brass", label: "New" };
   const category = product.category ?? product.categories?.[0]?.category?.name;
   return category ? { variant: "brass", label: category } : null;
@@ -151,6 +162,7 @@ export function ShelfTile({ product, variant = "default", priority, sizes, specL
   const outOfStock = product.quantity !== undefined && product.quantity <= 0;
   const saved = isSaved(product.id);
   const plate = showPlate ? tilePlate(product) : null;
+  const spec = specLine ?? skinSpecLine(product.skin);
   const href = `/product/${product.slug}`;
   const Heading = `h${headingLevel}` as "h2" | "h3" | "h4";
 
@@ -167,7 +179,7 @@ export function ShelfTile({ product, variant = "default", priority, sizes, specL
       maxQuantity: itemQuantityCap(product.quantity),
     });
     setSettleKey((k) => k + 1);
-    window.dispatchEvent(new CustomEvent("brasmora:bag-add", { detail: { productId: product.id, source: event.currentTarget.closest("[data-shelf-item]") } }));
+    window.dispatchEvent(new CustomEvent("patina:bag-add", { detail: { productId: product.id, source: event.currentTarget.closest("[data-shelf-item]") } }));
   };
 
   if (variant === "compact") {
@@ -220,7 +232,10 @@ export function ShelfTile({ product, variant = "default", priority, sizes, specL
       </Cubby>
 
       {plate ? (
-        <div className="mt-3 flex">
+        <div className="mt-3 flex items-center gap-2">
+          {product.skin ? (
+            <span aria-hidden="true" data-rarity={product.skin.rarity} className="inline-block size-2.5 shrink-0" style={{ background: rarityDef(product.skin.rarity)?.color ?? product.skin.rarityColor ?? undefined }} />
+          ) : null}
           <Plate variant={plate.variant}>{plate.label}</Plate>
         </div>
       ) : null}
@@ -243,7 +258,11 @@ export function ShelfTile({ product, variant = "default", priority, sizes, specL
         </Link>
       </Heading>
 
-      {featured && specLine ? <p className="mt-1 text-ui-sm text-ink-muted">{specLine}</p> : null}
+      {spec ? (
+        <p data-skin-spec="" className="meta tabular mt-1 text-ink-muted">
+          {spec}
+        </p>
+      ) : null}
 
       <div className="mt-2 flex items-center justify-between gap-3">
         <PriceDisplay price={price} comparePrice={compare} size={featured ? "md" : "sm"} />

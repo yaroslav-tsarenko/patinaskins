@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Tabs } from "@/components/ui/Tabs";
-import { useCurrency } from "@/providers/CurrencyProvider";
-import { formatPrice } from "@/lib/utils/format-price";
 import { STORE_POLICY } from "@/config/store-policy";
-import type { CareGuide } from "@/config/care";
 
 export interface SpecRow {
   label: string;
@@ -17,27 +14,20 @@ export interface SpecRow {
 interface ProductTabsProps {
   descriptionHtml: string;
   specs: SpecRow[];
-  care: { guide: CareGuide | null; materials: { id: string; title: string; steps: string[] }[] };
 }
 
 const linkCls = "font-semibold text-ink underline decoration-1 underline-offset-4 hover-device:hover:decoration-2";
 
 function DeliveryReturns() {
   const t = useTranslations("product");
-  const { currency, convert } = useCurrency();
-  const money = (n: number) => formatPrice(convert(n), currency);
-  const { shipping, returns, warranty } = STORE_POLICY;
+  const { delivery, returns } = STORE_POLICY;
   const rows: { term: string; detail: React.ReactNode }[] = [
-    { term: t("drDispatch"), detail: t("drDispatchBody", { from: shipping.dispatchFrom, days: shipping.processingDays }) },
-    { term: t("drUk"), detail: <>{t("drUkBody", { time: shipping.deliveryTimes.uk })} {shipping.ukImportNote}</> },
-    { term: t("drEu"), detail: t("drEuBody", { time: shipping.deliveryTimes.eu }) },
-    { term: t("drCost"), detail: t("drCostBody", { cost: money(shipping.standardCost), threshold: money(shipping.freeThreshold) }) },
-    {
-      term: t("drReturns"),
-      detail: t("drReturnsBody", { days: returns.withdrawalDays, sendDays: returns.returnShipDays, refundDays: returns.refundDays }),
-    },
-    { term: t("drReturnCost"), detail: returns.returnShippingPaidBy === "customer" ? t("drReturnCostCustomer") : t("drReturnCostFree") },
-    { term: t("drWarranty"), detail: t("drWarrantyBody", { months: warranty.months }) },
+    { term: t("drMethod"), detail: t("drMethodBody", { method: delivery.method, usual: delivery.usualTime }) },
+    { term: t("drAccept"), detail: delivery.offerExpiryNote },
+    { term: t("drProtection"), detail: t("drProtectionBody", { days: delivery.tradeProtectionDays, hold: delivery.tradeHoldMaxDays }) },
+    { term: t("drRequirements"), detail: delivery.requirements.join("; ") + "." },
+    { term: t("drGuarantee"), detail: t("drGuaranteeBody", { hours: delivery.deadlineHours, refundDays: returns.refundDays }) },
+    { term: t("drWithdrawal"), detail: t("drWithdrawalBody", { days: returns.withdrawalDays }) },
   ];
   return (
     <div className="max-w-[860px]">
@@ -57,14 +47,14 @@ function DeliveryReturns() {
           {t("returnsLink")}
         </Link>
         <Link href="/policies/warranty" className={linkCls}>
-          {t("warrantyLink")}
+          {t("guaranteeLink")}
         </Link>
       </p>
     </div>
   );
 }
 
-export function ProductTabs({ descriptionHtml, specs, care }: ProductTabsProps) {
+export function ProductTabs({ descriptionHtml, specs }: ProductTabsProps) {
   const t = useTranslations("product");
 
   const items = [
@@ -98,39 +88,6 @@ export function ProductTabs({ descriptionHtml, specs, care }: ProductTabsProps) 
                 ))}
               </tbody>
             </table>
-          ),
-        }
-      : null,
-    care.guide
-      ? {
-          id: "care",
-          label: t("tabCare"),
-          content: (
-            <div className="grid max-w-[1000px] gap-x-12 gap-y-8 md:grid-cols-2">
-              <section>
-                <h3 className="text-step-2 leading-[1.2] text-ink">{care.guide.title}</h3>
-                <ul className="mt-4 flex list-disc flex-col gap-2 pl-5 text-step-0 leading-[1.6] text-ink-muted">
-                  {care.guide.steps.map((step) => (
-                    <li key={step}>{step}</li>
-                  ))}
-                </ul>
-              </section>
-              {care.materials.length ? (
-                <div className="flex flex-col gap-6">
-                  {care.materials.map((m) => (
-                    <section key={m.id}>
-                      <h3 className="eyebrow text-ink">{m.title}</h3>
-                      <ul className="mt-3 flex list-disc flex-col gap-2 pl-5 text-step-0 leading-[1.6] text-ink-muted">
-                        {m.steps.map((step) => (
-                          <li key={step}>{step}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  ))}
-                </div>
-              ) : null}
-              <p className="meta text-ink-muted md:col-span-2">{t("careNote")}</p>
-            </div>
           ),
         }
       : null,

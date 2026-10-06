@@ -9,20 +9,19 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinne
 import { toast } from "sonner";
 import type { OrderDetail } from "@/types/order";
 
-const STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
+const STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "DELIVERED", "CANCELLED", "REFUNDED"];
 
 export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [newStatus, setNewStatus] = useState("");
-  const [tracking, setTracking] = useState("");
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     fetch(`/api/orders/${id}`)
       .then((res) => res.json())
-      .then((data) => { setOrder(data); setNewStatus(data.status); setTracking(data.trackingNumber || ""); })
+      .then((data) => { setOrder(data); setNewStatus(data.status); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
@@ -33,10 +32,10 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
       await fetch(`/api/orders/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus, trackingNumber: tracking || undefined }),
+        body: JSON.stringify({ status: newStatus }),
       });
       toast.success("Order status updated");
-      setOrder((prev) => prev ? { ...prev, status: newStatus, trackingNumber: tracking } : prev);
+      setOrder((prev) => prev ? { ...prev, status: newStatus } : prev);
     } catch {
       toast.error("Failed to update status");
     } finally {
@@ -61,10 +60,14 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
           <p style={{ fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>{order.customerEmail}</p>
         </div>
         <div className="admin-info-card">
-          <h3>Shipping</h3>
+          <h3>Steam delivery</h3>
           <p style={{ fontSize: "0.875rem", color: "var(--admin-text)" }}>
-            {order.shippingAddress.address1}, {order.shippingAddress.city}<br />
-            {order.shippingAddress.postalCode}, {order.shippingAddress.country}
+            Steam ID {order.steamId ?? "—"}
+            <br />
+            Billing: {order.shippingAddress.address1}, {order.shippingAddress.city}, {order.shippingAddress.postalCode}, {order.shippingAddress.country}
+          </p>
+          <p style={{ fontSize: "0.75rem", color: "var(--admin-text-secondary)" }}>
+            Withdrawal waiver accepted {order.waiverAcceptedAt ? new Date(order.waiverAcceptedAt).toLocaleString("en-GB") : "—"} (version {order.waiverVersion ?? "—"})
           </p>
         </div>
         <div className="admin-info-card">
@@ -72,7 +75,6 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
           <select className="admin-select" style={{ marginBottom: "0.5rem" }} value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
             {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-          <input className="admin-input" placeholder="Tracking number" style={{ marginBottom: "0.5rem" }} value={tracking} onChange={(e) => setTracking(e.target.value)} />
           <Button size="sm" color="primary" onPress={handleUpdateStatus} isLoading={updating} fullWidth>Update</Button>
         </div>
       </div>
@@ -82,7 +84,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
           <thead>
             <tr>
               <th>Product</th>
-              <th style={{ textAlign: "right" }}>Qty</th>
+              <th>Delivery</th>
               <th style={{ textAlign: "right" }}>Price</th>
               <th style={{ textAlign: "right" }}>Total</th>
             </tr>
@@ -91,7 +93,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             {order.items.map((item) => (
               <tr key={item.id}>
                 <td style={{ color: "var(--admin-text)" }}>{item.productName}{item.variantName && ` (${item.variantName})`}</td>
-                <td style={{ textAlign: "right" }}>{item.quantity}</td>
+                <td style={{ fontSize: "0.75rem" }}>{item.sihOrder ? `${item.sihOrder.status}${item.sihOrder.sihError ? ` · ${item.sihOrder.sihError}` : ""}` : "—"}</td>
                 <td style={{ textAlign: "right" }}>{formatPrice(item.price)}</td>
                 <td style={{ textAlign: "right", fontWeight: 600, color: "var(--admin-text)" }}>{formatPrice(item.total)}</td>
               </tr>
@@ -100,9 +102,8 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
         </table>
         <div style={{ padding: "1.25rem", textAlign: "right", fontSize: "0.875rem", borderTop: "1px solid var(--admin-border)" }}>
           <div style={{ color: "var(--admin-text-secondary)" }}>Subtotal: {formatPrice(order.subtotal)}</div>
-          <div style={{ color: "var(--admin-text-secondary)" }}>Shipping: {formatPrice(order.shippingCost)}</div>
-          <div style={{ color: "var(--admin-text-secondary)" }}>Tax: {formatPrice(order.taxAmount)}</div>
           <div style={{ fontWeight: 700, fontSize: "1.125rem", color: "var(--admin-text)", marginTop: "0.5rem" }}>Total: {formatPrice(order.total)}</div>
+          {order.chargeTotal != null && order.currency !== "USD" ? <div style={{ color: "var(--admin-text-secondary)" }}>Charged: {formatPrice(order.chargeTotal, order.currency)}</div> : null}
         </div>
       </div>
     </motion.div>

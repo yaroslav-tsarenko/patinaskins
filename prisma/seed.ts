@@ -22,7 +22,7 @@ async function main() {
     address: COMPANY.registeredOffice,
     currency: STORE_POLICY.currency,
     taxRate: STORE_POLICY.vatRegistered ? STORE_POLICY.tax.vatRatePercent : 0,
-    freeShippingMin: STORE_POLICY.shipping.freeThreshold,
+    freeShippingMin: null,
   };
   const storeSettings = await prisma.storeSettings.upsert({
     where: { id: "default" },

@@ -1,46 +1,29 @@
+import { WEAPON_TYPES } from "@/lib/skins/cs2";
+
 export interface NavCategory {
   slug: string;
   name: string;
   short: string;
 }
 
-export const NAV_CATEGORIES: NavCategory[] = [
-  { slug: "cookware", name: "Cookware", short: "Cookware" },
-  { slug: "bakeware", name: "Bakeware", short: "Bakeware" },
-  { slug: "utensils-gadgets", name: "Utensils & gadgets", short: "Utensils" },
-  { slug: "tableware", name: "Tableware", short: "Tableware" },
-  { slug: "cutlery", name: "Cutlery", short: "Cutlery" },
-  { slug: "glassware-drinkware", name: "Glassware & drinkware", short: "Glassware" },
-  { slug: "coffee-tea", name: "Coffee & tea", short: "Coffee & tea" },
-  { slug: "bar-wine", name: "Bar & wine", short: "Bar & wine" },
-  { slug: "storage-organisation", name: "Storage & organisation", short: "Storage" },
-  { slug: "kitchen-table-linen", name: "Kitchen & table linen", short: "Linen" },
-];
+export const NAV_CATEGORIES: NavCategory[] = WEAPON_TYPES.map((t) => ({ slug: t.key, name: t.label, short: t.label }));
 
-export const CORNICE_LINKS = ["cookware", "bakeware", "tableware", "glassware-drinkware", "coffee-tea", "bar-wine"];
+export const CORNICE_LINKS = ["knives", "gloves", "rifles", "sniper-rifles", "pistols", "smgs"];
 
 export const MEGA_ZONES: { title: string; slugs: string[] }[] = [
-  { title: "Cook & bake", slugs: ["cookware", "bakeware"] },
-  { title: "Prep & serve", slugs: ["utensils-gadgets", "cutlery", "tableware"] },
-  { title: "Drink", slugs: ["glassware-drinkware", "coffee-tea", "bar-wine"] },
-  { title: "Store & linen", slugs: ["storage-organisation", "kitchen-table-linen"] },
+  { title: "Rare items", slugs: ["knives", "gloves"] },
+  { title: "Primary weapons", slugs: ["rifles", "sniper-rifles", "smgs"] },
+  { title: "Secondary and heavy", slugs: ["pistols", "shotguns", "machine-guns"] },
 ];
-
-export const FURNITURE_ZONES: Record<"shelves" | "drawers" | "cupboards" | "hooks", string[]> = {
-  shelves: ["tableware", "glassware-drinkware"],
-  drawers: ["utensils-gadgets", "cutlery", "kitchen-table-linen"],
-  cupboards: ["cookware", "bakeware", "storage-organisation"],
-  hooks: ["coffee-tea", "bar-wine"],
-};
 
 export function navCategory(slug: string): NavCategory | undefined {
   return NAV_CATEGORIES.find((c) => c.slug === slug);
 }
 
 export const HELP_LINKS: { href: string; label: string; signedInHref?: string }[] = [
-  { href: "/policies/shipping", label: "Delivery" },
-  { href: "/policies/returns", label: "Returns & refunds" },
-  { href: "/policies/warranty", label: "Warranty" },
+  { href: "/policies/shipping", label: "Delivery via Steam" },
+  { href: "/policies/returns", label: "Refunds" },
+  { href: "/policies/warranty", label: "Item guarantee" },
   { href: "/policies/payment", label: "Payment" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact us" },

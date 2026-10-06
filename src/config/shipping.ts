@@ -1,7 +1,6 @@
 import { STORE_POLICY } from "@/config/store-policy";
 
 export const SHIPPING = {
-  statement: "Delivery to the UK and EU",
-  dispatchCountry: STORE_POLICY.shipping.dispatchCountry,
-  cartNote: "Delivery calculated at checkout",
+  statement: `Delivered by ${STORE_POLICY.delivery.method}`,
+  cartNote: "No delivery charge — items arrive as a Steam trade offer",
 } as const;

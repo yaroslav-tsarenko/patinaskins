@@ -4,7 +4,7 @@ export type SupportedCurrency = (typeof STORE_POLICY.supportedCurrencies)[number
 
 export type Rates = Record<SupportedCurrency, number>;
 
-const FALLBACK_RATES: Rates = { GBP: 1, EUR: 1.17, USD: 1.27 };
+const FALLBACK_RATES: Rates = { USD: 1, EUR: 0.86, GBP: 0.75 };
 const CACHE_MS = 60 * 60 * 1000;
 
 let cached: { rates: Rates; at: number } | null = null;
@@ -16,13 +16,13 @@ export function isSupportedCurrency(value: unknown): value is SupportedCurrency 
 export async function getExchangeRates(): Promise<Rates> {
   if (cached && Date.now() - cached.at < CACHE_MS) return cached.rates;
   try {
-    const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${STORE_POLICY.currency}&symbols=EUR,USD`, {
+    const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${STORE_POLICY.currency}&symbols=EUR,GBP`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) throw new Error(`rates ${res.status}`);
-    const data = (await res.json()) as { rates?: { EUR?: number; USD?: number } };
-    if (!data.rates?.EUR || !data.rates?.USD) throw new Error("rates payload");
-    cached = { rates: { GBP: 1, EUR: data.rates.EUR, USD: data.rates.USD }, at: Date.now() };
+    const data = (await res.json()) as { rates?: { EUR?: number; GBP?: number } };
+    if (!data.rates?.EUR || !data.rates?.GBP) throw new Error("rates payload");
+    cached = { rates: { USD: 1, EUR: data.rates.EUR, GBP: data.rates.GBP }, at: Date.now() };
     return cached.rates;
   } catch {
     return cached?.rates ?? FALLBACK_RATES;

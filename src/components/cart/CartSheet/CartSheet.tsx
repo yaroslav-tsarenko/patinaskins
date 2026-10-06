@@ -16,14 +16,13 @@ import { formatPrice } from "@/lib/utils/format-price";
 import { COMPANY } from "@/lib/company";
 
 const EMPTY_LINKS = [
-  { href: "/catalog/cookware", label: "Cookware" },
-  { href: "/catalog/tableware", label: "Tableware" },
-  { href: "/catalog/glassware-drinkware", label: "Glassware & drinkware" },
+  { href: "/catalog/knives", label: "Knives" },
+  { href: "/catalog/gloves", label: "Gloves" },
+  { href: "/catalog/rifles", label: "Rifles" },
 ];
 
 export function CartSheet() {
   const { cart, displayTotals, isSheetOpen, closeSheet } = useCart();
-  const tt = useTranslations("checkout.totals");
   const { currency } = useCurrency();
   const titleId = useId();
   const count = cart.itemCount;
@@ -76,10 +75,6 @@ export function CartSheet() {
                 <div className="flex items-baseline justify-between gap-4">
                   <dt className="text-ui-sm text-ink-muted">Subtotal</dt>
                   <dd className="tabular m-0 text-ui-sm text-ink">{formatPrice(displayTotals.subtotal, currency)}</dd>
-                </div>
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="text-ui-sm text-ink-muted">Delivery</dt>
-                  <dd className="tabular m-0 text-ui-sm text-ink">{displayTotals.shipping === 0 ? tt("free") : formatPrice(displayTotals.shipping, currency)}</dd>
                 </div>
                 <div className="mt-1 flex items-baseline justify-between gap-4 border-t border-line pt-3">
                   <dt className="text-step-0 font-medium text-ink">{COMPANY.vatRegistered ? "Total incl. VAT" : "Total"}</dt>

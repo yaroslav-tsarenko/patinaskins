@@ -89,6 +89,7 @@ export function MobileMenu({ open, onClose, categories, activeSlug = null, activ
                   <>
                     <Link href="/account" onClick={close} className={rowCls}>Account</Link>
                     <Link href="/account/orders" onClick={close} className={rowCls}>Orders</Link>
+                    <Link href="/account/steam" onClick={close} className={rowCls}>Steam account</Link>
                     <Link href="/account/wishlist" onClick={close} className={rowCls}>Saved</Link>
                     {role === "ADMIN" || role === "SUPER_ADMIN" ? (
                       <a href="/admin" onClick={close} className={rowCls}>Admin</a>
