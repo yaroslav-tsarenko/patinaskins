@@ -134,6 +134,7 @@ export async function GET(request: NextRequest) {
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 2 },
           categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+          skin: true,
         },
       }),
       prisma.product.count({ where }),

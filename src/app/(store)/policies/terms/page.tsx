@@ -4,7 +4,7 @@ import { POLICY_FACTS as F } from "@/lib/policy-facts";
 
 export const generateMetadata = policyMetadata(
   "terms",
-  `The terms ${F.company} trades on as ${F.brand}: who can order, prices, payment, delivery of ${F.game} items by ${F.deliveryMethod}, the right of withdrawal, refunds and complaints.`,
+  `The terms ${F.company} trades on as ${F.brand}: who can order, prices, payment, delivery of ${F.game} items by ${F.deliveryMethod}, the right to cancel, refunds and complaints.`,
 );
 
 const sections: PolicySection[] = [
@@ -171,12 +171,12 @@ const sections: PolicySection[] = [
   },
   {
     id: "cancel",
-    title: "Your right of withdrawal",
+    title: "Your right to cancel",
     body: (
       <>
         <p>
           Under the Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013 in the UK, and the Consumer Rights
-          Directive in the EU, you normally have {F.withdrawalDays} days to withdraw from a contract for digital content. That right ends
+          Directive in the EU, you normally have {F.withdrawalDays} days to cancel a contract for digital content. That right ends
           once delivery of the digital content has begun with your express consent and your acknowledgement that you lose the right.
         </p>
         <p>

@@ -8,7 +8,7 @@ export const CATALOG_PAGE_SIZE = 24;
 export const QUALITY_KEYS = ["normal", "stattrak", "souvenir"] as const;
 export type QualityKey = (typeof QUALITY_KEYS)[number];
 
-export const LIST_FILTERS = ["types", "weapons", "rarities", "exteriors", "qualities", "collections"] as const;
+export const LIST_FILTERS = ["types", "weapons", "rarities", "exteriors", "qualities", "phases", "collections"] as const;
 export type ListFilter = (typeof LIST_FILTERS)[number];
 
 const LIST_PARAM: Record<ListFilter, string> = {
@@ -17,12 +17,14 @@ const LIST_PARAM: Record<ListFilter, string> = {
   rarities: "rarity",
   exteriors: "exterior",
   qualities: "quality",
+  phases: "phase",
   collections: "collection",
 };
 
 const TYPE_KEYS = new Set<string>(WEAPON_TYPES.map((t) => t.key));
 const RARITY_KEYS = new Set<string>(RARITIES.map((r) => r.key));
-const EXTERIOR_KEYS = new Set<string>(EXTERIORS.map((e) => e.code.toLowerCase()));
+export const NOT_PAINTED = "np";
+const EXTERIOR_KEYS = new Set<string>([...EXTERIORS.map((e) => e.code.toLowerCase()), NOT_PAINTED]);
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const VALID: Record<ListFilter, (value: string) => boolean> = {
@@ -31,6 +33,7 @@ const VALID: Record<ListFilter, (value: string) => boolean> = {
   rarities: (v) => RARITY_KEYS.has(v),
   exteriors: (v) => EXTERIOR_KEYS.has(v),
   qualities: (v) => (QUALITY_KEYS as readonly string[]).includes(v),
+  phases: (v) => SLUG.test(v) && v.length <= 40,
   collections: (v) => SLUG.test(v) && v.length <= 80,
 };
 
@@ -48,6 +51,7 @@ export interface CatalogParams {
   rarities: string[];
   exteriors: string[];
   qualities: string[];
+  phases: string[];
   collections: string[];
   floatMin: number | null;
   floatMax: number | null;
@@ -83,6 +87,7 @@ export interface CatalogFacets {
   rarities: FacetOption[];
   exteriors: FacetOption[];
   qualities: FacetOption[];
+  phases: FacetOption[];
   collections: FacetOption[];
   float: { min: number; max: number } | null;
 }
@@ -138,6 +143,7 @@ export function parseCatalogParams(raw: RawSearchParams, defaultSort: SortKey = 
     rarities: list(raw, "rarities"),
     exteriors: list(raw, "exteriors"),
     qualities: list(raw, "qualities"),
+    phases: list(raw, "phases"),
     collections: list(raw, "collections"),
     floatMin,
     floatMax,
@@ -203,6 +209,7 @@ export function clearedParams(params: CatalogParams): CatalogParams {
     rarities: [],
     exteriors: [],
     qualities: [],
+    phases: [],
     collections: [],
     floatMin: null,
     floatMax: null,

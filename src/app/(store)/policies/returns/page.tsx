@@ -16,19 +16,19 @@ const sections: PolicySection[] = [
         <li>If we cannot deliver an item within {F.deliveryDeadlineHours} hours of payment confirmation, we refund the price you paid for it.</li>
         <li>If Steam reverses the trade while the item is under trade protection, we refund the item.</li>
         <li>You can cancel free of charge before {F.cancelBefore}.</li>
-        <li>Once delivery has begun, the {F.withdrawalDays}-day right of withdrawal no longer applies, because you asked us at checkout to start delivery straight away.</li>
+        <li>Once delivery has begun, the {F.withdrawalDays}-day right to cancel no longer applies, because you asked us at checkout to start delivery straight away.</li>
         <li>Refunds are made within {F.refundDays} days to {F.refundMethod}, in the currency you paid in.</li>
       </ul>
     ),
   },
   {
     id: "withdrawal",
-    title: "Right of withdrawal and immediate delivery",
+    title: "Right to cancel and immediate delivery",
     body: (
       <>
         <p>
           The Consumer Contracts Regulations 2013 (UK) and the Consumer Rights Directive (EU) give consumers {F.withdrawalDays} days to
-          withdraw from a contract for digital content, unless delivery has begun with their express consent and acknowledgement that the
+          cancel a contract for digital content, unless delivery has begun with their express consent and acknowledgement that the
           right is lost.
         </p>
         <p>

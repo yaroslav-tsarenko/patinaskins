@@ -4,7 +4,7 @@ import { BRAND, SITE_URL } from "@/lib/brand";
 import { STORE_POLICY } from "@/config/store-policy";
 import { computeTotals, rateConverter } from "@/lib/pricing";
 import { addressLines, displayOrderNumber, type StoredAddress } from "@/lib/orders";
-import { PAYMENT_METHOD_LABEL } from "@/lib/payments/transfermit";
+import { PAYMENT_METHOD_LABEL } from "@/lib/payments/types";
 import { PASSWORD_RESET_TTL_MINUTES } from "@/lib/validators/auth";
 import { invoiceAttachment, type InvoiceFile } from "@/lib/invoice";
 

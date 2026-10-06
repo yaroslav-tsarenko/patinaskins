@@ -4,7 +4,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage, type RGB }
 import fontkit from "@pdf-lib/fontkit";
 import { COMPANY } from "@/lib/company";
 import { BRAND } from "@/lib/brand";
-import { PAYMENT_METHOD_LABEL } from "@/lib/payments/transfermit";
+import { PAYMENT_METHOD_LABEL } from "@/lib/payments/types";
 import { addressLines, displayOrderNumber, orderCurrency, orderTotals, type Numeric, type OrderAmountsSource, type StoredAddress } from "@/lib/orders";
 
 export interface InvoiceSource extends OrderAmountsSource {
@@ -33,16 +33,18 @@ function hex(value: string): RGB {
   return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
 }
 
-const INK = hex("#2a1a15");
-const MUTED = hex("#5b4c47");
-const SUBTLE = hex("#72625d");
-const PAINT = hex("#3b2620");
-const LINE = hex("#d2d3cf");
+const INK = hex("#141517");
+const MUTED = hex("#45474b");
+const SUBTLE = hex("#54565b");
+const PAINT = hex("#141517");
+const LAMP = hex("#c77a12");
+const LINE = hex("#a9abaf");
 
 const FONT_FILES = {
-  display: "gloock-latin-400-normal.woff",
-  body: "commissioner-latin-400-normal.woff",
-  strong: "commissioner-latin-600-normal.woff",
+  display: "sofia-sans-condensed-latin-700-normal.woff",
+  body: "source-sans-3-latin-400-normal.woff",
+  strong: "source-sans-3-latin-600-normal.woff",
+  mono: "martian-mono-latin-500-normal.woff",
 } as const;
 
 const FALLBACK_LETTERS: Record<string, string> = {
@@ -55,6 +57,7 @@ interface Fonts {
   display: PDFFont;
   body: PDFFont;
   strong: PDFFont;
+  mono: PDFFont;
 }
 
 async function fontBytes(file: string): Promise<Uint8Array | null> {
@@ -67,9 +70,10 @@ async function fontBytes(file: string): Promise<Uint8Array | null> {
 
 async function embedFonts(doc: PDFDocument): Promise<Fonts> {
   doc.registerFontkit(fontkit);
-  const [display, body, strong] = await Promise.all([fontBytes(FONT_FILES.display), fontBytes(FONT_FILES.body), fontBytes(FONT_FILES.strong)]);
+  const [display, body, strong, mono] = await Promise.all([fontBytes(FONT_FILES.display), fontBytes(FONT_FILES.body), fontBytes(FONT_FILES.strong), fontBytes(FONT_FILES.mono)]);
   return {
-    display: display ? await doc.embedFont(display, { subset: true }) : await doc.embedFont(StandardFonts.TimesRoman),
+    display: display ? await doc.embedFont(display, { subset: true }) : await doc.embedFont(StandardFonts.HelveticaBold),
+    mono: mono ? await doc.embedFont(mono, { subset: true }) : await doc.embedFont(StandardFonts.Courier),
     body: body ? await doc.embedFont(body, { subset: true }) : await doc.embedFont(StandardFonts.Helvetica),
     strong: strong ? await doc.embedFont(strong, { subset: true }) : await doc.embedFont(StandardFonts.HelveticaBold),
   };
@@ -213,11 +217,31 @@ function tableHeader(w: Writer) {
   w.y -= 16;
 }
 
+function wordmark(w: Writer, x: number, y: number, size: number) {
+  const font = w.fonts.display;
+  const name = BRAND.name;
+  const cut = name.indexOf("i");
+  const dotless = font.getCharacterSet().includes(0x131);
+  if (cut < 0 || !dotless) {
+    w.text(name, x, y, { font, size, color: PAINT });
+    return;
+  }
+  const head = name.slice(0, cut);
+  const tail = name.slice(cut + 1);
+  const headWidth = font.widthOfTextAtSize(head, size);
+  const stemWidth = font.widthOfTextAtSize("\u0131", size);
+  w.page.drawText(head, { x, y, size, font, color: PAINT });
+  w.page.drawText("\u0131", { x: x + headWidth, y, size, font, color: PAINT });
+  const side = size * 0.105;
+  w.page.drawRectangle({ x: x + headWidth + (stemWidth - side) / 2, y: y + size * 0.6, width: side, height: side, color: LAMP });
+  w.page.drawText(tail, { x: x + headWidth + stemWidth, y, size, font, color: PAINT });
+}
+
 function masthead(w: Writer, number: string, compact: boolean) {
   const top = PAGE.height - PAGE.margin;
-  w.text(BRAND.name, PAGE.margin, top - 22, { font: w.fonts.display, size: compact ? 20 : 28, color: PAINT });
+  wordmark(w, PAGE.margin, top - 22, compact ? 20 : 28);
   w.label("Invoice", PAGE.width - PAGE.margin, top - 8, "right");
-  w.text(number, PAGE.width - PAGE.margin, top - 24, { font: w.fonts.strong, size: 12, align: "right" });
+  w.text(number, PAGE.width - PAGE.margin, top - 24, { font: w.fonts.mono, size: 11, align: "right" });
   w.rule(top - 36, 2, PAINT);
   w.y = top - 36 - 28;
 }
@@ -319,8 +343,8 @@ export async function renderInvoicePdf(order: InvoiceSource): Promise<Uint8Array
     nameLines.forEach((part, i) => w.text(part, PAGE.margin, rowTop - i * 13, { size: 9.5 }));
     variantLines.forEach((part, i) => w.text(part, PAGE.margin, rowTop - nameLines.length * 13 - i * 11.5 + 1, { size: 8.5, color: MUTED }));
     w.text(String(item.quantity), COLUMNS.qty, rowTop, { size: 9.5, color: MUTED, align: "right" });
-    w.text(money(line?.unit ?? 0, currency), COLUMNS.unit, rowTop, { size: 9.5, color: MUTED, align: "right" });
-    w.text(money(line?.total ?? 0, currency), COLUMNS.amount, rowTop, { size: 9.5, align: "right" });
+    w.text(money(line?.unit ?? 0, currency), COLUMNS.unit, rowTop, { font: fonts.mono, size: 8.5, color: MUTED, align: "right" });
+    w.text(money(line?.total ?? 0, currency), COLUMNS.amount, rowTop, { font: fonts.mono, size: 8.5, align: "right" });
     w.y = rowTop - height + 13 - 6;
     w.rule(w.y + 6, 0.5, LINE);
     w.y -= 12;
@@ -339,13 +363,13 @@ export async function renderInvoicePdf(order: InvoiceSource): Promise<Uint8Array
   w.y -= 4;
   for (const [name, value] of summary) {
     w.text(name, labelX, w.y, { size: 9.5, color: MUTED, align: "right" });
-    w.text(value, COLUMNS.amount, w.y, { size: 9.5, align: "right" });
+    w.text(value, COLUMNS.amount, w.y, { font: fonts.mono, size: 8.5, align: "right" });
     w.y -= 16;
   }
   w.rule(w.y + 6, 1.25, PAINT, labelX - 150, COLUMNS.amount);
   w.y -= 14;
   w.text(`Total (${currency})`, labelX, w.y, { font: fonts.strong, size: 11, align: "right" });
-  w.text(money(totals.total, currency), COLUMNS.amount, w.y, { font: fonts.display, size: 16, align: "right" });
+  w.text(money(totals.total, currency), COLUMNS.amount, w.y, { font: fonts.mono, size: 12, align: "right" });
   w.y -= 16;
   if (totals.vatRegistered && totals.vatIncluded) {
     w.text(`Includes VAT at ${totals.vatRatePercent}%`, labelX, w.y, { size: 9, color: MUTED, align: "right" });

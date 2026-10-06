@@ -1,21 +1,23 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { publicBrand } from "@/lib/utils/supplier";
-import { clampText, extractLabelledSpecs, htmlToText, sanitizeHtml } from "@/lib/utils/sanitize-html";
+import { clampText, htmlToText } from "@/lib/utils/sanitize-html";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { JsonLd } from "@/components/shared/SEO/JsonLd";
-import { ProductGallery } from "@/components/product/ProductGallery/ProductGallery";
-import { ProductInfo } from "@/components/product/ProductInfo/ProductInfo";
-import { ProductTabs, type SpecRow } from "@/components/product/ProductTabs/ProductTabs";
-import { ProductReviews } from "@/components/product/ProductReviews/ProductReviews";
-import { RelatedProducts } from "@/components/product/RelatedProducts/RelatedProducts";
-import { productJsonLd, validGtin13 } from "@/components/product/product-structured-data";
-import { SKIN_SELECT, getCategoryTree, loadShelfProducts, skinSummary } from "@/components/catalog/catalog-query";
-import type { ProductVariantOption } from "@/components/product/VariantSelector/VariantSelector";
+import { InspectionStage } from "@/components/product/InspectionStage";
+import { SkinReadout, type ExteriorOption, type MarkSwitch } from "@/components/product/SkinReadout";
+import { SkinDetailTabs } from "@/components/product/SkinDetailTabs";
+import { VariantLadder, type VariantRow } from "@/components/product/VariantLadder";
+import { productJsonLd } from "@/components/product/product-structured-data";
+import { ProductRail } from "@/components/home/ProductRail";
+import { RecentlyViewed, RecordView } from "@/components/skin/RecentlyViewed";
+import { SKIN_SELECT, getCategoryTree, loadSkinProducts, skinSummary } from "@/components/catalog/catalog-query";
+import { EXTERIORS, raritySlug, skinTitle, weaponTypeDef } from "@/lib/skins/cs2";
+import { MERCH } from "@/config/merchandising";
 
 export const revalidate = 60;
 
@@ -34,11 +36,8 @@ const getProduct = cache(async (slug: string) => {
       description: true,
       shortDescription: true,
       price: true,
-      comparePrice: true,
       quantity: true,
       trackInventory: true,
-      lowStockAlert: true,
-      weight: true,
       metaTitle: true,
       metaDescription: true,
       status: true,
@@ -46,16 +45,10 @@ const getProduct = cache(async (slug: string) => {
       gtin: true,
       ean: true,
       condition: true,
-      characteristics: true,
+      createdAt: true,
       skin: { select: { ...SKIN_SELECT, marketHashName: true } },
       images: { orderBy: { sortOrder: "asc" }, select: { id: true, url: true, alt: true } },
       categories: { select: { category: { select: { id: true, name: true, slug: true, parentId: true, isActive: true } } } },
-      variants: { select: { id: true, name: true, sku: true, price: true, quantity: true, options: true } },
-      reviews: {
-        where: { isApproved: true },
-        orderBy: { createdAt: "desc" },
-        select: { id: true, rating: true, comment: true, createdAt: true, user: { select: { name: true } } },
-      },
     },
   });
   if (!product || product.status !== "ACTIVE") return null;
@@ -64,14 +57,16 @@ const getProduct = cache(async (slug: string) => {
 
 type ProductRecord = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
 
-function summaryOf(product: ProductRecord): string {
-  const text = htmlToText(product.shortDescription) || htmlToText(product.description);
-  return text;
-}
+const LIVE = Prisma.sql`p."status" = 'ACTIVE'::"ProductStatus" AND (p."trackInventory" = false OR p."quantity" > 0)`;
 
 function metaDescription(product: ProductRecord): string {
-  const base = htmlToText(product.metaDescription) || summaryOf(product) || product.name;
-  return clampText(base, 160);
+  const skin = product.skin;
+  if (skin) {
+    const ext = EXTERIORS.find((e) => e.code === skin.exterior);
+    const parts = [skinTitle(skin), ext ? ext.label : "Not painted", skin.isStatTrak ? "StatTrak™" : null, skin.isSouvenir ? "Souvenir" : null].filter(Boolean).join(", ");
+    return clampText(`${parts}. Delivered to your Steam account as a trade offer after payment.`, 160);
+  }
+  return clampText(htmlToText(product.metaDescription) || htmlToText(product.shortDescription) || product.name, 160);
 }
 
 async function categoryPath(product: ProductRecord) {
@@ -84,32 +79,18 @@ async function categoryPath(product: ProductRecord) {
     chain.unshift({ id: current.id, name: current.name, slug: current.slug });
     current = current.parentId ? tree.byId.get(current.parentId) ?? null : null;
   }
-  return { chain, tree };
+  return chain;
 }
 
-function characteristicRows(value: unknown): SpecRow[] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
-  const rows: SpecRow[] = [];
-  for (const [group, entries] of Object.entries(value as Record<string, unknown>)) {
-    if (entries && typeof entries === "object" && !Array.isArray(entries)) {
-      for (const [label, v] of Object.entries(entries as Record<string, unknown>)) {
-        if (typeof v === "string" || typeof v === "number") rows.push({ label, value: String(v) });
-      }
-    } else if (typeof entries === "string" || typeof entries === "number") {
-      rows.push({ label: group, value: String(entries) });
-    }
-  }
-  return rows;
-}
-
-function formatWeight(kg: number): string {
-  return kg < 1 ? `${Math.round(kg * 1000)} g` : `${Number(kg.toFixed(2))} kg`;
+async function ids(query: Prisma.Sql): Promise<string[]> {
+  const rows = await prisma.$queryRaw<{ id: string }[]>(query);
+  return rows.map((r) => r.id);
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
-  if (!product) return { title: "Product not found", robots: { index: false, follow: true } };
+  if (!product) return { title: "Skin not found", robots: { index: false, follow: true } };
   return pageMetadata({
     title: product.metaTitle || product.name,
     description: metaDescription(product),
@@ -123,136 +104,161 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const product = await getProduct(slug);
   if (!product) notFound();
 
-  const t = await getTranslations("product");
-  const nav = await getTranslations("catalog");
-  const { chain, tree } = await categoryPath(product);
-  const root = chain[0] ?? null;
+  const chain = await categoryPath(product);
   const leaf = chain[chain.length - 1] ?? null;
-
   const price = Number(product.price);
-  const comparePrice = product.comparePrice != null ? Number(product.comparePrice) : null;
-  const brand = publicBrand(product.brand);
-  const available = !product.trackInventory || product.quantity > 0 || product.variants.some((v) => v.quantity > 0);
-  const descriptionText = htmlToText(product.description);
-  const gtin13 = validGtin13(product.ean, product.gtin);
+  const skin = product.skin;
+  const available = !product.trackInventory || product.quantity > 0;
+  const exclude = new Set<string>([product.id]);
+  const notIn = () => Prisma.sql`AND p."id" NOT IN (${Prisma.join([...exclude])})`;
 
-  const labelled = extractLabelledSpecs(product.description);
-  const specs: SpecRow[] = [
-    ...(brand ? [{ label: t("specBrand"), value: brand }] : []),
-    { label: t("specSku"), value: product.sku, mono: true },
-    ...(gtin13 ? [{ label: t("specEan"), value: gtin13, mono: true }] : []),
-    ...labelled,
-    ...characteristicRows(product.characteristics),
-  ];
-  const seen = new Set<string>();
-  const dedupedSpecs = specs.filter((row) => {
-    const key = row.label.toLowerCase();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-  if (product.weight != null && Number(product.weight) > 0 && !seen.has("weight")) dedupedSpecs.push({ label: t("specWeight"), value: formatWeight(Number(product.weight)) });
+  const siblings = skin?.skinName
+    ? await prisma.$queryRaw<{ id: string; slug: string; exterior: string | null; isStatTrak: boolean; price: number }[]>`
+        SELECT p."id", p."slug", s."exterior", s."isStatTrak", p."price"::float AS price
+        FROM "Product" p JOIN "Skin" s ON s."productId" = p."id"
+        WHERE ${LIVE} AND s."weapon" = ${skin.weapon} AND s."skinName" = ${skin.skinName}
+          AND s."isSouvenir" = ${skin.isSouvenir} AND s."phase" IS NOT DISTINCT FROM ${skin.phase}
+        ORDER BY p."price" ASC`
+    : [];
 
-  if (product.skin) dedupedSpecs.unshift({ label: t("specMarketName"), value: product.skin.marketHashName });
-
-  const variants: ProductVariantOption[] = product.variants.map((v) => ({
-    id: v.id,
-    name: v.name,
-    sku: v.sku,
-    price: v.price != null ? Number(v.price) : null,
-    quantity: v.quantity,
-    options: Object.fromEntries(
-      Object.entries((v.options && typeof v.options === "object" && !Array.isArray(v.options) ? v.options : {}) as Record<string, unknown>)
-        .filter(([, value]) => typeof value === "string" || typeof value === "number")
-        .map(([k, value]) => [k, String(value)]),
-    ),
-  }));
-
-  const relatedSource = leaf ? tree.subtreeIds(leaf.id) : [];
-  const relatedRows = relatedSource.length
-    ? await prisma.product.findMany({
-        where: { status: "ACTIVE", id: { not: product.id }, categories: { some: { categoryId: { in: relatedSource } } } },
-        select: { id: true, quantity: true, trackInventory: true },
-        orderBy: { createdAt: "desc" },
-        take: 24,
+  const cheapest = (code: string | null, st: boolean) => siblings.find((s) => s.exterior === code && s.isStatTrak === st && s.id !== product.id) ?? null;
+  const exteriors: ExteriorOption[] = skin?.exterior
+    ? EXTERIORS.map((e) => {
+        if (e.code === skin.exterior) return { code: e.code, slug: product.slug, price, current: true };
+        const hit = cheapest(e.code, skin.isStatTrak);
+        return { code: e.code, slug: hit?.slug ?? null, price: hit?.price ?? null, current: false };
       })
     : [];
-  const inStock = (r: { quantity: number; trackInventory: boolean }) => Number(!r.trackInventory || r.quantity > 0);
-  let relatedIds = relatedRows.sort((a, b) => inStock(b) - inStock(a)).map((r) => r.id);
-  if (relatedIds.length < 4 && root && root.id !== leaf?.id) {
-    const more = await prisma.product.findMany({
-      where: { status: "ACTIVE", id: { notIn: [product.id, ...relatedIds] }, categories: { some: { categoryId: { in: tree.subtreeIds(root.id) } } }, OR: [{ trackInventory: false }, { quantity: { gt: 0 } }] },
-      select: { id: true },
-      orderBy: { createdAt: "desc" },
-      take: 4 - relatedIds.length,
-    });
-    relatedIds = [...relatedIds, ...more.map((m) => m.id)];
+  let markSwitch: MarkSwitch | null = null;
+  if (skin && !skin.isSouvenir) {
+    const flipped = cheapest(skin.exterior, !skin.isStatTrak) ?? siblings.find((s) => s.isStatTrak !== skin.isStatTrak) ?? null;
+    if (flipped) {
+      markSwitch = skin.isStatTrak ? { current: "stattrak", stattrak: product.slug, standard: flipped.slug } : { current: "standard", standard: product.slug, stattrak: flipped.slug };
+    }
   }
-  const related = await loadShelfProducts(relatedIds.slice(0, 4));
 
-  const reviews = product.reviews.map((r) => ({ id: r.id, rating: r.rating, comment: r.comment, author: r.user?.name ?? null, createdAt: r.createdAt }));
+  const variantIds = siblings.filter((s) => s.id !== product.id).slice(0, MERCH.siblings).map((s) => s.id);
+  variantIds.forEach((id) => exclude.add(id));
+  const variants = await loadSkinProducts(variantIds);
+  const zoneIndex = (code: string | null | undefined) => EXTERIORS.findIndex((e) => e.code === code);
+  const variantRows: VariantRow[] = variants
+    .sort((a, b) => Number(a.skin?.isStatTrak) - Number(b.skin?.isStatTrak) || zoneIndex(a.skin?.exterior) - zoneIndex(b.skin?.exterior))
+    .map((v) => ({ product: v }));
 
-  const breadcrumbItems = [
-    { label: nav("home"), href: "/" },
-    { label: nav("shop"), href: "/catalog" },
-    ...chain.map((c) => ({ label: c.name, href: `/catalog/${c.slug}` })),
-    { label: product.name },
-  ];
+  const sameFinishIds = skin?.skinName
+    ? await ids(Prisma.sql`
+        SELECT id FROM (
+          SELECT DISTINCT ON (s."weapon") p."id", p."price"
+          FROM "Product" p JOIN "Skin" s ON s."productId" = p."id"
+          WHERE ${LIVE} AND s."skinName" = ${skin.skinName} AND s."weapon" <> ${skin.weapon} ${notIn()}
+          ORDER BY s."weapon", p."price" ASC
+        ) x ORDER BY x."price" DESC LIMIT ${MERCH.related}`)
+    : [];
+  sameFinishIds.forEach((id) => exclude.add(id));
+
+  const loadoutIds = skin?.collection
+    ? await ids(Prisma.sql`
+        SELECT id FROM (
+          SELECT DISTINCT ON (s."weapon") p."id", p."price"
+          FROM "Product" p JOIN "Skin" s ON s."productId" = p."id"
+          WHERE ${LIVE} AND s."collection" = ${skin.collection} AND s."weapon" <> ${skin.weapon} ${notIn()}
+          ORDER BY s."weapon", p."price" ASC
+        ) x ORDER BY x."price" DESC LIMIT ${MERCH.related}`)
+    : [];
+  loadoutIds.forEach((id) => exclude.add(id));
+
+  const pairType = skin?.weaponType === "knives" ? "gloves" : skin?.weaponType === "gloves" ? "knives" : null;
+  const pairIds = pairType
+    ? await ids(Prisma.sql`
+        SELECT id FROM (
+          SELECT DISTINCT ON (s."weapon") p."id", p."price"
+          FROM "Product" p JOIN "Skin" s ON s."productId" = p."id"
+          WHERE ${LIVE} AND s."weaponType" = ${pairType} AND p."price" BETWEEN ${price * (1 - MERCH.pairsTolerance)} AND ${price * (1 + MERCH.pairsTolerance)} ${notIn()}
+          ORDER BY s."weapon", abs(p."price" - ${price}) ASC
+        ) x ORDER BY abs(x."price" - ${price}) ASC LIMIT ${MERCH.related}`)
+    : [];
+  pairIds.forEach((id) => exclude.add(id));
+
+  const moreIds = skin
+    ? await ids(Prisma.sql`
+        SELECT id FROM (
+          SELECT DISTINCT ON (s."skinName") p."id", p."price"
+          FROM "Product" p JOIN "Skin" s ON s."productId" = p."id"
+          WHERE ${LIVE} AND s."weapon" = ${skin.weapon} AND s."skinName" IS DISTINCT FROM ${skin.skinName} ${notIn()}
+          ORDER BY s."skinName", p."price" DESC
+        ) x ORDER BY x."price" DESC LIMIT ${MERCH.related}`)
+    : [];
+
+  const [sameFinish, loadout, pairs, more] = await Promise.all([loadSkinProducts(sameFinishIds), loadSkinProducts(loadoutIds), loadSkinProducts(pairIds), loadSkinProducts(moreIds)]);
+
+  const crumbs = [{ label: "Home", href: "/" }, { label: "All skins", href: "/catalog" }, ...chain.map((c) => ({ label: c.name, href: `/catalog/${c.slug}` })), { label: product.name }];
+  const weaponCategory = chain.length > 1 ? chain[chain.length - 1] : null;
+  const typeDef = skin ? weaponTypeDef(skin.weaponType) : null;
 
   const jsonLd = productJsonLd({
     name: product.name,
     slug: product.slug,
     sku: product.sku,
-    description: clampText(descriptionText || summaryOf(product), 5000),
+    description: metaDescription(product),
     images: product.images.map((i) => i.url),
-    brand,
+    brand: publicBrand(product.brand),
     ean: product.ean,
     gtin: product.gtin,
     price,
     available,
     condition: product.condition,
     category: chain.map((c) => c.name).join(" > ") || null,
-    reviews,
+    reviews: [],
   });
+
+  const listing = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    sku: product.sku,
+    price,
+    quantity: product.trackInventory ? product.quantity : undefined,
+    images: product.images.map((i) => ({ url: i.url, alt: i.alt })),
+    category: leaf?.name ?? null,
+    skin: skinSummary(product.skin),
+  };
 
   return (
     <div className="mx-auto max-w-container px-gutter pb-28 lg:pb-24">
       <JsonLd data={jsonLd} />
-      <Breadcrumbs items={breadcrumbItems} className="lg:hidden" withJsonLd={false} />
+      <RecordView id={product.id} />
+      <Breadcrumbs items={crumbs} className="lg:hidden" withJsonLd={false} />
 
-      <div data-product="" className="grid gap-x-10 gap-y-8 lg:grid-cols-12 lg:pt-8">
+      <div data-product="" className="grid gap-x-12 gap-y-8 lg:grid-cols-12 lg:pt-8">
         <div className="min-w-0 lg:col-span-7">
-          <ProductGallery images={product.images} productName={product.name} />
+          <div className="lg:sticky lg:top-[calc(var(--header-height-compact)+24px)]">
+          <InspectionStage src={product.images[0]?.url ?? null} alt={product.images[0]?.alt || product.name} rarity={raritySlug(skin?.rarity)} exterior={skin?.exterior ?? null} productId={product.id} />
+          </div>
         </div>
         <div className="min-w-0 lg:col-span-5">
-          <div className="lg:sticky lg:top-[calc(var(--header-height-compact)+24px)]">
-            <ProductInfo
-              id={product.id}
-              name={product.name}
-              slug={product.slug}
-              sku={product.sku}
-              price={price}
-              comparePrice={comparePrice}
-              quantity={product.quantity}
-              trackInventory={product.trackInventory}
-              lowStockAlert={product.lowStockAlert}
-              summary={summaryOf(product) ? clampText(summaryOf(product), 320) : null}
-              categoryName={leaf?.name ?? null}
-              imageUrl={product.images[0]?.url ?? null}
-              variants={variants}
-              breadcrumbs={<Breadcrumbs items={breadcrumbItems} className="hidden pt-0 lg:block" />}
-              skin={skinSummary(product.skin)}
+          <div>
+            <SkinReadout
+              product={listing}
+              exteriors={exteriors}
+              markSwitch={markSwitch}
+              weaponHref={weaponCategory ? `/catalog/${weaponCategory.slug}` : null}
+              breadcrumbs={<Breadcrumbs items={crumbs} className="hidden pt-0 lg:block" />}
             />
           </div>
         </div>
       </div>
 
-      <div className="mt-16 lg:mt-24">
-        <ProductTabs descriptionHtml={sanitizeHtml(product.description)} specs={dedupedSpecs} />
-      </div>
+      {variantRows.length > 0 ? <VariantLadder rows={variantRows} title={skin?.skinName ? `${skin.weapon} | ${skin.skinName}: other exteriors and versions` : "Other versions"} /> : null}
 
-      {reviews.length ? <ProductReviews reviews={reviews} /> : null}
-      <RelatedProducts products={related} />
+      <SkinDetailTabs skin={skinSummary(product.skin)} className="mt-16 lg:mt-24" />
+
+      <div className="mt-20 flex flex-col gap-20">
+        <ProductRail id="pairs-well" title={pairType === "gloves" ? "Gloves at a similar price" : "Knives at a similar price"} lead="Within 40% of this skin's price, one per model." products={pairs} link={pairType ? { href: `/catalog/${pairType}`, label: pairType === "gloves" ? "All gloves" : "All knives" } : undefined} />
+        <ProductRail id="same-finish" title={`${skin?.skinName ?? "This finish"} on other weapons`} lead="The same finish, applied to a different weapon." products={sameFinish} />
+        <ProductRail id="loadout" title="Complete the loadout" lead={skin?.collection ? `Other weapons from ${skin.collection}.` : undefined} products={loadout} />
+        <ProductRail id="more-weapon" title={`More ${skin?.weapon ?? typeDef?.label ?? ""} skins`} products={more} link={weaponCategory ? { href: `/catalog/${weaponCategory.slug}`, label: `All ${weaponCategory.name} skins` } : undefined} />
+        <RecentlyViewed excludeId={product.id} />
+      </div>
     </div>
   );
 }

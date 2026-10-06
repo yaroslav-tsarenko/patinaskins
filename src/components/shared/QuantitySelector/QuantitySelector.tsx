@@ -44,14 +44,14 @@ export function QuantitySelector({
 
   const compact = size === "compact";
   const segment = cn(
-    "flex shrink-0 cursor-pointer items-center justify-center text-ink transition-colors duration-[160ms]",
-    "hover-device:enabled:hover:bg-brand-soft disabled:cursor-not-allowed disabled:text-ink-subtle disabled:opacity-60",
-    compact ? "size-9" : "size-11",
+    "flex shrink-0 cursor-pointer items-center justify-center text-ink transition-colors duration-[140ms]",
+    "hover-device:enabled:hover:bg-surface-1 disabled:cursor-not-allowed disabled:text-ink-subtle disabled:opacity-60",
+    compact ? "size-9" : "size-10",
   );
 
   return (
     <div className={cn("inline-flex flex-col gap-1.5", className)}>
-      <div role="group" aria-labelledby={`${id}-label`} className="inline-flex w-fit border border-control bg-raised">
+      <div role="group" aria-labelledby={`${id}-label`} className="inline-flex w-fit overflow-hidden rounded-control border border-control bg-raised">
         <span id={`${id}-label`} className="sr-only">
           {label}
         </span>
@@ -71,15 +71,15 @@ export function QuantitySelector({
             if (e.key === "Enter") commit((e.target as HTMLInputElement).value);
           }}
           className={cn(
-            "tabular w-[52px] border-x border-control bg-transparent text-center text-step-0 text-ink focus-visible:outline-offset-[-2px]",
-            compact ? "h-9 w-11" : "h-11",
+            "w-11 border-x border-control bg-transparent text-center font-mono text-data text-ink focus-visible:outline-offset-[-2px]",
+            compact ? "h-9" : "h-10",
           )}
         />
         <button type="button" className={segment} onClick={() => onChange(Math.min(max, quantity + 1))} disabled={quantity >= max} aria-label="Increase quantity">
           <Plus size={16} aria-hidden="true" />
         </button>
       </div>
-      {showStockHint && quantity >= max ? <p className="meta text-ink-muted">Only {max} available</p> : null}
+      {showStockHint && quantity >= max ? <p className="font-mono text-data-sm text-ink-muted">{max} available</p> : null}
       <span aria-live="polite" className="sr-only">
         {announcement}
       </span>

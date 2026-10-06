@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-export const CONSENT_KEY = "patina-consent";
+export const CONSENT_KEY = "patinaskins-consent";
 export const CONSENT_VERSION = 1;
 export const CONSENT_MAX_AGE_DAYS = 365;
 

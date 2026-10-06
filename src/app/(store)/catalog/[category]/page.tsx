@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { pageMetadata, pagedDescription } from "@/lib/seo/metadata";
-import { MEGA_ZONES } from "@/config/navigation";
+import { prisma } from "@/lib/prisma";
+import { RARITIES, raritySlug } from "@/lib/skins/cs2";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { CatalogBrowser } from "@/components/catalog/CatalogBrowser";
 import { CategoryOpener } from "@/components/catalog/CategoryOpener";
-import { SubcategoryRow } from "@/components/catalog/SubcategoryRow";
 import { categoryCounts, categoryStats, getCategoryTree, queryCatalog, type CategoryRecord, type CategoryTree } from "@/components/catalog/catalog-query";
 import { hasActiveFilters, parseCatalogParams, type RawSearchParams } from "@/components/catalog/catalog-url";
 
@@ -26,10 +26,16 @@ function chainOf(tree: CategoryTree, category: CategoryRecord): CategoryRecord[]
 }
 
 function relatedRoots(tree: CategoryTree, counts: Map<string, number>, root: CategoryRecord) {
-  const zone = MEGA_ZONES.find((z) => z.slugs.includes(root.slug));
-  const zoneSlugs = zone ? zone.slugs.filter((s) => s !== root.slug) : [];
-  const ordered = [...zoneSlugs.map((s) => tree.bySlug.get(s)).filter((c): c is CategoryRecord => Boolean(c)), ...tree.roots.filter((c) => c.id !== root.id && !zoneSlugs.includes(c.slug))];
-  return ordered.filter((c) => (counts.get(c.id) ?? 0) > 0).slice(0, 3);
+  return tree.roots.filter((c) => c.id !== root.id && (counts.get(c.id) ?? 0) > 0).slice(0, 3);
+}
+
+async function rarityCounts(categoryIds: string[]) {
+  const rows = await prisma.skin.groupBy({
+    by: ["rarity"],
+    where: { product: { status: "ACTIVE", categories: { some: { categoryId: { in: categoryIds } } } } },
+    _count: { _all: true },
+  });
+  return new Map(rows.map((r) => [r.rarity, r._count._all]));
 }
 
 export async function generateMetadata({ params, searchParams }: CategoryPageProps): Promise<Metadata> {
@@ -70,20 +76,22 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   const parent = category.parentId ? tree.byId.get(category.parentId) ?? null : null;
   const anchor = parent ?? category;
 
-  const [counts, stats, result] = await Promise.all([
+  const [counts, stats, result, tiers] = await Promise.all([
     categoryCounts(tree),
     categoryStats(tree.subtreeIds(category.id)),
     queryCatalog({ kind: "category", category }, { ...query, category: null }, { basePath }),
+    parent ? rarityCounts(tree.subtreeIds(category.id)) : Promise.resolve(new Map<string, number>()),
   ]);
 
-  const children = tree.children(category.id).filter((c) => (counts.get(c.id) ?? 0) > 0);
-  const subLinks = [
-    { slug: anchor.slug, label: t("allIn", { name: anchor.name }), count: counts.get(anchor.id) ?? 0, href: `/catalog/${anchor.slug}`, active: anchor.id === category.id },
-    ...tree
-      .children(anchor.id)
-      .filter((c) => (counts.get(c.id) ?? 0) > 0)
-      .map((c) => ({ slug: c.slug, label: c.name, count: counts.get(c.id) ?? 0, href: `/catalog/${c.slug}`, active: c.id === category.id })),
-  ];
+  const index = tree
+    .children(anchor.id)
+    .map((c) => ({ slug: c.slug, label: c.name, count: counts.get(c.id) ?? 0, href: `/catalog/${c.slug}`, active: c.id === category.id }))
+    .filter((c) => c.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  const rarities = parent
+    ? RARITIES.map((r) => ({ key: r.key, slug: raritySlug(r.key), label: r.label, count: tiers.get(r.key) ?? 0, href: `${basePath}?rarity=${r.key}` })).filter((r) => r.count > 0)
+    : [];
 
   const related = relatedRoots(tree, counts, root).map((c) => ({ name: c.name, href: `/catalog/${c.slug}` }));
 
@@ -92,22 +100,21 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       <Breadcrumbs
         items={[
           { label: t("home"), href: "/" },
-          { label: t("shop"), href: "/catalog" },
+          { label: "All skins", href: "/catalog" },
           ...chain.slice(0, -1).map((c) => ({ label: c.name, href: `/catalog/${c.slug}` })),
           { label: category.name },
         ]}
       />
       <CategoryOpener
         name={category.name}
-        description={category.description}
-        artUrl={tree.uniqueArt(category)}
         count={stats.count}
-        inStock={stats.inStock}
-        subCount={children.length}
+        lead={category.description}
         minPrice={stats.minPrice}
         maxPrice={stats.maxPrice}
+        index={parent ? [] : index}
+        indexLabel={`${category.name} by weapon`}
+        rarities={rarities}
       />
-      <SubcategoryRow label={t("subcategories")} links={subLinks} />
       <CatalogBrowser
         basePath={basePath}
         params={{ ...query, category: null, page: result.page }}
@@ -116,7 +123,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         page={result.page}
         totalPages={result.totalPages}
         facets={result.facets}
-        contextLabel={category.name}
         related={related}
         headingId="category-results"
         heading={t("resultsIn", { name: category.name })}

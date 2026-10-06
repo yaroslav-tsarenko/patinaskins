@@ -23,11 +23,11 @@ export function Alert({ tone = "danger", title, children, action, className, id,
   const t = TONE[tone];
   const Icon = t.Icon;
   return (
-    <div id={id} tabIndex={tabIndex} role={t.role} className={cn("flex items-start gap-3 border px-4 py-3.5 text-ink", t.box, className)}>
-      <Icon size={20} aria-hidden="true" className={cn("mt-0.5", t.text)} />
+    <div id={id} tabIndex={tabIndex} role={t.role} className={cn("flex items-start gap-3 rounded-control border px-4 py-3.5 text-ui-md text-ink", t.box, className)}>
+      <Icon size={16} aria-hidden="true" className={cn("mt-1", t.text)} />
       <div className="min-w-0 flex-1">
         {title ? <p className="font-semibold text-ink">{title}</p> : null}
-        {children ? <div className={cn("text-ui-sm text-ink", title && "mt-1")}>{children}</div> : null}
+        {children ? <div className={cn("text-ui-md text-ink", title && "mt-1")}>{children}</div> : null}
       </div>
       {action ? <div className="shrink-0 self-center">{action}</div> : null}
     </div>

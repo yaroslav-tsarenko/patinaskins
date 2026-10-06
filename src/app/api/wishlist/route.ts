@@ -15,7 +15,7 @@ export async function GET() {
       include: {
         product: {
           omit: { metadata: true, costPrice: true },
-          include: { images: { take: 1, orderBy: { sortOrder: "asc" } } },
+          include: { images: { take: 1, orderBy: { sortOrder: "asc" } }, skin: true },
         },
       },
       orderBy: { createdAt: "desc" },

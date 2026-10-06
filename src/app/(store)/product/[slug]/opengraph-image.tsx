@@ -6,7 +6,7 @@ import { STORE_POLICY } from "@/config/store-policy";
 import { defaultLocale } from "@/i18n/config";
 import { formatPrice } from "@/lib/utils/format-price";
 import { OG_PALETTE as P, OG_SIZE, ogImageSource } from "@/lib/og/assets";
-import { BrassPlate, Packshot, Shelf, Wordmark, ogResponse, titleSize } from "@/lib/og/parts";
+import { Stage, Wordmark, ogResponse, titleSize } from "@/lib/og/parts";
 import { stripSupplierMentions } from "@/lib/utils/supplier";
 
 export const revalidate = 3600;
@@ -20,7 +20,6 @@ const loadProduct = cache(async (slug: string) =>
       name: true,
       status: true,
       price: true,
-      comparePrice: true,
       images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
       categories: { select: { category: { select: { name: true, parentId: true, isActive: true } } } },
     },
@@ -42,44 +41,25 @@ export default async function Image({ params }: { params: SlugParams }) {
   const active = product?.status === "ACTIVE";
   const name = active ? stripSupplierMentions(product.name) : BRAND.tagline;
   const price = active ? Number(product.price) : null;
-  const compare = active && product.comparePrice != null && Number(product.comparePrice) > Number(product.price) ? Number(product.comparePrice) : null;
   const linked = active ? product.categories.map((c) => c.category).filter((c) => c.isActive) : [];
   const category = (linked.find((c) => c.parentId) ?? linked[0])?.name ?? null;
   const src = active ? await ogImageSource(product.images[0]?.url, 900) : null;
-  const nameSize = titleSize(name, [[28, 64], [48, 56], [72, 48], [110, 42]]);
+  const nameSize = titleSize(name, [[24, 64], [44, 54], [72, 46], [110, 40]]);
 
   return ogResponse(
-    <div style={{ display: "flex", width: "100%", height: "100%", background: P.chalk }}>
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", width: 620, height: "100%", padding: "0 56px 92px", background: P.stage }}>
-        <Packshot src={src} size={440} background={P.stage} />
-        <div style={{ display: "flex", marginTop: 6 }}>
-          <Shelf color={P.shelf} hairline={P.shelfHairline} />
-        </div>
+    <div style={{ display: "flex", width: "100%", height: "100%", background: P.room, color: P.ink, padding: "56px", gap: 56 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Stage src={src} width={560} height={518} />
       </div>
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, height: "100%", padding: "64px 64px 60px", background: P.paint, color: P.chalk }}>
-        <Wordmark size={44} color={P.chalk} />
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1 }}>
+        <Wordmark size={48} />
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {category ? (
-            <div style={{ display: "flex", fontFamily: "Commissioner", fontWeight: 600, fontSize: 20, letterSpacing: 2.4, textTransform: "uppercase", color: P.onPaintMuted, marginBottom: 18 }}>
-              {category}
-            </div>
-          ) : null}
-          <div style={{ display: "block", fontFamily: "Gloock", fontSize: nameSize, lineHeight: 1.06, color: P.chalk, lineClamp: 4, overflow: "hidden", maxHeight: nameSize * 1.06 * 4 + 4 }}>{name}</div>
+          {category ? <div style={{ display: "flex", fontFamily: "Martian Mono", fontSize: 20, letterSpacing: 2, textTransform: "uppercase", color: P.inkMuted, marginBottom: 16 }}>{category}</div> : null}
+          <div style={{ display: "block", fontFamily: "Sofia Sans Condensed", fontWeight: 700, fontSize: nameSize, lineHeight: 1.02, color: P.ink, lineClamp: 4, overflow: "hidden", maxHeight: nameSize * 1.02 * 4 + 4 }}>{name}</div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {price != null && price > 0 ? (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <BrassPlate fontSize={34}>{formatPrice(price, STORE_POLICY.currency)}</BrassPlate>
-              {compare ? (
-                <div style={{ display: "flex", marginLeft: 20, fontFamily: "Commissioner", fontSize: 28, color: P.onPaintMuted, textDecoration: "line-through" }}>
-                  {formatPrice(compare, STORE_POLICY.currency)}
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <div style={{ display: "flex" }} />
-          )}
-          <div style={{ display: "flex", fontFamily: "Commissioner", fontSize: 22, color: P.onPaintMuted }}>{BRAND.domain}</div>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+          {price != null && price > 0 ? <div style={{ display: "flex", fontFamily: "Martian Mono", fontSize: 40, color: P.ink }}>{formatPrice(price, STORE_POLICY.currency)}</div> : <div style={{ display: "flex" }} />}
+          <div style={{ display: "flex", fontFamily: "Martian Mono", fontSize: 18, color: P.inkMuted }}>{BRAND.domain}</div>
         </div>
       </div>
     </div>,

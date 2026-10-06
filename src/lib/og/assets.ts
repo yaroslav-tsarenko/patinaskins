@@ -6,32 +6,31 @@ import { isBlockedImageHost } from "@/lib/utils/supplier";
 export const OG_SIZE = { width: 1200, height: 630 };
 
 export const OG_PALETTE = {
-  paint: "#3b2620",
-  plinth: "#2e1d18",
-  chalk: "#f1f3f2",
-  chalkDeep: "#e5e8e6",
-  stage: "#ffffff",
-  ink: "#2a1a15",
-  inkMuted: "#5b4c47",
-  onPaintMuted: "#c8bbb3",
-  onPaintLine: "rgba(241, 243, 242, 0.16)",
-  brass: "#c9a04e",
-  onBrass: "#2a1a15",
-  brassOnPaint: "#d6b064",
-  shelf: "#3b2620",
-  shelfHairline: "rgba(59, 38, 32, 0.28)",
-  contact: "rgba(42, 26, 21, 0.2)",
+  room: "#121315",
+  rig: "#0d0e10",
+  floor: "#0b0c0d",
+  stage: "#18191c",
+  raised: "#1c1e21",
+  ink: "#eceae5",
+  inkMuted: "#aaa7a0",
+  rule: "#3a3d42",
+  line: "#2a2c30",
+  accent: "#f39a2e",
+  lampLine: "rgba(255, 233, 199, 0.55)",
+  lampPool: "rgba(255, 233, 199, 0.09)",
+  contact: "rgba(0, 0, 0, 0.55)",
 } as const;
 
-type FontSpec = { name: string; file: string; weight: 400 | 600; style: "normal" };
+type FontSpec = { name: string; file: string; weight: 400 | 500 | 600 | 700; style: "normal" };
 
 const FONT_FILES: FontSpec[] = [
-  { name: "Gloock", file: "gloock-latin-400-normal.woff", weight: 400, style: "normal" },
-  { name: "Commissioner", file: "commissioner-latin-400-normal.woff", weight: 400, style: "normal" },
-  { name: "Commissioner", file: "commissioner-latin-600-normal.woff", weight: 600, style: "normal" },
+  { name: "Sofia Sans Condensed", file: "sofia-sans-condensed-latin-700-normal.woff", weight: 700, style: "normal" },
+  { name: "Source Sans 3", file: "source-sans-3-latin-400-normal.woff", weight: 400, style: "normal" },
+  { name: "Source Sans 3", file: "source-sans-3-latin-600-normal.woff", weight: 600, style: "normal" },
+  { name: "Martian Mono", file: "martian-mono-latin-500-normal.woff", weight: 500, style: "normal" },
 ];
 
-let fontCache: Promise<{ name: string; data: ArrayBuffer; weight: 400 | 600; style: "normal" }[]> | null = null;
+let fontCache: Promise<{ name: string; data: ArrayBuffer; weight: 400 | 500 | 600 | 700; style: "normal" }[]> | null = null;
 
 export function ogFonts() {
   fontCache ??= Promise.all(

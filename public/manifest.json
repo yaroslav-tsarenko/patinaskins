@@ -1,15 +1,15 @@
 {
   "id": "/",
-  "name": "Patinaskins — Counter-Strike 2 skins",
+  "name": "Patinaskins",
   "short_name": "Patinaskins",
-  "description": "Counter-Strike 2 weapon skins, knives and gloves, delivered to your Steam account by trade offer.",
+  "description": "CS2 skins with exterior, rarity and price in plain view. Pay by card; we send the skin to your Steam account as a trade offer.",
   "lang": "en-GB",
   "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#F1F3F2",
-  "theme_color": "#3B2620",
+  "background_color": "#121315",
+  "theme_color": "#0D0E10",
   "categories": [
     "shopping"
   ],

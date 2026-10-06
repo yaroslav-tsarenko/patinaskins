@@ -99,7 +99,7 @@ export async function POST() {
       }));
 
     const sections = [
-      { title: "New on the shelf", subtitle: null, slug: "new-on-the-shelf", filterType: "newest", categorySlug: null, viewAllUrl: "/catalog?sort=newest", viewAllLabel: "Newest first" },
+      { title: "New in the bay", subtitle: null, slug: "new-in-the-bay", filterType: "newest", categorySlug: null, viewAllUrl: "/catalog?sort=newest", viewAllLabel: "Newest first" },
       { title: "Reduced", subtitle: "Lowered prices, with the previous price shown beside each", slug: "reduced", filterType: "onSale", categorySlug: null, viewAllUrl: "/catalog?onSale=true", viewAllLabel: "See everything reduced" },
       ...stocked.slice(0, 4).map((c) => ({
         title: c.name,

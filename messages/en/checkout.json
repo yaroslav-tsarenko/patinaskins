@@ -8,8 +8,8 @@
   "continue": "Continue",
   "back": "Back",
   "empty": {
-    "title": "Your bag is empty",
-    "subtitle": "Add a skin to your bag to check out.",
+    "title": "Your cart is empty",
+    "subtitle": "Add a skin to your cart to check out.",
     "action": "Browse skins"
   },
   "errors": {
@@ -45,7 +45,7 @@
     "threeDs": "Your bank may ask you to confirm the payment in your banking app (3-D Secure).",
     "steamTo": "Steam trade offer to {name}",
     "waiverLabelShort": "Request for immediate delivery",
-    "waiverNote": "Without this request we cannot start delivery. Once delivery begins, the {days}-day right of withdrawal no longer applies. <link>How withdrawal works</link>."
+    "waiverNote": "Without this request we cannot start delivery. Once delivery begins, the {days}-day right to cancel no longer applies. <link>How cancelling works</link>."
   },
   "totals": {
     "subtotal": "Subtotal",
@@ -65,7 +65,7 @@
   "counter": {
     "title": "Your order",
     "toggle": "Show order summary · {total}",
-    "editBag": "Edit bag"
+    "editBag": "Edit cart"
   },
   "policies": {
     "terms": "Terms & conditions",
@@ -76,7 +76,7 @@
   "frame": {
     "home": "{brand}, home",
     "secure": "Secure checkout",
-    "backToBag": "Back to bag",
+    "backToBag": "Back to cart",
     "policiesLabel": "Policies",
     "cookieSettings": "Cookie settings",
     "credentials": "{brand} is a trading name of {company}, company number {number}, {address}. {email}",
@@ -90,15 +90,16 @@
   "problems": {
     "title": "We couldn't take this order",
     "totalChangedTitle": "Your total has changed",
+    "PAYMENTS_NOT_CONNECTED": "Card payments are being connected. Nothing has been charged.",
     "PAYMENT_UNAVAILABLE": "Card payments are not available at the moment, so we can't take this order. Nothing has been charged. Please try again later or email {email}.",
     "PAYMENT_LINK_FAILED": "We couldn't open the secure payment page. Nothing has been charged. Please try again in a few minutes.",
     "TOTAL_CHANGED": "The price of an item or the exchange rate has changed, so your total is now {total}. Check it and press Pay again.",
-    "ORDER_LIMIT": "One order can hold up to {max} items. Remove some items from your bag to continue.",
-    "PRODUCT_UNAVAILABLE": "{name} is no longer available. Remove it from your bag to continue.",
+    "ORDER_LIMIT": "One order can hold up to {max} items. Remove some items from your cart to continue.",
+    "PRODUCT_UNAVAILABLE": "{name} is no longer available. Remove it from your cart to continue.",
     "PRICE_UNAVAILABLE": "We couldn't confirm the current price of {name}. Nothing has been charged. Please try again in a moment.",
     "STEAM_NOT_LINKED": "Link your Steam account before you pay.",
     "TRADE_URL_REQUIRED": "Save your Steam trade URL before you pay.",
-    "CART_EMPTY": "Your bag is empty.",
+    "CART_EMPTY": "Your cart is empty.",
     "INVALID_REQUEST": "Some details are missing or not valid. Check each step and try again.",
     "RATE_LIMITED": "Too many attempts in a short time. Wait a minute and try again.",
     "UNAUTHORISED": "Your session has ended. Sign in again to continue.",
@@ -134,9 +135,9 @@
     },
     "failed": {
       "title": "Your payment didn't go through",
-      "body": "You haven't been charged. The items are still in your bag, so you can try again or use another card.",
+      "body": "You haven't been charged. The items are still in your cart, so you can try again or use another card.",
       "retry": "Try again",
-      "bag": "Back to bag",
+      "cart": "Back to cart",
       "help": "If money has left your account, email {email} and we'll look into it."
     },
     "pending": {
@@ -167,7 +168,7 @@
   },
   "signIn": {
     "title": "Sign in to check out",
-    "body": "Items are delivered to a Steam account by trade offer, so checkout needs an account with your Steam account linked. Your bag stays as it is while you sign in.",
+    "body": "Items are delivered to a Steam account by trade offer, so checkout needs an account with your Steam account linked. Your cart stays as it is while you sign in.",
     "steam": "Sign in through Steam",
     "email": "Sign in with email"
   }

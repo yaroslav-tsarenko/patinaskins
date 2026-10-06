@@ -3,12 +3,13 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { mentionsSupplier, publicBrand } from "@/lib/utils/supplier";
 import { isNewArrival, newArrivalCutoff } from "@/lib/new-arrivals";
-import type { ShelfProduct } from "@/components/product/ShelfTile/ShelfTile";
+import type { SkinProduct } from "@/components/skin/SkinTray";
 import { slugify } from "@/lib/utils/slugify";
 import { EXTERIORS, RARITIES, WEAPON_TYPES, rarityRank, weaponSlug, type SkinSummary } from "@/lib/skins/cs2";
 import {
   CATALOG_PAGE_SIZE,
   LIST_FILTERS,
+  NOT_PAINTED,
   QUALITY_KEYS,
   buildCatalogHref,
   type CatalogFacets,
@@ -83,6 +84,8 @@ interface Row {
   rarity: string | null;
   exterior: string | null;
   quality: string | null;
+  phase: string | null;
+  phaseKey: string | null;
   collection: string | null;
   collectionKey: string | null;
   floatMin: number | null;
@@ -130,7 +133,7 @@ export type CatalogScope =
   | { kind: "search"; query: string };
 
 export interface CatalogResult {
-  products: ShelfProduct[];
+  products: SkinProduct[];
   total: number;
   page: number;
   totalPages: number;
@@ -198,8 +201,10 @@ async function loadRows(scope: CatalogScope, tree: CategoryTree): Promise<Row[]>
     weapon: r.skin?.weapon ?? null,
     weaponKey: r.skin ? weaponSlug(r.skin.weapon) : null,
     rarity: r.skin?.rarity ?? null,
-    exterior: r.skin?.exterior ? r.skin.exterior.toLowerCase() : null,
+    exterior: r.skin ? (r.skin.exterior ? r.skin.exterior.toLowerCase() : NOT_PAINTED) : null,
     quality: r.skin ? (r.skin.isStatTrak ? "stattrak" : r.skin.isSouvenir ? "souvenir" : "normal") : null,
+    phase: r.skin?.phase ?? null,
+    phaseKey: r.skin?.phase ? slugify(r.skin.phase) : null,
     collection: r.skin?.collection ?? null,
     collectionKey: r.skin?.collection ? slugify(r.skin.collection) : null,
     floatMin: r.skin?.floatMin ?? null,
@@ -213,6 +218,7 @@ const LIST_VALUE: Record<ListFilter, (row: Row) => string | null> = {
   rarities: (r) => r.rarity,
   exteriors: (r) => r.exterior,
   qualities: (r) => r.quality,
+  phases: (r) => r.phaseKey,
   collections: (r) => r.collectionKey,
 };
 
@@ -271,7 +277,7 @@ function leafCategory(categories: { category: { name: string; slug: string; pare
   return leaf?.category ?? null;
 }
 
-export async function loadShelfProducts(ids: string[]): Promise<ShelfProduct[]> {
+export async function loadSkinProducts(ids: string[]): Promise<SkinProduct[]> {
   if (ids.length === 0) return [];
   const [records, newSince] = await Promise.all([
     prisma.product.findMany({
@@ -434,9 +440,10 @@ export async function queryCatalog(
   );
   const exteriors = listFacet(
     "exteriors",
-    (key) => EXTERIORS.find((e) => e.code.toLowerCase() === key)?.label ?? key,
-    (key) => EXTERIORS.findIndex((e) => e.code.toLowerCase() === key),
+    (key) => (key === NOT_PAINTED ? "Not painted" : EXTERIORS.find((e) => e.code.toLowerCase() === key)?.label ?? key),
+    (key) => (key === NOT_PAINTED ? 99 : EXTERIORS.findIndex((e) => e.code.toLowerCase() === key)),
   );
+  const phases = listFacet("phases", (_key, sample) => sample.phase ?? _key, () => 0);
   const qualities = listFacet("qualities", (key) => key, (key) => (QUALITY_KEYS as readonly string[]).indexOf(key));
   const collections = listFacet("collections", (_key, sample) => sample.collection ?? _key, () => 0);
   const floatRows = rows.filter((r) => r.floatMin !== null && r.floatMax !== null && passes(r, "float"));
@@ -449,7 +456,7 @@ export async function queryCatalog(
   const totalPages = Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE));
   const page = Math.min(params.page, totalPages);
   const pageIds = matched.slice((page - 1) * CATALOG_PAGE_SIZE, page * CATALOG_PAGE_SIZE).map((r) => r.id);
-  const products = await loadShelfProducts(pageIds);
+  const products = await loadSkinProducts(pageIds);
 
   return {
     products,
@@ -472,6 +479,7 @@ export async function queryCatalog(
       rarities,
       exteriors,
       qualities,
+      phases,
       collections,
       float,
     },

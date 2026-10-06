@@ -5,7 +5,7 @@ import { STORE_POLICY } from "@/config/store-policy";
 import { computeTotals, rateConverter } from "@/lib/pricing";
 import { getRate, isSupportedCurrency, type SupportedCurrency } from "@/lib/exchange-rates";
 import { displayOrderNumber } from "@/lib/orders";
-import { createTransfermitPayment, transfermitSafeName } from "@/lib/payments/transfermit";
+import { getPaymentProvider, PaymentUnavailableError } from "@/lib/payments/provider";
 import { canonicalTradeUrl } from "@/lib/steam";
 import { sendAlert } from "@/lib/alerts/telegram";
 import { skinSpecText } from "@/lib/skins/cs2";
@@ -183,6 +183,9 @@ export interface SkinCheckoutResult {
 }
 
 export async function createSkinCheckout(input: SkinCheckoutInput): Promise<SkinCheckoutResult> {
+  const provider = getPaymentProvider();
+  if (!provider.available) throw new PaymentUnavailableError(provider.id);
+
   const user = await prisma.user.findUnique({ where: { id: input.userId }, include: { steamAccount: true } });
   if (!user) throw new SkinCheckoutError("UNAUTHORISED", 401);
   const steam = user.steamAccount;
@@ -279,40 +282,31 @@ export async function createSkinCheckout(input: SkinCheckoutInput): Promise<Skin
   for (const s of sihOrders) await logSihEvent({ orderId: s.id, source: "system", toStatus: "awaiting_payment" });
 
   try {
-    const first = transfermitSafeName(input.billing.firstName || input.contact.firstName, "Customer");
-    const last = transfermitSafeName(input.billing.lastName || input.contact.lastName, "Buyer");
-    const res = await createTransfermitPayment({
+    const { redirectUrl, providerRef } = await provider.createPayment({
+      order: { id: order.id, number: displayOrderNumber(order.orderNumber), description: `Order ${displayOrderNumber(order.orderNumber)}` },
       amount: quote.charge.total,
       currency: quote.currency,
-      referenceId: order.id,
-      description: `Order ${displayOrderNumber(order.orderNumber)}`,
-      customer: {
-        referenceId: user.id,
-        firstName: first,
-        lastName: last,
-        email: input.contact.email,
-        phone: input.contact.phone || undefined,
-        ip: input.ip,
-      },
-      billingAddress: {
-        addressLine1: address.address1,
-        addressLine2: address.address2 || undefined,
-        city: address.city,
-        countryCode: address.country,
-        postalCode: address.postalCode,
-      },
       returnUrl: `${input.baseUrl}/order/confirmed?order=${order.id}`,
-      webhookUrl: `${input.baseUrl}/api/webhooks/transfermit`,
+      cancelUrl: `${input.baseUrl}/checkout?payment=failed`,
+      webhookUrl: `${input.baseUrl}/api/webhooks/payment/${provider.id}`,
+      customer: {
+        id: user.id,
+        email: input.contact.email,
+        firstName: input.billing.firstName || input.contact.firstName,
+        lastName: input.billing.lastName || input.contact.lastName,
+        phone: input.contact.phone,
+        ip: input.ip,
+        billing: { address1: address.address1, address2: address.address2, city: address.city, postalCode: address.postalCode, country: address.country },
+      },
     });
-    const paymentId = res.result?.id;
-    const paymentUrl = res.result?.redirectUrl;
-    if (!paymentId || !paymentUrl) throw new Error(res.error || res.message || "Transfermit returned no redirect URL");
-    await prisma.order.update({ where: { id: order.id }, data: { paymentId } });
-    return { orderId: order.id, paymentUrl };
+    if (!providerRef || !redirectUrl) throw new Error(`${provider.id} returned no redirect URL`);
+    await prisma.order.update({ where: { id: order.id }, data: { paymentId: providerRef } });
+    return { orderId: order.id, paymentUrl: redirectUrl };
   } catch (err) {
     console.error(`[skin-checkout] payment init failed for order ${order.id}: ${String(err)}`);
     await prisma.order.update({ where: { id: order.id }, data: { paymentStatus: "FAILED", status: "CANCELLED" } });
     await prisma.sihOrder.updateMany({ where: { orderId: order.id, status: "awaiting_payment" }, data: { status: "failed", sihError: "payment_init_failed" } });
+    if (err instanceof PaymentUnavailableError) throw err;
     throw new SkinCheckoutError("PAYMENT_LINK_FAILED", 502);
   }
 }

@@ -11,7 +11,7 @@ interface SearchPageProps {
   searchParams: Promise<RawSearchParams>;
 }
 
-const SEARCH_SORTS: SortKey[] = ["relevance", "newest", "price-asc", "price-desc", "popular", "name-asc"];
+const SEARCH_SORTS: SortKey[] = ["relevance", "price-asc", "price-desc", "rarity-desc", "newest", "name-asc"];
 
 function readQuery(raw: RawSearchParams): string {
   const q = Array.isArray(raw.q) ? raw.q[0] : raw.q;
@@ -42,13 +42,30 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className="mx-auto max-w-container px-gutter pb-24">
       <Breadcrumbs items={[{ label: t("home"), href: "/" }, { label: t("searchTitle") }]} />
-      <div className="max-w-[760px] pb-8 pt-2">
+      <div className="max-w-[760px] pb-8 pt-1">
         <SearchForm query={query} label={t("searchLabel")} placeholder={t("searchPlaceholder")} submit={t("searchSubmit")} />
       </div>
 
-      <header className="flex flex-wrap items-baseline gap-x-5 gap-y-2 pb-8">
-        <h1 className="text-step-4 leading-[1.05] text-ink [overflow-wrap:anywhere]">{searchable ? t("queryHeading", { query }) : t("searchTitle")}</h1>
-        {result ? <p className="tabular text-step-0 text-ink-muted">{t("results", { count: result.scopeTotal })}</p> : null}
+      <header className="pb-8">
+        <h1 className="m-0 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-step-5 font-[650] leading-none tracking-[-0.01em] text-ink [overflow-wrap:anywhere]">
+          {searchable ? t("queryHeading", { query }) : t("searchTitle")}
+          {result ? <span className="font-mono text-data font-normal tracking-normal text-ink-muted">{result.scopeTotal.toLocaleString("en-GB")}</span> : null}
+        </h1>
+        {result && result.facets.weapons.length > 0 ? (
+          <ul className="m-0 mt-4 flex list-none flex-wrap gap-x-6 gap-y-1 p-0">
+            {result.facets.weapons
+              .filter((w) => w.count > 0)
+              .slice(0, 8)
+              .map((w) => (
+                <li key={w.key}>
+                  <a href={`/search?q=${encodeURIComponent(query)}&weapon=${w.key}`} className="inline-flex min-h-9 items-baseline gap-1.5 font-display text-[0.9375rem] font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline">
+                    {w.label}
+                    <span className="font-mono text-[0.75rem] font-normal text-ink-subtle">· {w.count}</span>
+                  </a>
+                </li>
+              ))}
+          </ul>
+        ) : null}
       </header>
 
       {showBrowser && result ? (

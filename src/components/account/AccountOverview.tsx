@@ -6,8 +6,11 @@ import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Alert } from "@/components/ui/Alert";
-import { SkeletonBar } from "@/components/ui/ShelfLoader";
+import { SkeletonBar } from "@/components/ui/ReadoutLoader";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
+import { SkinRow } from "@/components/skin/SkinTray";
+import { SteamAccountBlock } from "@/components/skin/SteamAccountBlock";
+import { useSteamAccount } from "@/components/account/SteamDelivery/SteamDelivery";
 import { formatPrice } from "@/lib/utils/format-price";
 import type { OrderView } from "@/lib/orders";
 import { AccountPageHeader } from "./AccountSidebar/AccountSidebar";
@@ -16,13 +19,17 @@ import { useAccountData } from "./useAccountData";
 import { LoadError } from "./LoadError";
 import { formatOrderDate } from "./format";
 
+const linkCls = "inline-flex min-h-10 items-center gap-1.5 text-ui-md font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline";
+
 export function AccountOverview() {
   const t = useTranslations("account.overview");
   const { user } = useAuth();
+  const steam = useSteamAccount(Boolean(user));
   const welcome = useSearchParams().get("welcome") === "1";
   const { data, error, loading, reload } = useAccountData<{ orders: OrderView[] }>("/api/account/orders");
   const latest = data?.orders[0];
-  const firstName = user?.firstName || user?.name?.split(" ")[0] || "";
+  const persona = steam.steam?.personaName ?? null;
+  const firstName = persona || user?.firstName || user?.name?.split(" ")[0] || "";
 
   return (
     <div>
@@ -30,10 +37,23 @@ export function AccountOverview() {
         <p className="m-0 text-ink-muted">{user?.email ? t("signedInAs", { email: user.email }) : t("signedInSteam")}</p>
       </AccountPageHeader>
 
-      {welcome ? <Alert tone="success" title={t("welcomeTitle")} className="mb-8">{t("welcomeBody")}</Alert> : null}
+      {welcome ? (
+        <Alert tone="success" title={t("welcomeTitle")} className="mb-8">
+          {t("welcomeBody")}
+        </Alert>
+      ) : null}
+
+      <section aria-labelledby="steam-title" className="mb-12">
+        <h2 id="steam-title" className="eyebrow m-0 mb-3">
+          Steam account
+        </h2>
+        <div className="border-y border-line py-4">
+          {steam.loading ? <SkeletonBar className="w-1/2" /> : <SteamAccountBlock steam={steam.steam} nextPath="/account" tradeHref="/account/steam" />}
+        </div>
+      </section>
 
       <section aria-labelledby="latest-order" className="mb-12">
-        <h2 id="latest-order" className="m-0 mb-4 text-step-2 leading-none text-ink">
+        <h2 id="latest-order" className="eyebrow m-0 mb-3">
           {t("latestTitle")}
         </h2>
         {loading ? (
@@ -44,23 +64,28 @@ export function AccountOverview() {
         ) : error ? (
           <LoadError onRetry={reload} />
         ) : latest ? (
-          <div className="border-t border-line">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-5 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
-              <div className="min-w-0">
-                <p className="m-0 font-mono text-ui-md text-ink">{latest.number}</p>
-                <p className="meta m-0 text-ink-muted">{t("placed", { date: formatOrderDate(latest.createdAt), count: latest.lines.reduce((n, l) => n + l.quantity, 0) })}</p>
+          <div className="border-y border-line py-4">
+            <SkinRow
+              name={latest.lines[0]?.name ?? latest.number}
+              href={latest.lines[0]?.slug ? `/product/${latest.lines[0].slug}` : null}
+              imageUrl={latest.lines[0]?.imageUrl}
+              skin={latest.lines[0]?.skin}
+              aside={<span className="price text-[1rem] text-ink">{formatPrice(latest.totals.total, latest.currency)}</span>}
+            >
+              <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <OrderStatus state={latest.state} />
+                <span className="font-mono text-[0.75rem] text-ink-muted">
+                  {latest.number} · {formatOrderDate(latest.createdAt)}
+                </span>
+                <Link href={`/account/orders/${latest.id}`} className={`${linkCls} ml-auto`}>
+                  {t("view")}
+                  <span className="sr-only"> {latest.number}</span>
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
               </div>
-              <OrderStatus state={latest.state} className="justify-self-end sm:justify-self-auto" />
-              <p className="tabular m-0 font-display text-step-1 text-ink">{formatPrice(latest.totals.total, latest.currency)}</p>
-              <Link href={`/account/orders/${latest.id}`} className="inline-flex min-h-11 items-center gap-1.5 text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4 hover-device:hover:decoration-2">
-                {t("view")}
-                <span className="sr-only"> {latest.number}</span>
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
-            <span aria-hidden="true" className="shelf-rule" />
+            </SkinRow>
             {data && data.orders.length > 1 ? (
-              <Link href="/account/orders" className="mt-4 inline-flex min-h-11 items-center text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4">
+              <Link href="/account/orders" className={`${linkCls} mt-3`}>
                 {t("allOrders", { count: data.orders.length })}
               </Link>
             ) : null}
@@ -70,21 +95,20 @@ export function AccountOverview() {
         )}
       </section>
 
-      <section aria-labelledby="quick-links">
-        <h2 id="quick-links" className="m-0 mb-4 text-step-2 leading-none text-ink">
-          {t("linksTitle")}
-        </h2>
-        <ul className="m-0 grid list-none grid-cols-1 border-t border-line p-0 sm:grid-cols-2 sm:gap-x-10">
-          {(["steam", "orders", "addresses", "profile", "saved"] as const).map((key) => (
-            <li key={key} className="border-b border-line">
-              <Link href={key === "saved" ? "/account/wishlist" : `/account/${key}`} className="flex min-h-14 flex-col justify-center py-3 hover-device:hover:[&>span:first-child]:underline">
-                <span className="text-step-0 font-medium text-ink underline-offset-4">{t(`links.${key}.title`)}</span>
-                <span className="meta text-ink-muted">{t(`links.${key}.body`)}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <nav aria-label="Account shortcuts" className="flex flex-wrap gap-x-8 gap-y-1">
+        <Link href="/account/steam" className={linkCls}>
+          Trade URL
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+        <Link href="/account/profile" className={linkCls}>
+          Profile
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+        <Link href="/account/wishlist" className={linkCls}>
+          Saved
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+      </nav>
     </div>
   );
 }

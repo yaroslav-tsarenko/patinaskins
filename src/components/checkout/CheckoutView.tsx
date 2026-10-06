@@ -6,31 +6,32 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock } from "lucide-react";
-import { DrawerStepper, type StepperErrorSummary } from "@/components/ui/Stepper";
+import { LockKeyhole } from "lucide-react";
+import { Stepper, type StepperErrorSummary } from "@/components/ui/Stepper";
 import { Input } from "@/components/ui/Field";
 import { Checkbox } from "@/components/ui/Choice";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { AccordionItem } from "@/components/ui/Accordion";
-import { ShelfLoader } from "@/components/ui/ShelfLoader";
+import { ReadoutLoader } from "@/components/ui/ReadoutLoader";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
 import { PaymentLogos } from "@/components/shared/PaymentLogos/PaymentLogos";
-import { Cubby } from "@/components/product/ShelfTile/ShelfTile";
+import { SkinRow } from "@/components/skin/SkinTray";
+import { SteamAccountBlock, steamTail } from "@/components/skin/SteamAccountBlock";
+import { TradeUrlField, maskToken, savedTradeParts } from "@/components/skin/TradeUrlField";
 import { PhoneField } from "@/components/account/fields/PhoneField";
 import { AddressFields } from "@/components/account/fields/AddressFields";
-import { SteamDelivery, useSteamAccount } from "@/components/account/SteamDelivery/SteamDelivery";
+import { useSteamAccount } from "@/components/account/SteamDelivery/SteamDelivery";
 import { useCart } from "@/providers/CartProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { useFieldError } from "@/lib/hooks/useFieldError";
 import { checkoutFormSchema, type CheckoutFormData } from "@/lib/validators/checkout";
-import { countryName, DEFAULT_COUNTRY_CODE, dialCodeFor } from "@/lib/countries";
+import { countryName, DEFAULT_COUNTRY_CODE } from "@/lib/countries";
 import { formatPrice } from "@/lib/utils/format-price";
 import { STORE_POLICY } from "@/config/store-policy";
 import { COMPANY } from "@/lib/company";
 import { CheckoutCounter } from "./CheckoutCounter";
-import { MerchantInfo } from "./MerchantInfo";
 import { TotalsList } from "./TotalsList";
 import { quotePayloadItems, useCheckoutQuote, type QuoteProblem } from "./useCheckoutQuote";
 
@@ -40,10 +41,13 @@ const CHECKOUT_PATH = "/checkout";
 type FieldName = FieldPath<CheckoutFormData>;
 
 const STEP_FIELDS: FieldName[][] = [
-  ["contact.email", "contact.firstName", "contact.lastName", "contact.phoneCountry", "contact.phone"],
-  ["billing.street", "billing.address2", "billing.city", "billing.postcode", "billing.country"],
+  [],
+  [],
+  ["contact.email", "contact.firstName", "contact.lastName", "contact.phoneCountry", "contact.phone", "billing.street", "billing.address2", "billing.city", "billing.postcode", "billing.country"],
   ["acceptedPolicies", "acceptedWaiver"],
 ];
+
+const LAST_STEP = 3;
 
 const FIELD_IDS: Record<string, string> = {
   "contact.email": "co-email",
@@ -68,6 +72,7 @@ const EMPTY: CheckoutFormData = {
 };
 
 const KNOWN_PROBLEMS = [
+  "PAYMENTS_NOT_CONNECTED",
   "PAYMENT_UNAVAILABLE",
   "PAYMENT_LINK_FAILED",
   "TOTAL_CHANGED",
@@ -106,30 +111,12 @@ function getAt(source: unknown, path: string): unknown {
   return path.split(".").reduce<unknown>((value, key) => (value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined), source);
 }
 
-function SignInGate() {
-  const t = useTranslations("checkout.signIn");
-  return (
-    <div className="mx-auto flex max-w-narrow flex-col gap-5 px-gutter py-12">
-      <h1 className="m-0 text-step-4 leading-[1.1] text-ink">{t("title")}</h1>
-      <p className="measure m-0 text-ui-md text-ink-muted">{t("body")}</p>
-      <div className="flex flex-wrap gap-3">
-        <Button as="a" href={`/api/auth/steam?next=${encodeURIComponent(CHECKOUT_PATH)}`} size="lg">
-          {t("steam")}
-        </Button>
-        <Button as={Link} href={`/auth/login?next=${encodeURIComponent(CHECKOUT_PATH)}`} size="lg" variant="outline">
-          {t("email")}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 export function CheckoutView() {
   const t = useTranslations("checkout");
   const tf = useTranslations("forms");
   const fe = useFieldError();
   const searchParams = useSearchParams();
-  const { cart, displayTotals, isHydrated } = useCart();
+  const { cart, displayTotals, isHydrated, removeItem } = useCart();
   const { user, loading: authLoading } = useAuth();
   const { currency } = useCurrency();
   const steamAccount = useSteamAccount(Boolean(user));
@@ -140,6 +127,7 @@ export function CheckoutView() {
   const [paymentFailed, setPaymentFailed] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [steamMissing, setSteamMissing] = useState(false);
+  const [acceptedChanges, setAcceptedChanges] = useState("");
   const prefilled = useRef(false);
 
   const form = useForm<CheckoutFormData>({
@@ -243,19 +231,24 @@ export function CheckoutView() {
   );
 
   const handleContinue = async () => {
-    const names = STEP_FIELDS[step];
-    const valid = await trigger(names);
-    if (!valid) {
-      setErrorSummary(buildSummary(names));
+    if (step === 0 && !steamAccount.steam) {
+      setSteamMissing(true);
       return;
     }
     if (step === 1 && !steamReady) {
       setSteamMissing(true);
-      setErrorSummary({ message: t("delivery.steamRequired"), fields: [{ id: "steam-trade-url", label: t("delivery.steamTitle") }] });
       return;
     }
+    const names = STEP_FIELDS[step];
+    if (names.length) {
+      const valid = await trigger(names);
+      if (!valid) {
+        setErrorSummary(buildSummary(names));
+        return;
+      }
+    }
     setSteamMissing(false);
-    goTo(Math.min(step + 1, 2));
+    goTo(Math.min(step + 1, LAST_STEP));
   };
 
   const pay = form.handleSubmit(
@@ -287,8 +280,8 @@ export function CheckoutView() {
       setSubmitting(false);
     },
     (errors) => {
-      const firstStep = [0, 1, 2].find((index) => STEP_FIELDS[index].some((name) => getAt(errors, name)));
-      const target = firstStep ?? 2;
+      const firstStep = [0, 1, 2, 3].find((index) => STEP_FIELDS[index].some((name) => getAt(errors, name)));
+      const target = firstStep ?? LAST_STEP;
       if (target !== step) setStep(target);
       setErrorSummary(buildSummary(STEP_FIELDS[target]));
     },
@@ -296,7 +289,7 @@ export function CheckoutView() {
 
   const problemText = (p: SubmitProblem | QuoteProblem | null) => {
     if (!p) return null;
-    const code = KNOWN_PROBLEMS.includes(p.code) ? p.code : "SERVER_ERROR";
+    const code = KNOWN_PROBLEMS.includes(p.code) || t.has(`problems.${p.code}`) ? p.code : "SERVER_ERROR";
     return t(`problems.${code}`, {
       name: p.name ?? "",
       max: p.max ?? STORE_POLICY.limits.maxItemsPerOrder,
@@ -310,54 +303,89 @@ export function CheckoutView() {
   const imageFor = useMemo(() => new Map(cart.items.map((item) => [item.productId, item.imageUrl])), [cart.items]);
 
   if (!isHydrated || authLoading) {
-    return <ShelfLoader block />;
+    return <ReadoutLoader block />;
   }
 
   if (cart.items.length === 0 && !submitting) {
     return (
       <div className="mx-auto max-w-narrow px-gutter py-12">
-        <h1 className="m-0 text-step-4 leading-[1.1] text-ink">{t("title")}</h1>
-        <EmptyState title={t("empty.title")} subtitle={t("empty.subtitle")} actionLabel={t("empty.action")} actionHref="/catalog" align="start" className="px-0" />
+        <h1 className="m-0 text-step-5 font-[650] leading-none text-ink">{t("title")}</h1>
+        <EmptyState title={t("empty.title")} subtitle={t("empty.subtitle")} actionLabel="Browse all skins" actionHref="/catalog" align="start" className="px-0" />
       </div>
     );
   }
 
-  if (!user) return <SignInGate />;
-
   const counterProps = { items: cart.items, totals, currency, quote, loading };
 
-  const contactPanel = (
-    <div className="flex flex-col gap-5">
-      <Input
-        id="co-email"
-        type="email"
-        label={tf("email")}
-        required
-        autoComplete="email"
-        hint={t("contact.emailHint")}
-        error={fe(formState.errors.contact?.email?.message)}
-        {...register("contact.email")}
-      />
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Input id="co-first" label={tf("firstName")} required autoComplete="given-name" error={fe(formState.errors.contact?.firstName?.message)} {...register("contact.firstName")} />
-        <Input id="co-last" label={tf("lastName")} required autoComplete="family-name" error={fe(formState.errors.contact?.lastName?.message)} {...register("contact.lastName")} />
-      </div>
-      <PhoneField
-        idPrefix="co-phone"
-        dialRegister={register("contact.phoneCountry")}
-        numberRegister={register("contact.phone")}
-        error={fe(formState.errors.contact?.phone?.message)}
-        dialError={fe(formState.errors.contact?.phoneCountry?.message)}
-      />
-      <p className="meta m-0 text-ink-muted">{t("contact.phoneOptional")}</p>
+  const steamPanel = !user ? (
+    <div className="flex flex-col items-start gap-4">
+      <p className="m-0 max-w-[52ch] text-step-0 text-ink">We deliver skins as Steam trade offers, so checkout starts with your Steam account.</p>
+      <Button as="a" href={`/api/auth/steam?next=${encodeURIComponent(CHECKOUT_PATH)}`} variant="steam" size="lg">
+        Sign in through Steam
+      </Button>
+      <Link href={`/auth/login?next=${encodeURIComponent(CHECKOUT_PATH)}`} className="min-h-11 py-2 text-ui-md font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline">
+        Sign in with email instead
+      </Link>
+      <p className="m-0 text-ui-sm text-ink-muted">Your cart stays as it is while you sign in.</p>
+    </div>
+  ) : steamAccount.loading ? (
+    <ReadoutLoader />
+  ) : steamAccount.steam ? (
+    <SteamAccountBlock
+      steam={steamAccount.steam}
+      nextPath={CHECKOUT_PATH}
+      showTradeStatus={false}
+      action={
+        <a href={`/api/auth/steam?link=1&next=${encodeURIComponent(CHECKOUT_PATH)}`} className="text-ui-md font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline">
+          Not you? Switch account
+        </a>
+      }
+    />
+  ) : (
+    <div className="flex flex-col gap-3">
+      {steamMissing ? <Alert tone="danger">Link your Steam account to continue.</Alert> : null}
+      <p className="m-0 max-w-[52ch] text-step-0 text-ink">We deliver skins as Steam trade offers, so your Steam account must be linked.</p>
+      <SteamAccountBlock steam={null} nextPath={CHECKOUT_PATH} />
     </div>
   );
 
-  const deliveryPanel = (
-    <div className="flex flex-col gap-8">
-      <fieldset className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
-        <legend className="mb-3 p-0 text-step-1 font-semibold text-ink">{t("delivery.billingTitle")}</legend>
-        <p className="meta m-0 text-ink-muted">{t("delivery.billingHint")}</p>
+  const tradePanel = steamAccount.steam ? (
+    <div className="flex flex-col gap-4">
+      {steamMissing && !steamReady ? <Alert tone="danger">Save a trade URL that belongs to your linked Steam account to continue.</Alert> : null}
+      <TradeUrlField
+        steam={steamAccount.steam}
+        onSaved={(next) => {
+          steamAccount.setSteam(next);
+          setSteamMissing(false);
+        }}
+      />
+      <p className="m-0 max-w-[60ch] text-ui-sm text-ink-muted">We save it to your account for future orders. You can change it any time in Account, Trade URL.</p>
+    </div>
+  ) : (
+    <p className="m-0 text-ui-md text-ink-muted">Link your Steam account first.</p>
+  );
+
+  const billingPanel = (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-5">
+        <Input
+          id="co-email"
+          type="email"
+          label={tf("email")}
+          required
+          autoComplete="email"
+          hint="We send your receipt and delivery updates here."
+          error={fe(formState.errors.contact?.email?.message)}
+          {...register("contact.email")}
+        />
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Input id="co-first" label={tf("firstName")} required autoComplete="given-name" error={fe(formState.errors.contact?.firstName?.message)} {...register("contact.firstName")} />
+          <Input id="co-last" label={tf("lastName")} required autoComplete="family-name" error={fe(formState.errors.contact?.lastName?.message)} {...register("contact.lastName")} />
+        </div>
+      </div>
+      <fieldset className="m-0 flex min-w-0 flex-col gap-4 border-0 border-t border-line p-0 pt-6">
+        <legend className="eyebrow float-left mb-1 w-full p-0">{t("delivery.billingTitle")}</legend>
+        <p className="m-0 text-ui-sm text-ink-muted">{t("delivery.billingHint")}</p>
         <AddressFields
           idPrefix="bl"
           autoCompleteSection="billing"
@@ -377,101 +405,83 @@ export function CheckoutView() {
           }}
         />
       </fieldset>
-      <section aria-labelledby="co-steam" className="flex flex-col gap-4 border-t border-line pt-6">
-        <h3 id="co-steam" className="m-0 text-step-1 font-semibold text-ink">
-          {t("delivery.steamTitle")}
-        </h3>
-        <p className="meta m-0 text-ink-muted">{t("delivery.steamLead", { method: STORE_POLICY.delivery.method, usual: STORE_POLICY.delivery.usualTime })}</p>
-        {steamMissing && !steamReady ? <Alert tone="danger">{t("delivery.steamRequired")}</Alert> : null}
-        <SteamDelivery
-          nextPath={CHECKOUT_PATH}
-          steam={steamAccount.steam}
-          loading={steamAccount.loading}
-          failed={steamAccount.failed}
-          onSaved={(next) => {
-            steamAccount.setSteam(next);
-            setSteamMissing(false);
-          }}
-          onRetry={steamAccount.reload}
-          headingLevel={3}
+      <div className="flex flex-col gap-2 border-t border-line pt-6">
+        <PhoneField
+          idPrefix="co-phone"
+          dialRegister={register("contact.phoneCountry")}
+          numberRegister={register("contact.phone")}
+          error={fe(formState.errors.contact?.phone?.message)}
+          dialError={fe(formState.errors.contact?.phoneCountry?.message)}
+          required={false}
         />
-      </section>
+        <p className="m-0 text-ui-sm text-ink-muted">{t("contact.phoneOptional")}</p>
+      </div>
     </div>
   );
 
   const payLabel = quoteReady && quote ? t("review.pay", { amount: formatPrice(quote.totals.total, quote.currency) }) : t("review.payPending");
   const accepted = Boolean(values.acceptedPolicies) && Boolean(values.acceptedWaiver);
-  const billingLines = [
-    values.billing?.street,
-    values.billing?.address2,
-    [values.billing?.city, values.billing?.postcode?.toUpperCase()].filter(Boolean).join(" "),
-    countryName(values.billing?.country),
-  ].filter(Boolean);
   const lines =
     quote && quote.currency === currency
       ? quote.lines
       : cart.items.map((item, index) => ({ productId: item.productId, name: item.name, variantName: item.variantName ?? null, quantity: item.quantity, unit: totals.lines[index]?.unit ?? 0, total: totals.lines[index]?.total ?? 0 }));
 
+  const priceChanges =
+    quote && quote.currency === currency
+      ? quote.lines
+          .map((line) => {
+            const index = cart.items.findIndex((item) => item.productId === line.productId);
+            const was = index >= 0 ? displayTotals.lines[index]?.unit ?? null : null;
+            return was !== null && Math.abs(was - line.unit) >= 0.01 ? { productId: line.productId, name: line.name, was, now: line.unit } : null;
+          })
+          .filter((c): c is { productId: string; name: string; was: number; now: number } => Boolean(c))
+      : [];
+  const changeSignature = priceChanges.map((c) => `${c.productId}:${c.now}`).join("|");
+  const priceIssueOpen = priceChanges.length > 0 && acceptedChanges !== changeSignature;
+  const trade = savedTradeParts(steamAccount.steam?.tradeUrl);
+  const provider = STORE_POLICY.payment.providerName ?? "our payment provider";
+
   const reviewPanel = (
-    <div className="flex flex-col gap-8">
-      <dl className="m-0 grid grid-cols-1 gap-x-8 gap-y-5 border-b border-line pb-6 sm:grid-cols-2">
-        <div className="min-w-0">
-          <dt className="eyebrow mb-2 flex items-center justify-between gap-4 text-ink-muted">
-            {t("review.contactTitle")}
-            <button type="button" onClick={() => goTo(0)} className="min-h-9 cursor-pointer text-ui-sm font-semibold normal-case tracking-normal text-ink underline underline-offset-4">
-              {t("review.change")}
-              <span className="sr-only"> {t("review.contactTitle")}</span>
-            </button>
-          </dt>
-          <dd className="m-0 text-ui-sm leading-[1.6] text-ink">
-            {contactSummary}
-            <br />
-            {values.contact?.email}
-            {values.contact?.phone ? (
-              <>
-                <br />
-                <span className="tabular">{`${dialCodeFor(values.contact?.phoneCountry)} ${values.contact.phone}`}</span>
-              </>
-            ) : null}
-          </dd>
-        </div>
-        <div className="min-w-0">
-          <dt className="eyebrow mb-2 flex items-center justify-between gap-4 text-ink-muted">
-            {t("review.deliveryTitle")}
-            <button type="button" onClick={() => goTo(1)} className="min-h-9 cursor-pointer text-ui-sm font-semibold normal-case tracking-normal text-ink underline underline-offset-4">
-              {t("review.change")}
-              <span className="sr-only"> {t("review.deliveryTitle")}</span>
-            </button>
-          </dt>
-          <dd className="m-0 text-ui-sm leading-[1.6] text-ink">
-            <span className="block">{t("review.steamTo", { name: steamAccount.steam?.personaName ?? steamAccount.steam?.steamId64 ?? "" })}</span>
-            <span className="meta mt-1 block text-ink-muted">{t("review.billing", { address: billingLines.join(", ") })}</span>
-          </dd>
-        </div>
-      </dl>
+    <div className="flex flex-col gap-7">
+      {priceIssueOpen ? (
+        <Alert
+          tone="warning"
+          title="A price changed when we re-confirmed it"
+          action={
+            <Button size="sm" onPress={() => setAcceptedChanges(changeSignature)}>
+              Accept new price
+            </Button>
+          }
+        >
+          <ul className="m-0 flex list-none flex-col gap-1 p-0">
+            {priceChanges.map((c) => (
+              <li key={c.productId}>
+                The price of {c.name} changed from <s className="font-mono text-data text-ink-muted">{formatPrice(c.was, currency)}</s> to <span className="font-mono text-data font-semibold">{formatPrice(c.now, currency)}</span>.{" "}
+                <button type="button" onClick={() => removeItem(c.productId)} className="cursor-pointer font-semibold underline underline-offset-4">
+                  Remove it
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Alert>
+      ) : null}
 
       <div>
-        <h3 className="eyebrow m-0 mb-3 text-ink-muted">{t("review.itemsTitle")}</h3>
-        <ul className="m-0 flex list-none flex-col divide-y divide-line p-0">
-          {lines.map((line, index) => (
-            <li key={`${line.productId}-${index}`} className="flex items-center gap-4 py-3">
-              <Cubby src={imageFor.get(line.productId) ?? null} alt="" size="compact" sizes="48px" className="w-12 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="m-0 line-clamp-2 text-ui-sm font-medium text-ink">{line.name}</p>
-                {line.variantName ? <p className="meta m-0 text-ink-muted">{line.variantName}</p> : null}
-              </div>
-              <p className="tabular m-0 shrink-0 text-ui-sm text-ink">{formatPrice(line.total, currency)}</p>
-            </li>
-          ))}
+        <h3 className="eyebrow m-0 mb-2">{t("review.itemsTitle")}</h3>
+        <ul className="m-0 flex list-none flex-col divide-y divide-line border-y border-line p-0">
+          {lines.map((line, index) => {
+            const item = cart.items.find((i) => i.productId === line.productId);
+            return (
+              <li key={`${line.productId}-${index}`} className="py-3">
+                <SkinRow name={line.name} imageUrl={imageFor.get(line.productId) ?? null} skin={item?.skin} aside={<span className="font-mono text-data text-ink">{formatPrice(line.total, currency)}</span>} />
+              </li>
+            );
+          })}
         </ul>
+        <TotalsList totals={totals} currency={currency} showCurrencyCode totalSize="md" className="mt-4" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 border-t border-line pt-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <MerchantInfo />
-        <TotalsList totals={totals} currency={currency} showCurrencyCode totalSize="md" />
-      </div>
-
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <Checkbox
           id="co-accept"
           label={t.rich("review.accept", {
@@ -489,17 +499,19 @@ export function CheckoutView() {
           error={fe(formState.errors.acceptedPolicies?.message)}
           {...register("acceptedPolicies")}
         />
-        <Checkbox id="co-waiver" label={STORE_POLICY.waiver.text} error={fe(formState.errors.acceptedWaiver?.message)} {...register("acceptedWaiver")} />
-        <p className="meta m-0 text-ink-muted">
-          {t.rich("review.waiverNote", {
-            days: STORE_POLICY.returns.withdrawalDays,
-            link: (chunks) => (
-              <Link href="/policies/returns#withdrawal" target="_blank" className="underline underline-offset-4">
-                {chunks}
+        <Checkbox
+          id="co-waiver"
+          label={
+            <>
+              {STORE_POLICY.waiver.text}{" "}
+              <Link href="/policies/returns#withdrawal" target="_blank" className="font-semibold underline underline-offset-4">
+                Refunds policy
               </Link>
-            ),
-          })}
-        </p>
+            </>
+          }
+          error={fe(formState.errors.acceptedWaiver?.message)}
+          {...register("acceptedWaiver")}
+        />
       </div>
 
       {submitProblem ? (
@@ -515,18 +527,24 @@ export function CheckoutView() {
 
       <div className="flex flex-col gap-5">
         <div className="flex flex-wrap-reverse items-center justify-between gap-4">
-          <Button variant="ghost" onPress={() => goTo(1)}>
+          <Button variant="ghost" onPress={() => goTo(2)}>
             {t("back")}
           </Button>
-          <Button type="submit" size="lg" isDisabled={!accepted || !quoteReady || !steamReady} isLoading={submitting} startContent={<Lock size={18} aria-hidden="true" />} className="max-sm:w-full">
+          <Button
+            type="submit"
+            size="lg"
+            isDisabled={!accepted || !quoteReady || !steamReady || priceIssueOpen}
+            isLoading={submitting}
+            startContent={<LockKeyhole size={18} aria-hidden="true" />}
+            className="max-sm:w-full"
+          >
             {payLabel}
           </Button>
         </div>
         <div className="flex flex-col gap-3 border-t border-line pt-5">
           <PaymentLogos height={28} />
-          <p className="meta m-0 text-ink-muted">{t("review.hosted")}</p>
-          <p className="meta m-0 text-ink-muted">{STORE_POLICY.payment.providerName ? t("review.processedBy", { provider: STORE_POLICY.payment.providerName }) : t("review.processedByProvider")}</p>
-          <p className="meta m-0 text-ink-muted">{t("review.threeDs")}</p>
+          <p className="m-0 text-ui-sm text-ink-muted">Card payments are processed securely by {provider}. We never see or store your full card number.</p>
+          <p className="m-0 text-ui-sm text-ink-muted">{t("review.threeDs")}</p>
         </div>
       </div>
     </div>
@@ -534,10 +552,10 @@ export function CheckoutView() {
 
   return (
     <div className="mx-auto max-w-narrow px-gutter pb-20 pt-8 lg:pt-12">
-      <h1 className="m-0 mb-6 text-step-4 leading-[1.05] text-ink lg:mb-10">{t("title")}</h1>
+      <h1 className="m-0 mb-6 text-step-5 font-[650] leading-none tracking-[-0.01em] text-ink lg:mb-10">{t("title")}</h1>
 
       <div className="mb-6 border-y border-line lg:hidden">
-        <AccordionItem title={t("counter.toggle", { total: formatPrice(totals.total, currency) })} open={summaryOpen} onOpenChange={setSummaryOpen} headingLevel={2} className="border-b-0">
+        <AccordionItem title={`Show summary · ${formatPrice(totals.total, currency)}`} open={summaryOpen} onOpenChange={setSummaryOpen} headingLevel={2} flush className="border-b-0">
           <CheckoutCounter {...counterProps} headingLevel={3} />
         </AccordionItem>
       </div>
@@ -553,7 +571,7 @@ export function CheckoutView() {
               size="sm"
               onPress={() => {
                 setPaymentFailed(false);
-                goTo(2);
+                goTo(LAST_STEP);
               }}
             >
               {t("paymentFailed.retry")}
@@ -566,24 +584,26 @@ export function CheckoutView() {
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10">
         <form noValidate onSubmit={pay} className="min-w-0 lg:col-span-7" aria-label={t("title")}>
-          <DrawerStepper
+          <Stepper
             label={t("stepsLabel")}
             current={step}
             onEdit={(index) => goTo(index)}
             onContinue={handleContinue}
             onBack={() => goTo(Math.max(0, step - 1))}
             continueLabel={t("continue")}
-            hideActions={step === 2}
+            continueDisabled={step === 0 && !user}
+            hideActions={step === LAST_STEP}
             errorSummary={errorSummary}
             steps={[
-              { id: "contact", title: t("contact.title"), summary: contactSummary || undefined, content: contactPanel },
-              { id: "delivery", title: t("delivery.title"), summary: billingSummary || undefined, content: deliveryPanel },
-              { id: "review", title: t("review.title"), content: reviewPanel },
+              { id: "steam", title: "Steam account", summary: steamAccount.steam ? `Signed in as ${steamAccount.steam.personaName ?? "Steam user"} · SteamID ${steamTail(steamAccount.steam.steamId64)}` : undefined, content: steamPanel },
+              { id: "trade", title: "Trade URL", summary: trade ? `partner ${trade.partnerId} · token ${maskToken(trade.token)}` : undefined, content: tradePanel },
+              { id: "billing", title: "Receipt and billing", summary: [contactSummary, values.contact?.email, billingSummary].filter(Boolean).join(" · ") || undefined, content: billingPanel },
+              { id: "review", title: "Review and pay", content: reviewPanel },
             ]}
           />
         </form>
         <aside aria-label={t("counter.title")} className="hidden lg:col-span-5 lg:block">
-          <div className="sticky top-6 border border-line bg-raised p-6">
+          <div className="sticky top-6 rounded-control bg-raised p-6 shadow-[var(--shadow-card),0_0_0_1px_var(--color-border)]">
             <CheckoutCounter {...counterProps} />
           </div>
         </aside>

@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/Field";
 import { Checkbox } from "@/components/ui/Choice";
 import { Plate } from "@/components/ui/Plate";
 import { Alert } from "@/components/ui/Alert";
-import { SkeletonBar } from "@/components/ui/ShelfLoader";
+import { SkeletonBar } from "@/components/ui/ReadoutLoader";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog/ConfirmDialog";
 import { AddressFields } from "@/components/account/fields/AddressFields";
@@ -91,7 +91,7 @@ function AddressForm({ editing, onDone, onCancel }: { editing: Exclude<Editing, 
   });
 
   return (
-    <div data-drawer="" data-open="" className="border-t border-line">
+    <div className="border-t border-line">
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5 bg-raised p-5 sm:p-6" aria-labelledby="address-form-title">
         <h2 id="address-form-title" ref={headingRef} tabIndex={-1} className="m-0 text-step-2 leading-none text-ink outline-none">
           {existing ? t("editTitle") : t("addTitle")}
@@ -123,7 +123,7 @@ function AddressForm({ editing, onDone, onCancel }: { editing: Exclude<Editing, 
           </Button>
         </div>
       </form>
-      <span aria-hidden="true" className="shelf-rule" />
+      
     </div>
   );
 }
@@ -212,7 +212,7 @@ export function AddressBook() {
               <li key={address.id} className={cn("flex flex-col gap-4 border bg-raised p-5", address.isDefault ? "border-control" : "border-line")}>
                 <div className="flex items-start justify-between gap-3">
                   <p className="m-0 text-step-0 font-medium text-ink">{`${address.firstName} ${address.lastName}`}</p>
-                  {address.isDefault ? <Plate variant="brass">{t("default")}</Plate> : null}
+                  {address.isDefault ? <Plate variant="neutral">{t("default")}</Plate> : null}
                 </div>
                 <address className="text-ui-sm not-italic leading-[1.6] text-ink-muted">
                   {addressLines({ ...address, firstName: "", lastName: "" }).map((line) => (

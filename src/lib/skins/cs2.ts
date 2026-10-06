@@ -69,12 +69,33 @@ export const RARITIES: RarityDef[] = [
   { key: "restricted", label: "Restricted", color: "#8847ff" },
   { key: "classified", label: "Classified", color: "#d32ce6" },
   { key: "covert", label: "Covert", color: "#eb4b4b" },
-  { key: "extraordinary", label: "★ Extraordinary", color: "#8650ac" },
+  { key: "extraordinary", label: "Extraordinary", color: "#8650ac" },
   { key: "contraband", label: "Contraband", color: "#e4ae39" },
 ];
 
 export function rarityDef(key: string | null | undefined): RarityDef | null {
   return RARITIES.find((r) => r.key === key) ?? null;
+}
+
+export type RaritySlug = "consumer" | "industrial" | "milspec" | "restricted" | "classified" | "covert" | "gold";
+
+const RARITY_SLUG: Record<RarityKey, RaritySlug> = {
+  consumer: "consumer",
+  industrial: "industrial",
+  "mil-spec": "milspec",
+  restricted: "restricted",
+  classified: "classified",
+  covert: "covert",
+  extraordinary: "gold",
+  contraband: "gold",
+};
+
+export function raritySlug(key: string | null | undefined): RaritySlug | undefined {
+  return key ? RARITY_SLUG[key as RarityKey] : undefined;
+}
+
+export function isStarType(weaponType: string | null | undefined): boolean {
+  return weaponType === "knives" || weaponType === "gloves";
 }
 
 export function rarityRank(key: string | null | undefined): number {

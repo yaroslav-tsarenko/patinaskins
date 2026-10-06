@@ -1,6 +1,5 @@
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement } from "react";
 import { ImageResponse } from "next/og";
-import { BRAND } from "@/lib/brand";
 import { OG_PALETTE as P, OG_SIZE, ogFonts } from "./assets";
 
 export async function ogResponse(element: ReactElement, cacheSeconds = 86400) {
@@ -12,59 +11,58 @@ export async function ogResponse(element: ReactElement, cacheSeconds = 86400) {
   });
 }
 
-export function Shelf({ color, hairline, width = "100%" }: { color: string; hairline: string; width?: number | string }) {
+export function Wordmark({ size, color = P.ink }: { size: number; color?: string }) {
+  const square = Math.round(size * 0.105);
   return (
-    <div style={{ display: "flex", flexDirection: "column", width }}>
-      <div style={{ height: 4, background: color, width: "100%" }} />
-      <div style={{ height: 5 }} />
-      <div style={{ height: 2, background: hairline, width: "100%" }} />
+    <div style={{ display: "flex", alignItems: "flex-end", fontFamily: "Sofia Sans Condensed", fontWeight: 700, fontSize: size, lineHeight: 1, letterSpacing: -size * 0.01, color }}>
+      <span>Pat</span>
+      <span style={{ display: "flex", position: "relative" }}>
+        <span>{"ı"}</span>
+        <span style={{ position: "absolute", left: "50%", top: size * 0.06, width: square, height: square, marginLeft: -square / 2, background: P.accent }} />
+      </span>
+      <span>naskins</span>
     </div>
   );
 }
 
-export function BrassPlate({ children, fontSize = 30, onPaint = true }: { children: ReactNode; fontSize?: number; onPaint?: boolean }) {
-  const cut = Math.round(fontSize * 0.42);
-  const padY = Math.round(fontSize * 0.34);
-  const padX = Math.round(fontSize * 0.7);
-  const text = typeof children === "string" ? children : String(children ?? "");
-  const w = Math.round(text.length * fontSize * 0.56 + padX * 2);
-  const h = Math.round(fontSize * 1.25 + padY * 2);
+export function Stage({ src, width, height }: { src: string | null; width: number; height: number }) {
+  const inset = Math.round(width * 0.12);
   return (
     <div
       style={{
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: w,
-        height: h,
-        lineHeight: 1.25,
-        background: onPaint ? P.brassOnPaint : P.brass,
-        color: P.onBrass,
-        fontFamily: "Commissioner",
-        fontWeight: 600,
-        fontSize,
-        letterSpacing: 0.2,
-        clipPath: `polygon(${cut}px 0px, ${w - cut}px 0px, ${w}px ${cut}px, ${w}px ${h - cut}px, ${w - cut}px ${h}px, ${cut}px ${h}px, 0px ${h - cut}px, 0px ${cut}px)`,
+        position: "relative",
+        width,
+        height,
+        background: P.stage,
+        backgroundImage: `radial-gradient(ellipse 70% 62% at 50% 0%, ${P.lampPool}, transparent 72%)`,
+        borderRadius: 4,
+        overflow: "hidden",
       }}
     >
-      {children}
+      <div style={{ position: "absolute", top: 0, left: inset, right: inset, height: 1, background: P.lampLine }} />
+      <div style={{ position: "absolute", left: "18%", right: "18%", bottom: "8%", height: 12, borderRadius: "50%", background: P.contact, filter: "blur(6px)" }} />
+      {src ? (
+        <img src={src} alt="" style={{ position: "absolute", left: "9%", top: "12%", width: "82%", height: "72%", objectFit: "contain" }} />
+      ) : null}
     </div>
   );
 }
 
-export function Wordmark({ size, color }: { size: number; color: string }) {
+export function Ruler({ width, lit = "FT" }: { width: number; lit?: "FN" | "MW" | "FT" | "WW" | "BS" }) {
+  const zones: Record<string, [number, number]> = { FN: [0, 0.07], MW: [0.07, 0.15], FT: [0.15, 0.38], WW: [0.38, 0.45], BS: [0.45, 1] };
+  const majors = [0, 0.07, 0.15, 0.38, 0.45, 1];
+  const [a, b] = zones[lit];
   return (
-    <div style={{ display: "flex", fontFamily: "Gloock", fontSize: size, lineHeight: 1, letterSpacing: -size * 0.01, color }}>{BRAND.name}</div>
-  );
-}
-
-export function Packshot({ src, size, background }: { src: string | null; size: number; background: string }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", width: size, height: size }}>
-        {src ? <img src={src} width={size} height={size} style={{ objectFit: "contain", width: size, height: size, background }} alt="" /> : null}
-      </div>
-      <div style={{ display: "flex", width: Math.round(size * 0.78), height: 14, marginTop: -8, borderRadius: "50%", background: P.contact, filter: "blur(6px)" }} />
+    <div style={{ display: "flex", position: "relative", width, height: 20 }}>
+      <div style={{ position: "absolute", left: a * width, width: (b - a) * width, bottom: 1, height: 6, background: P.ink }} />
+      {Array.from({ length: 21 }, (_, i) => i * 0.05).map((v) => (
+        <div key={v} style={{ position: "absolute", left: v * width, bottom: 1, width: 1, height: 7, background: P.rule }} />
+      ))}
+      {majors.map((v) => (
+        <div key={v} style={{ position: "absolute", left: Math.min(width - 1, v * width), bottom: 1, width: 1, height: 14, background: P.ink }} />
+      ))}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 1, background: P.rule }} />
     </div>
   );
 }

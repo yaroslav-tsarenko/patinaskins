@@ -1,58 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { Accordion, AccordionItem } from "@/components/ui/Accordion";
 import { JsonLd } from "@/components/shared/SEO/JsonLd";
-import { POLICY_FACTS as F } from "@/lib/policy-facts";
+import { FAQ_GROUPS as GROUPS, FAQ_VALUES as VALUES, faqLinkTags as linkTags, faqPlainTags as plainTags } from "@/components/faq/faq-content";
 import { FaqIndex, OutlineLink } from "./FaqIndex";
 import { pageMetadata } from "@/lib/seo/metadata";
-
-const GROUPS: { id: string; items: string[] }[] = [
-  { id: "orders", items: ["place", "account", "unique", "float", "change", "noEmail"] },
-  { id: "delivery", items: ["how", "time", "requirements", "protection", "expired", "safety"] },
-  { id: "returns", items: ["when", "withdrawal", "refund", "account"] },
-  { id: "payment", items: ["methods", "safe", "currencies", F.vatRegistered ? "vatYes" : "vatNo", "when"] },
-  { id: "items", items: ["what", "store", "rarity", "affiliation"] },
-  { id: "account", items: ["who", "steam", "password", "delete"] },
-];
-
-const VALUES = {
-  brand: F.brand,
-  company: F.company,
-  email: F.email,
-  withdrawalDays: F.withdrawalDays,
-  refundDays: F.refundDays,
-  refundMethod: F.refundMethod,
-  maxItems: F.maxItemsPerOrder,
-  restricted: F.restrictedCountries,
-  method: F.deliveryMethod,
-  usual: F.deliveryUsual,
-  deadlineHours: F.deliveryDeadlineHours,
-  protectionDays: F.tradeProtectionDays,
-  holdDays: F.tradeHoldMaxDays,
-  cancelBefore: F.cancelBefore,
-  cardMethods: F.cardMethods,
-  currencies: F.currencies,
-  minAge: F.minAge,
-  replyTime: F.replyTime,
-  supportHours: F.supportHours,
-};
-
-const linkTags = {
-  returns: (chunks: ReactNode) => <Link href="/policies/returns">{chunks}</Link>,
-  warranty: (chunks: ReactNode) => <Link href="/policies/warranty">{chunks}</Link>,
-  privacy: (chunks: ReactNode) => <Link href="/policies/privacy">{chunks}</Link>,
-  policies: (chunks: ReactNode) => <Link href="/policies">{chunks}</Link>,
-};
-
-const plainTags = {
-  returns: (chunks: string) => chunks,
-  warranty: (chunks: string) => chunks,
-  privacy: (chunks: string) => chunks,
-  policies: (chunks: string) => chunks,
-};
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("faq");
@@ -94,7 +47,7 @@ export default async function FaqPage() {
       <Breadcrumbs items={[{ label: t("home"), href: "/" }, { label: t("title") }]} />
 
       <header className="measure">
-        <h1 className="m-0 font-display text-step-5 leading-[1.02] tracking-[-0.01em] text-ink">{t("title")}</h1>
+        <h1 className="m-0 text-step-5 font-[650] leading-none tracking-[-0.01em] text-ink">{t("title")}</h1>
         <p className="mt-5 text-step-1 leading-[1.5] text-ink-muted [&_a]:text-ink [&_a]:underline [&_a]:decoration-1 [&_a]:underline-offset-4">
           {t.rich("lead", { ...VALUES, ...linkTags })}
         </p>
@@ -115,13 +68,13 @@ export default async function FaqPage() {
               aria-labelledby={`${group.id}-title`}
               className={index === 0 ? "scroll-mt-32" : "mt-16 scroll-mt-32 lg:mt-20"}
             >
-              <h2 id={`${group.id}-title`} className="m-0 mb-5 font-display text-step-3 leading-[1.12] text-ink">
+              <h2 id={`${group.id}-title`} className="m-0 mb-5 text-step-3 font-semibold leading-[1.1] text-ink">
                 {group.title}
               </h2>
               <Accordion>
                 {group.items.map((item) => (
                   <AccordionItem key={item.key} id={`${group.id}-${item.key}`} title={item.q} headingLevel={3}>
-                    <div className="measure text-step-0 leading-[1.7] text-ink [&_a]:underline [&_a]:decoration-1 [&_a]:underline-offset-4">
+                    <div className="measure text-step-0 leading-[1.7] text-ink-muted [&_a]:font-semibold [&_a]:text-ink [&_a]:underline [&_a]:decoration-1 [&_a]:underline-offset-4">
                       {item.a}
                     </div>
                   </AccordionItem>
@@ -131,7 +84,7 @@ export default async function FaqPage() {
           ))}
 
           <section aria-labelledby="faq-help" className="mt-20 border-t border-line pt-10 lg:mt-24">
-            <h2 id="faq-help" className="m-0 font-display text-step-3 leading-[1.12] text-ink">
+            <h2 id="faq-help" className="m-0 text-step-3 font-semibold leading-[1.1] text-ink">
               {t("stillNeedHelp")}
             </h2>
             <p className="measure mt-3 text-step-0 leading-[1.6] text-ink-muted">{t("stillNeedHelpBody", VALUES)}</p>

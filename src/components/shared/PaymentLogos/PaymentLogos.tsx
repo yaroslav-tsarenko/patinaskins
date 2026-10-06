@@ -10,20 +10,15 @@ const LOGOS = [
 export interface PaymentLogosProps {
   height?: 20 | 24 | 28;
   withPci?: boolean;
-  plaque?: boolean;
   className?: string;
 }
 
-export function PaymentLogos({ height = 28, withPci = true, plaque = false, className }: PaymentLogosProps) {
+export function PaymentLogos({ height = 28, withPci = true, className }: PaymentLogosProps) {
   const logos = withPci ? LOGOS : LOGOS.filter((l) => l.key !== "pci");
   return (
     <ul
       aria-label="Accepted payments"
-      className={cn(
-        "m-0 flex list-none flex-wrap items-center gap-2.5 p-0",
-        plaque && "bevel-sm px-3.5 py-2 before:bg-stage",
-        className,
-      )}
+      className={cn("m-0 flex list-none flex-wrap items-center gap-2 p-0", className)}
     >
       {logos.map((logo) => (
         <li key={logo.key} className="flex">

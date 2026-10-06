@@ -44,7 +44,7 @@ export const STORE_POLICY = {
   policiesLastUpdated: POLICY_DATE,
   waiver: {
     version: POLICY_DATE,
-    text: "I request immediate delivery of the digital item and acknowledge I lose my right of withdrawal once delivery begins.",
+    text: "I ask you to start delivery straight after payment and I understand I lose my right to cancel once the trade offer is sent.",
   },
   support: {
     replyTime: "within 1 business day",

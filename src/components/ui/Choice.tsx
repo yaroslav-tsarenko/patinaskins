@@ -36,12 +36,12 @@ export function Checkbox({ label, description, count, indeterminate, error, dens
       <label
         htmlFor={fieldId}
         className={cn(
-          "group flex cursor-pointer items-start gap-2.5 text-step-0 leading-[1.4] text-ink",
+          "group flex cursor-pointer items-start gap-2.5 text-step-0 leading-[1.45] text-ink",
           dense ? "min-h-11 items-center py-2" : "py-1",
           rest.disabled && "cursor-not-allowed text-ink-subtle",
         )}
       >
-        <span className="relative mt-px grid size-5 shrink-0 place-items-center">
+        <span className="relative mt-[3px] grid size-[18px] shrink-0 place-items-center">
           <input
             ref={(node) => {
               local.current = node;
@@ -52,8 +52,8 @@ export function Checkbox({ label, description, count, indeterminate, error, dens
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? `${fieldId}-error` : undefined}
             className={cn(
-              "peer absolute inset-0 m-0 cursor-pointer appearance-none border-[1.5px] border-control bg-raised",
-              "transition-colors duration-[160ms] hover-device:hover:border-ink-muted",
+              "peer absolute inset-0 m-0 cursor-pointer appearance-none rounded-control border-[1.5px] border-control bg-raised",
+              "transition-colors duration-[140ms] hover-device:hover:border-ink-muted",
               "checked:border-brand checked:bg-brand indeterminate:border-brand indeterminate:bg-brand",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
               "disabled:cursor-not-allowed disabled:bg-surface-1 disabled:border-line",
@@ -62,15 +62,15 @@ export function Checkbox({ label, description, count, indeterminate, error, dens
             )}
             {...rest}
           />
-          <Check size={14} strokeWidth={2} aria-hidden="true" className="pointer-events-none relative text-on-brand opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-0" />
-          <span aria-hidden="true" className="pointer-events-none absolute h-0.5 w-2.5 bg-on-brand opacity-0 peer-indeterminate:opacity-100" />
+          <Check size={12} strokeWidth={2.5} aria-hidden="true" className="pointer-events-none relative text-on-brand opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-0" />
+          <span aria-hidden="true" className="pointer-events-none absolute h-0.5 w-2 bg-on-brand opacity-0 peer-indeterminate:opacity-100" />
         </span>
         <span className="flex min-w-0 flex-1 items-baseline justify-between gap-3">
           <span className="min-w-0">
             {label}
             {description ? <span className="meta mt-0.5 block text-ink-muted">{description}</span> : null}
           </span>
-          {typeof count === "number" ? <span className="tabular meta shrink-0 text-ink-muted">{count}</span> : null}
+          {typeof count === "number" ? <span className="shrink-0 font-mono text-data-sm text-ink-muted">{count}</span> : null}
         </span>
       </label>
       {error ? <FieldError id={`${fieldId}-error`}>{error}</FieldError> : null}
@@ -88,13 +88,13 @@ export interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 
 function RadioDot({ inputProps }: { inputProps: InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInputElement> } }) {
   return (
-    <span className="relative mt-px grid size-5 shrink-0 place-items-center">
+    <span className="relative mt-[3px] grid size-[18px] shrink-0 place-items-center">
       <input
         type="radio"
         {...inputProps}
         className={cn(
           "peer absolute inset-0 m-0 cursor-pointer appearance-none rounded-full border-[1.5px] border-control bg-raised",
-          "transition-colors duration-[160ms] hover-device:hover:border-ink-muted checked:border-brand",
+          "transition-colors duration-[140ms] hover-device:hover:border-ink-muted checked:border-brand",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
           "disabled:cursor-not-allowed disabled:bg-surface-1 disabled:border-line",
           inputProps.className,
@@ -116,7 +116,7 @@ export function Radio({ label, description, count, wrapperClassName, id, ref, ..
           {label}
           {description ? <span className="meta mt-0.5 block text-ink-muted">{description}</span> : null}
         </span>
-        {typeof count === "number" ? <span className="tabular meta shrink-0 text-ink-muted">{count}</span> : null}
+        {typeof count === "number" ? <span className="shrink-0 font-mono text-data-sm text-ink-muted">{count}</span> : null}
       </span>
     </label>
   );
@@ -134,8 +134,8 @@ export function RadioRow({ label, description, meta, aside, wrapperClassName, id
     <label
       htmlFor={fieldId}
       className={cn(
-        "flex cursor-pointer items-start gap-3 border border-control px-4 py-4 transition-colors duration-[160ms]",
-        "hover-device:hover:border-ink-muted has-checked:border-brand has-checked:bg-raised has-checked:shadow-[inset_0_0_0_1px_var(--color-accent)]",
+        "flex cursor-pointer items-start gap-3 border border-control px-4 py-4 transition-colors duration-[140ms]",
+        "rounded-control hover-device:hover:border-ink-muted has-checked:bg-brand-soft has-checked:shadow-[inset_0_-2px_0_var(--color-accent)]",
         "has-disabled:cursor-not-allowed has-disabled:text-ink-subtle",
         wrapperClassName,
       )}
@@ -191,20 +191,92 @@ export function Switch({ checked, onChange, label, description, disabled, locked
           disabled={disabled}
           onClick={() => onChange?.(!checked)}
           className={cn(
-            "relative h-6 w-11 shrink-0 border border-control transition-colors duration-[260ms] ease-[var(--ease-std)]",
-            checked ? "border-brand bg-brand" : "bg-raised hover-device:hover:border-ink-muted",
+            "relative h-[22px] w-10 shrink-0 rounded-control border border-control transition-colors duration-[200ms] ease-[var(--ease-std)]",
+            checked ? "border-accent-edge bg-brand" : "bg-raised hover-device:hover:border-ink-muted",
             disabled ? "cursor-not-allowed opacity-80" : "cursor-pointer",
           )}
         >
           <span
             aria-hidden="true"
             className={cn(
-              "absolute left-[3px] top-[3px] size-4 transition-transform duration-[260ms] ease-[var(--ease-furniture)]",
-              checked ? "translate-x-5 bg-on-brand" : "translate-x-0 bg-control",
+              "absolute left-[2px] top-[2px] size-4 rounded-[1px] transition-transform duration-[200ms] ease-[var(--ease-instrument)]",
+              checked ? "translate-x-[18px] bg-on-brand" : "translate-x-0 bg-control",
             )}
           />
         </button>
       </div>
+    </div>
+  );
+}
+
+export interface SegmentOption<T extends string> {
+  value: T;
+  label: ReactNode;
+  disabled?: boolean;
+}
+
+export interface SegmentedProps<T extends string> {
+  options: SegmentOption<T>[];
+  value: T;
+  onChange: (value: T) => void;
+  label: string;
+  size?: "sm" | "md";
+  fullWidth?: boolean;
+  className?: string;
+}
+
+export function Segmented<T extends string>({ options, value, onChange, label, size = "md", fullWidth = false, className }: SegmentedProps<T>) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const enabled = options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0);
+  const move = (from: number, dir: 1 | -1) => {
+    const pos = enabled.indexOf(from);
+    const next = enabled[(pos + dir + enabled.length) % enabled.length];
+    if (next === undefined) return;
+    onChange(options[next].value);
+    refs.current[next]?.focus();
+  };
+  return (
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className={cn("inline-flex rounded-control border border-control bg-raised p-0", fullWidth && "flex w-full", className)}
+    >
+      {options.map((option, index) => {
+        const selected = option.value === value;
+        return (
+          <button
+            key={option.value}
+            ref={(node) => {
+              refs.current[index] = node;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            disabled={option.disabled}
+            tabIndex={selected || (!options.some((o) => o.value === value) && index === 0) ? 0 : -1}
+            onClick={() => onChange(option.value)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                e.preventDefault();
+                move(index, 1);
+              } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                e.preventDefault();
+                move(index, -1);
+              }
+            }}
+            className={cn(
+              "relative flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap px-3 text-ui-sm font-semibold transition-colors duration-[140ms] first:rounded-l-[1px] last:rounded-r-[1px]",
+              size === "sm" ? "h-8" : "h-9 touch-device:h-11",
+              fullWidth && "flex-1",
+              index > 0 && "border-l border-line",
+              selected ? "bg-brand-soft text-ink shadow-[inset_0_-2px_0_var(--color-accent)]" : "text-ink-muted hover-device:hover:text-ink",
+              option.disabled && "cursor-not-allowed text-ink-subtle",
+            )}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

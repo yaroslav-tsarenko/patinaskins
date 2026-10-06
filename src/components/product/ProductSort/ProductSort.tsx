@@ -15,7 +15,7 @@ const LABEL_KEY: Record<SortKey, "sortNewest" | "sortPriceAsc" | "sortPriceDesc"
   "float-asc": "sortFloat",
 };
 
-export const CATALOG_SORTS: SortKey[] = ["newest", "price-asc", "price-desc", "rarity-desc", "float-asc", "popular", "name-asc"];
+export const CATALOG_SORTS: SortKey[] = ["newest", "price-asc", "price-desc", "rarity-desc", "name-asc"];
 
 interface ProductSortProps {
   value: string;
@@ -34,7 +34,7 @@ export function ProductSort({ value, onChange, options = CATALOG_SORTS, classNam
       onChange={(e) => onChange(e.target.value as SortKey)}
       options={options.map((key) => ({ value: key, label: t(LABEL_KEY[key]) }))}
       wrapperClassName={className}
-      className="min-w-[10.5rem]"
+      className="min-w-[11.5rem] rounded-control"
     />
   );
 }

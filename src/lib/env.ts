@@ -19,6 +19,14 @@ const optional = z
   .optional()
   .transform((v) => (v && v.trim() ? v.trim() : undefined));
 
+export const PAYMENT_PROVIDER_IDS = ["none", "mock"] as const;
+export type PaymentProviderId = (typeof PAYMENT_PROVIDER_IDS)[number];
+
+export function mockPaymentsAllowed(): boolean {
+  const flag = process.env.PAYMENT_MOCK_ENABLED;
+  return process.env.NODE_ENV !== "production" && (flag === "true" || flag === "1");
+}
+
 const shape = {
   SIH_API_KEY: z.string().min(1, "SIH_API_KEY is required"),
   SIH_API_BASE: z.string().url().default("https://api.sih.market/api/v1"),
@@ -30,9 +38,15 @@ const shape = {
   SIH_MIN_MARGIN_ABS: num(catalogConfig.pricing.minMarginAbs),
   SIH_LOW_BALANCE_THRESHOLD: num(100),
 
-  TRANSFERMIT_API_KEY: z.string().min(1, "TRANSFERMIT_API_KEY is required"),
-  TRANSFERMIT_WEBHOOK_SECRET: z.string().min(1, "TRANSFERMIT_WEBHOOK_SECRET is required"),
-  TRANSFERMIT_API_URL: z.string().url().default("https://app.transfermit.com/api/v1/payments"),
+  PAYMENT_PROVIDER: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.trim() ? v.trim().toLowerCase() : "none"))
+    .pipe(z.enum(PAYMENT_PROVIDER_IDS))
+    .refine((v) => v !== "mock" || mockPaymentsAllowed(), {
+      message: 'PAYMENT_PROVIDER="mock" is refused: it requires NODE_ENV other than "production" and PAYMENT_MOCK_ENABLED=true',
+    }),
+  PAYMENT_MOCK_ENABLED: bool(false),
 
   STEAM_API_KEY: optional,
 
@@ -72,4 +86,8 @@ export const env: Env = new Proxy({} as Env, {
 
 export function hasEnv(...keys: (keyof Env)[]): boolean {
   return keys.every((key) => shape[key].safeParse(process.env[key as string]).success);
+}
+
+export function assertPaymentConfig(): void {
+  void env.PAYMENT_PROVIDER;
 }

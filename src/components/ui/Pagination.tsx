@@ -26,7 +26,7 @@ export interface PaginationProps {
 }
 
 const textLinkCls =
-  "inline-flex min-h-10 items-center gap-1.5 text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4 hover-device:hover:decoration-2";
+  "inline-flex min-h-10 items-center gap-1.5 text-ui-sm font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline";
 
 export function Pagination({ page, totalPages, onPageChange, hrefForPage, className }: PaginationProps) {
   if (totalPages <= 1) return null;
@@ -73,24 +73,24 @@ export function Pagination({ page, totalPages, onPageChange, hrefForPage, classN
           typeof token === "number" ? (
             <li key={token}>
               {token === page ? (
-                <span aria-current="page" className="bevel-sm tabular flex size-10 items-center justify-center text-ui-sm font-semibold text-on-brand before:bg-brand">
+                <span aria-current="page" className="relative flex size-10 items-center justify-center rounded-control font-mono text-data text-ink after:absolute after:inset-x-1 after:bottom-0 after:h-0.5 after:bg-brand">
                   {token}
                 </span>
               ) : (
                 control(token, token, {
-                  className: "tabular flex size-10 cursor-pointer items-center justify-center text-ui-sm text-ink transition-colors duration-[160ms] hover-device:hover:bg-brand-soft",
+                  className: "flex size-10 cursor-pointer items-center justify-center rounded-control font-mono text-data text-ink-muted transition-colors duration-[140ms] hover-device:hover:bg-raised hover-device:hover:text-ink",
                   label: `Page ${token}`,
                 })
               )}
             </li>
           ) : (
-            <li key={token} aria-hidden="true" className="flex size-10 items-center justify-center text-ui-sm text-ink-subtle">
+            <li key={token} aria-hidden="true" className="flex size-10 items-center justify-center font-mono text-data text-ink-subtle">
               …
             </li>
           ),
         )}
       </ol>
-      <p className="tabular meta text-ink-muted sm:hidden">
+      <p className="font-mono text-data text-ink-muted sm:hidden">
         Page {page} of {totalPages}
       </p>
       {next}
@@ -102,7 +102,7 @@ export function LoadMore({ shown, total, onLoadMore, loading, className }: { sho
   if (shown >= total) return null;
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>
-      <p className="tabular meta text-ink-muted">
+      <p className="font-mono text-data text-ink-muted">
         Showing {shown} of {total}
       </p>
       <Button variant="outline" onPress={onLoadMore} isLoading={loading}>

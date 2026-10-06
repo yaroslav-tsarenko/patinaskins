@@ -25,7 +25,7 @@
     },
     "returns": {
       "title": "Refunds",
-      "scope": "When we refund an item, the right of withdrawal before delivery begins, and how refunds are paid."
+      "scope": "When we refund an item, the right to cancel before delivery begins, and how refunds are paid."
     },
     "shipping": {
       "title": "Delivery via Steam",

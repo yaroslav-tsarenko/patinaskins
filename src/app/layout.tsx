@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { preload } from "react-dom";
-import "@fontsource-variable/commissioner/wght.css";
+import "@fontsource-variable/source-sans-3/wght.css";
+import "@fontsource-variable/martian-mono/wdth.css";
 import "./fonts.css";
 import "@/styles/globals.css";
 import { BRAND, SITE_URL } from "@/lib/brand";
@@ -12,10 +13,10 @@ import { absoluteUrl } from "@/lib/seo/url";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({ locale: defaultLocale, namespace: "seo" });
-  const title = `${BRAND.name} — ${BRAND.tagline}`;
+  const title = `${BRAND.name} · ${BRAND.tagline}`;
   const description = t("siteDescription");
   return {
-    title: { default: title, template: `%s | ${BRAND.name}` },
+    title: { default: title, template: `%s · ${BRAND.name}` },
     description,
     metadataBase: new URL(SITE_URL),
     applicationName: BRAND.name,
@@ -46,8 +47,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#3B2620" },
-    { media: "(prefers-color-scheme: dark)", color: "#120D0B" },
+    { media: "(prefers-color-scheme: light)", color: "#F6F6F5" },
+    { media: "(prefers-color-scheme: dark)", color: "#0D0E10" },
   ],
 };
 
@@ -57,7 +58,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  preload("/fonts/gloock-latin-400-normal.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  preload("/fonts/sofia-sans-condensed-latin-wght-normal.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
 
   return (
     <html

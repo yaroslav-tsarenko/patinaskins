@@ -5,15 +5,17 @@ import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export const controlClass = cn(
-  "block w-full min-w-0 bg-raised border border-control text-step-0 text-ink placeholder:text-ink-subtle",
-  "transition-[border-color,box-shadow] duration-[160ms] ease-[var(--ease-std)]",
-  "hover-device:hover:border-ink-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+  "block w-full min-w-0 rounded-control bg-raised border border-control text-step-0 text-ink placeholder:text-ink-subtle shadow-lamp-catch",
+  "transition-[border-color,box-shadow] duration-[140ms] ease-[var(--ease-std)]",
+  "hover-device:hover:border-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
   "disabled:bg-surface-1 disabled:text-ink-subtle disabled:cursor-not-allowed disabled:hover:border-control",
 );
 
-export const readOnlyClass = "read-only:border-transparent read-only:bg-surface-1";
+export const readOnlyClass = "read-only:border-transparent read-only:bg-surface-1 read-only:shadow-none";
 
 export const controlErrorClass = "border-danger shadow-[inset_0_0_0_1px_var(--color-danger)] hover-device:hover:border-danger";
+
+export const dataInputClass = "font-mono text-data [font-stretch:100%]";
 
 export interface FieldShellProps {
   id: string;
@@ -35,7 +37,7 @@ export function FieldShell({ id, label, hint, error, required, className, labelH
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
       {label ? (
-        <label htmlFor={id} className={cn("text-ui-sm font-medium leading-[1.4] text-ink", labelHidden && "sr-only")}>
+        <label htmlFor={id} className={cn("text-ui-md font-semibold leading-[1.3] text-ink", labelHidden && "sr-only")}>
           {label}
           {required ? (
             <span className="text-ink-muted" aria-hidden="true">
@@ -71,6 +73,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   prefix?: ReactNode;
   suffix?: ReactNode;
   size?: "md" | "sm";
+  mono?: boolean;
   labelHidden?: boolean;
   wrapperClassName?: string;
   ref?: Ref<HTMLInputElement>;
@@ -83,6 +86,7 @@ export function Input({
   prefix,
   suffix,
   size = "md",
+  mono = false,
   labelHidden,
   wrapperClassName,
   className,
@@ -97,7 +101,7 @@ export function Input({
     <FieldShell id={fieldId} label={label} hint={hint} error={error} required={required} className={wrapperClassName} labelHidden={labelHidden}>
       <div className="relative flex min-w-0">
         {prefix ? (
-          <span className="tabular inline-flex shrink-0 items-center border border-r-0 border-control bg-raised px-3.5 text-step-0 text-ink-muted">
+          <span className="inline-flex shrink-0 items-center rounded-l-control border border-r-0 border-control bg-surface-1 px-3 font-mono text-data text-ink-muted">
             {prefix}
           </span>
         ) : null}
@@ -108,7 +112,7 @@ export function Input({
           aria-required={required || undefined}
           aria-invalid={error ? true : undefined}
           aria-describedby={fieldDescribedBy(fieldId, hint, error)}
-          className={cn(controlClass, readOnlyClass, size === "sm" ? "h-9 px-3 text-ui-sm" : "h-12 px-3.5", suffix ? "pr-11" : null, error ? controlErrorClass : null, className)}
+          className={cn(controlClass, readOnlyClass, size === "sm" ? "h-10 px-3 text-ui-sm" : "h-12 px-3.5", prefix ? "rounded-l-none" : null, mono ? dataInputClass : null, suffix ? "pr-11" : null, error ? controlErrorClass : null, className)}
           {...rest}
         />
         {suffix ? <span className="absolute inset-y-0 right-0 flex items-center">{suffix}</span> : null}
@@ -129,7 +133,7 @@ export function PasswordInput(props: Omit<InputProps, "type" | "suffix">) {
           onClick={() => setVisible((v) => !v)}
           aria-pressed={visible}
           aria-label={visible ? "Hide password" : "Show password"}
-          className="flex h-10 w-10 items-center justify-center text-ink-muted hover-device:hover:text-ink"
+          className="mr-1 flex h-10 w-10 cursor-pointer items-center justify-center rounded-control text-ink-muted hover-device:hover:text-ink"
         >
           {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
         </button>

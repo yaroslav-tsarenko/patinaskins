@@ -4,7 +4,7 @@ import { STORE_POLICY } from "@/config/store-policy";
 import { defaultLocale } from "@/i18n/config";
 import { formatPrice } from "@/lib/utils/format-price";
 import { OG_PALETTE as P, OG_SIZE, ogImageSource } from "@/lib/og/assets";
-import { BrassPlate, Packshot, Shelf, Wordmark, ogResponse, titleSize } from "@/lib/og/parts";
+import { Stage, Wordmark, ogResponse, titleSize } from "@/lib/og/parts";
 import { categoryStats, getCategoryTree } from "@/components/catalog/catalog-query";
 
 export const revalidate = 3600;
@@ -38,35 +38,23 @@ export default async function Image({ params }: { params: CategoryParams }) {
   const nameSize = titleSize(name, [[14, 92], [24, 76], [40, 62], [80, 50]]);
 
   return ogResponse(
-    <div style={{ display: "flex", width: "100%", height: "100%", background: P.chalk }}>
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1, height: "100%", padding: "64px 56px 60px 72px", color: P.ink }}>
-        <Wordmark size={44} color={P.ink} />
+    <div style={{ display: "flex", width: "100%", height: "100%", background: P.room, color: P.ink, padding: "64px 72px", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: 560 }}>
+        <Wordmark size={48} />
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontFamily: "Commissioner", fontWeight: 600, fontSize: 20, letterSpacing: 2.4, textTransform: "uppercase", color: P.inkMuted, marginBottom: 18 }}>{eyebrow}</div>
-          <div style={{ display: "block", fontFamily: "Gloock", fontSize: nameSize, lineHeight: 1.04, color: P.ink, lineClamp: 3, overflow: "hidden", maxHeight: nameSize * 1.04 * 3 + 4 }}>{name}</div>
+          <div style={{ display: "flex", fontFamily: "Martian Mono", fontSize: 20, letterSpacing: 2, textTransform: "uppercase", color: P.inkMuted, marginBottom: 16 }}>{eyebrow}</div>
+          <div style={{ display: "block", fontFamily: "Sofia Sans Condensed", fontWeight: 700, fontSize: nameSize, lineHeight: 1.02, color: P.ink, lineClamp: 3, overflow: "hidden", maxHeight: nameSize * 1.02 * 3 + 4 }}>{name}</div>
           {data && data.stats.count > 0 ? (
-            <div style={{ display: "flex", alignItems: "center", marginTop: 28, fontFamily: "Commissioner", fontSize: 28, color: P.inkMuted }}>
+            <div style={{ display: "flex", alignItems: "center", marginTop: 24, fontFamily: "Martian Mono", fontSize: 24, color: P.inkMuted }}>
               {t("ogItems", { count: data.stats.count })}
-              {data.stats.minPrice != null ? (
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: 1, height: 26, background: P.shelfHairline, margin: "0 20px" }} />
-                  {t("ogFrom", { price: formatPrice(data.stats.minPrice, STORE_POLICY.currency) })}
-                </div>
-              ) : null}
+              {data.stats.minPrice != null ? <div style={{ display: "flex", marginLeft: 20 }}>{t("ogFrom", { price: formatPrice(data.stats.minPrice, STORE_POLICY.currency) })}</div> : null}
             </div>
           ) : null}
         </div>
-        <div style={{ display: "flex" }}>
-          <BrassPlate fontSize={24} onPaint={false}>
-            {BRAND.domain}
-          </BrassPlate>
-        </div>
+        <div style={{ display: "flex", fontFamily: "Martian Mono", fontSize: 18, color: P.inkMuted }}>{BRAND.domain}</div>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", width: 560, height: "100%", padding: "0 48px 92px", background: P.stage }}>
-        <Packshot src={src} size={420} background={P.stage} />
-        <div style={{ display: "flex", marginTop: 6 }}>
-          <Shelf color={P.shelf} hairline={P.shelfHairline} />
-        </div>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Stage src={src} width={480} height={480} />
       </div>
     </div>,
     3600,

@@ -10,9 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-commissioner)", "Commissioner Variable", "Commissioner Fallback", "Segoe UI", "sans-serif"],
-        display: ["var(--font-gloock)", "Gloock", "Gloock Fallback", "Georgia", "serif"],
-        mono: ["ui-monospace", "SF Mono", "Menlo", "Consolas", "monospace"],
+        sans: ["var(--font-sans)"],
+        display: ["var(--font-display)"],
+        mono: ["var(--font-mono)"],
       },
       fontSize: {
         "step--1": "0.75rem",
@@ -48,17 +48,10 @@ const config: Config = {
         raised: "var(--color-raised)",
         stage: "var(--color-stage)",
         "on-stage": "var(--color-on-stage)",
-        paint: "var(--color-paint)",
-        plinth: "var(--color-plinth)",
         ink: {
           DEFAULT: "var(--color-text)",
           muted: "var(--color-text-secondary)",
           subtle: "var(--color-text-tertiary)",
-        },
-        "on-paint": {
-          DEFAULT: "var(--color-on-paint)",
-          muted: "var(--color-on-paint-muted)",
-          line: "var(--color-on-paint-line)",
         },
         brand: {
           DEFAULT: "var(--color-accent)",
@@ -68,16 +61,6 @@ const config: Config = {
         },
         "on-brand": "var(--color-on-accent)",
         sale: "var(--color-accent-3)",
-        brass: {
-          DEFAULT: "var(--color-brass)",
-          tint: "var(--color-brass-tint)",
-          "on-paint": "var(--color-brass-on-paint)",
-        },
-        "on-brass": "var(--color-on-brass)",
-        shelf: {
-          DEFAULT: "var(--color-shelf)",
-          hairline: "var(--color-shelf-hairline)",
-        },
         line: {
           DEFAULT: "var(--color-border)",
           hover: "var(--color-border-hover)",
@@ -113,7 +96,7 @@ const config: Config = {
         pill: "var(--radius-pill)",
       },
       transitionTimingFunction: {
-        furniture: "cubic-bezier(0.22, 1, 0.36, 1)",
+        instrument: "var(--ease-instrument)",
         std: "cubic-bezier(0.4, 0, 0.2, 1)",
         "in-out-strong": "cubic-bezier(0.76, 0, 0.24, 1)",
       },
@@ -124,7 +107,7 @@ const config: Config = {
         reveal: "900ms",
       },
       zIndex: {
-        "shelf-item": "1",
+        "tray-item": "1",
         sticky: "40",
         dropdown: "50",
         drawer: "60",
@@ -145,8 +128,8 @@ const config: Config = {
     heroui({
       layout: { radius: { small: "0px", medium: "0px", large: "0px" } },
       themes: {
-        light: { colors: { background: "#F1F3F2", foreground: "#2A1A15", primary: { DEFAULT: "#3B2620", foreground: "#F1F3F2" } } },
-        dark: { colors: { background: "#1D1613", foreground: "#F0EBE5", primary: { DEFAULT: "#EDE7DF", foreground: "#1D1613" } } },
+        light: { colors: { background: "#F6F6F5", foreground: "#141517", primary: { DEFAULT: "#141517", foreground: "#F6F6F5" } } },
+        dark: { colors: { background: "#0D0E10", foreground: "#ECEAE5", primary: { DEFAULT: "#ECEAE5", foreground: "#0D0E10" } } },
       },
     }),
   ],

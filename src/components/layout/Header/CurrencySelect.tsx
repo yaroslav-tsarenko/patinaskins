@@ -22,14 +22,14 @@ export function CurrencySelect({ size = "xs", className, showLabel = false }: { 
           value={currency}
           onChange={(e) => setCurrency(e.target.value as Currency)}
           className={cn(
-            "tabular cursor-pointer appearance-none border border-transparent bg-transparent text-ink transition-colors duration-[160ms]",
-            "hover-device:hover:border-control focus-visible:border-brand",
-            size === "xs" ? "h-7 pl-2 pr-7 text-ui-xs text-ink-muted hover-device:hover:text-ink" : "h-12 border-control bg-raised pl-3.5 pr-10 text-step-0",
+            "cursor-pointer appearance-none rounded-control border border-transparent bg-transparent font-mono text-ink transition-colors duration-[140ms]",
+            "hover-device:hover:border-control",
+            size === "xs" ? "h-9 pl-2.5 pr-7 text-[0.8125rem] text-ink-muted hover-device:hover:text-ink" : "h-11 border-control bg-raised pl-3.5 pr-10 text-data",
           )}
         >
           {CURRENCIES.map((code) => (
             <option key={code} value={code}>
-              {code} {SYMBOL[code]}
+              {size === "xs" ? code : `${code} ${SYMBOL[code]}`}
             </option>
           ))}
         </select>

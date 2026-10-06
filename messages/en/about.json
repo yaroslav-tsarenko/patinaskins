@@ -5,7 +5,7 @@
   "breadcrumb": "About",
   "hero": {
     "title": "A store for Counter-Strike 2 skins",
-    "lead": "{brand} sells weapon skins, knives and gloves for {game} to customers in the {countries}. We are a store, not a marketplace: you buy items from us, and each one is delivered to your Steam account by trade offer."
+    "lead": "{brand} sells weapon skins, knives and gloves for {game} to customers in the {countries}. You buy each skin from us, at the price shown, and we deliver it to your Steam account as a trade offer."
   },
   "range": {
     "title": "What we sell",
@@ -21,7 +21,7 @@
   "notSold": {
     "title": "What we don't do",
     "items": {
-      "marketplace": "Buy, list or exchange items from users. {brand} does not take items in.",
+      "marketplace": "Buy items from users or swap items with them. {brand} does not take items in.",
       "cases": "Sell cases, keys, stickers or agents.",
       "accounts": "Sell Steam accounts, or ask for your Steam password or Steam Guard codes.",
       "other": "Offer gambling, case openings or anything with a random outcome."
@@ -45,8 +45,8 @@
       "link": "Item guarantee"
     },
     "withdrawal": {
-      "label": "Withdrawal",
-      "body": "You can cancel for free until delivery begins. The {days}-day right of withdrawal ends once delivery has begun at your request.",
+      "label": "Cancelling",
+      "body": "You can cancel for free until delivery begins. The {days}-day right to cancel ends once delivery has begun at your request.",
       "link": "Refund policy"
     }
   },

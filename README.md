@@ -7,7 +7,7 @@ Storefront and admin for Patinaskins (patinaskins.com), a Counter-Strike 2 skins
 - Next.js 16 (App Router), TypeScript, Tailwind CSS 4
 - PostgreSQL with Prisma ORM 7 (`@prisma/adapter-pg`)
 - JWT session cookie plus Steam OpenID sign-in and account linking
-- Transfermit hosted card payments
+- Card payments behind a provider interface (`src/lib/payments`); no live provider connected yet
 - Item supplier: api.sih.market (catalogue, live price, purchase and delivery)
 - next-intl (messages in `messages/en/*.json`), Nodemailer, pdf-lib invoices
 
@@ -31,12 +31,36 @@ Data model: `Product` (storefront) ↔ `Skin` (public filter attributes: weapon 
 
 1. `POST /api/checkout` re-confirms each item's live supplier price. If a price rose beyond `SIH_PRICE_TOLERANCE`, the product is re-priced and the buyer sees the new total before paying (`TOTAL_CHANGED`).
 2. One `Order` is created with one `OrderItem` and one `SihOrder` (status `awaiting_payment`) per skin, plus the buyer's consent to immediate delivery (timestamp, text and version).
-3. The buyer pays on Transfermit's hosted page.
-4. `POST /api/webhooks/transfermit` (HMAC-verified) claims the order as paid once, checks the amount and currency, emails the confirmation and invoice, and submits each `SihOrder` to the supplier with a single-flight `paid → submitted` claim. Supplier failures park the item as `refund_pending` and raise a critical alert.
+3. The configured payment provider creates a payment for the exact charge total and the buyer is redirected to its payment page. The provider reference is stored as `Order.paymentId`.
+4. `POST /api/webhooks/payment/<provider>` verifies the webhook, re-fetches the payment state from the provider and passes that verified state to `settlePayment` (`src/lib/payment-settlement.ts`). Settlement checks the amount and currency for an exact match (anything else is held for review with a critical alert), claims the order as paid once, emails the confirmation and invoice, and submits each `SihOrder` to the supplier with a single-flight `paid → submitted` claim. Supplier failures park the item as `refund_pending` and raise a critical alert.
 5. `POST /api/webhooks/sih?secret=…` re-fetches the authoritative supplier state and moves items through `processing → sent → finished`, or `failed`/`rolled_back` → `refund_pending`.
 6. Refunds are operator-driven: `/admin/sih` lists the refund backlog with "Mark refunded".
 
 A bag can hold several skins; they are paid together and delivered item by item. Each item's status is visible on `/account/orders/[id]`, which also triggers a rate-limited refresh from the supplier while items are in flight.
+
+### Payments
+
+No card provider is connected yet. Everything provider-specific sits behind one interface in `src/lib/payments/provider.ts`:
+
+| Method | Contract |
+| --- | --- |
+| `createPayment({ order, amount, currency, returnUrl, cancelUrl, webhookUrl, customer })` | Creates the payment and returns `{ redirectUrl, providerRef }`. |
+| `parseWebhook(request)` | Verifies the signature and returns `{ providerRef, orderId, status, amount, currency }`, with `status` one of `paid`, `failed`, `pending`. Throws `PaymentWebhookError` to reject. |
+| `fetchStatus(providerRef)` | Returns the same shape straight from the provider's API. |
+
+`PAYMENT_PROVIDER` selects the provider:
+
+- `none` (default) — `available` is false. `POST /api/checkout` answers `503 { "code": "PAYMENTS_NOT_CONNECTED" }` before touching the supplier or creating an order, and checkout shows "Card payments are being connected. Nothing has been charged."
+- `mock` — local testing. Allowed only when `NODE_ENV` is not `production` and `PAYMENT_MOCK_ENABLED=true`; otherwise env validation fails and `src/instrumentation.ts` stops the server at startup. Checkout redirects to `/checkout/mock-pay` (404 in production), whose Pay / Fail buttons record the outcome and send an HMAC-signed webhook to `/api/webhooks/payment/mock`, so the whole paid → supplier → delivered path can be run against the supplier mock.
+
+The webhook route never settles from the payload alone: it always calls `fetchStatus` and settles from that answer. Settlement is idempotent, so repeated or late webhooks are safe.
+
+To connect a real provider:
+
+1. Add `src/lib/payments/<name>.ts` exporting a `PaymentProvider` with `id: "<name>"`. `createPayment` must charge exactly `amount` in `currency` and use `order.id` as the provider's merchant reference; `fetchStatus` must return the amount and currency the provider actually captured, or settlement holds the order for review.
+2. Add its variables to `src/lib/env.ts` (validated with zod like the others) and to `.env.example`.
+3. Add `"<name>"` to `PAYMENT_PROVIDER_IDS` in `src/lib/env.ts` and register the provider in the `PROVIDERS` map in `src/lib/payments/provider.ts`.
+4. Set `PAYMENT_PROVIDER=<name>` and register `https://<your-domain>/api/webhooks/payment/<name>` with the provider if it does not take a per-payment webhook URL.
 
 ### Crons
 
@@ -73,4 +97,4 @@ npm run dev
 
 ## Deployment
 
-Deploy on Vercel with the variables from `.env.example`. Set `APP_URL` and `NEXT_PUBLIC_SITE_URL` to the main domain; the `*.vercel.app` address should redirect there so Steam sign-in and payment returns never show the technical URL. After the first deploy run `npm run sih:webhook` once with production variables.
+Deploy on Vercel with the variables from `.env.example`. Set `APP_URL` and `NEXT_PUBLIC_SITE_URL` to the main domain; the `*.vercel.app` address should redirect there so Steam sign-in, payment returns and payment webhooks never use the technical URL. After the first deploy run `npm run sih:webhook` once with production variables.

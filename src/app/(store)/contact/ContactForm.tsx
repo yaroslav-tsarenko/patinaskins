@@ -59,22 +59,21 @@ export function ContactForm({ replyTime, prefilledOrder, prefilledTopic = "" }: 
 
   if (sentTo) {
     return (
-      <div ref={statusRef} tabIndex={-1} role="status" className="bg-raised p-6 outline-none sm:p-8">
-        <h2 className="m-0 font-display text-step-2 leading-[1.2] text-ink">{t("successTitle")}</h2>
+      <div ref={statusRef} tabIndex={-1} role="status" className="rounded-control bg-raised p-6 shadow-[inset_2px_0_0_var(--color-success)] outline-none sm:p-8">
+        <h2 className="m-0 text-step-2 font-semibold leading-[1.12] text-ink">{t("successTitle")}</h2>
         <p className="mt-3 text-step-0 leading-[1.6] text-ink">{t("success", { email: sentTo, replyTime })}</p>
         <div className="mt-6">
           <Button variant="outline" onPress={() => setSentTo(null)}>
             {t("sendAnother")}
           </Button>
         </div>
-        <span aria-hidden="true" className="shelf-rule -mx-6 -mb-6 mt-8 sm:-mx-8 sm:-mb-8" />
       </div>
     );
   }
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} aria-labelledby="contact-form-title" className="flex flex-col gap-6">
-      <h2 id="contact-form-title" className="m-0 font-display text-step-2 leading-[1.2] text-ink">
+      <h2 id="contact-form-title" className="m-0 text-step-2 font-semibold leading-[1.12] text-ink">
         {t("formTitle")}
       </h2>
 

@@ -11,8 +11,8 @@
   "noResults": "Nothing matches your search",
   "viewAll": "View all",
   "backTo": "Back to {page}",
-  "addedToCart": "Added to bag",
-  "removedFromCart": "Removed from bag",
+  "addedToCart": "Added to cart",
+  "removedFromCart": "Removed from cart",
   "savedChanges": "Changes saved",
   "copiedToClipboard": "Copied"
 }

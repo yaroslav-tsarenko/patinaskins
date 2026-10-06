@@ -50,7 +50,7 @@
     "policiesRequired": "Tick the box to accept the Terms and Conditions and the Refund policy.",
     "emailTaken": "An account with this email already exists. Sign in or reset your password.",
     "currentPasswordWrong": "Your current password is not correct.",
-    "cartEmpty": "Your bag is empty.",
+    "cartEmpty": "Your cart is empty.",
     "waiverRequired": "Tick the box to ask us to start delivery straight away. We cannot deliver the item without it."
   }
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
-import { CredentialPlaque } from "@/components/layout/Footer/Footer";
+import { CredentialsSheet } from "@/components/layout/Credentials/CredentialsSheet";
 import { POLICY_FACTS as F } from "@/lib/policy-facts";
 import { ContactForm } from "./ContactForm";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -33,15 +33,15 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-0">
         <div className="lg:col-span-5">
-          <h1 className="m-0 font-display text-step-5 leading-[1.02] tracking-[-0.01em] text-ink">{t("title")}</h1>
+          <h1 className="m-0 text-step-5 font-[650] leading-none tracking-[-0.01em] text-ink">{t("title")}</h1>
           <p className="measure mt-5 text-step-1 leading-[1.5] text-ink-muted">{t("promise", VALUES)}</p>
 
           <div className="mt-10">
-            <CredentialPlaque stacked />
+            <CredentialsSheet stacked />
           </div>
 
           <div className="mt-10 border-t border-line pt-6 text-step-0 leading-[1.6] [&_a]:text-ink [&_a]:underline [&_a]:decoration-1 [&_a]:underline-offset-4 hover-device:[&_a:hover]:decoration-2">
-            <p className="m-0 font-medium text-ink">{t("orderQuestions")}</p>
+            <p className="m-0 font-semibold text-ink">{t("orderQuestions")}</p>
             <p className="mt-2 text-ink-muted">{t.rich("orderLinks", linkTags)}</p>
             <p className="mt-2 text-ink-muted">{t.rich("faqLink", linkTags)}</p>
           </div>

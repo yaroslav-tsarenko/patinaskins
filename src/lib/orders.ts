@@ -1,3 +1,4 @@
+import type { SkinSummary } from "@/lib/skins/cs2";
 import { STORE_POLICY } from "@/config/store-policy";
 import { computeTotals, rateConverter, type Totals } from "@/lib/pricing";
 import { countryName } from "@/lib/countries";
@@ -101,7 +102,13 @@ export function addressLines(address: StoredAddress | null | undefined): string[
 export const ORDER_VIEW_INCLUDE = {
   items: {
     include: {
-      product: { select: { slug: true, images: { take: 1, orderBy: { sortOrder: "asc" as const }, select: { url: true } } } },
+      product: {
+        select: {
+          slug: true,
+          images: { take: 1, orderBy: { sortOrder: "asc" as const }, select: { url: true } },
+          skin: { select: { weaponType: true, weapon: true, skinName: true, rarity: true, rarityColor: true, exterior: true, floatMin: true, floatMax: true, isStatTrak: true, isSouvenir: true, collection: true, phase: true } },
+        },
+      },
       sihOrder: {
         select: {
           status: true,
@@ -196,7 +203,7 @@ interface OrderViewSource extends OrderAmountsSource {
     variantName: string | null;
     quantity: number;
     price: Numeric;
-    product?: { slug: string; images: { url: string }[] } | null;
+    product?: { slug: string; images: { url: string }[]; skin?: SkinSummary | null } | null;
     sihOrder?: Parameters<typeof itemDelivery>[0];
   }[];
 }
@@ -224,6 +231,7 @@ export function orderView(order: OrderViewSource) {
       total: totals.lines[index]?.total ?? 0,
       slug: item.product?.slug ?? null,
       imageUrl: item.product?.images[0]?.url ?? null,
+      skin: item.product?.skin ?? null,
       delivery: itemDelivery(item.sihOrder),
     })),
     delivery,

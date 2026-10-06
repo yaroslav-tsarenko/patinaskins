@@ -79,12 +79,17 @@ export function Tabs({ items, defaultId, value, onChange, label, accordionBelow 
               onClick={() => select(item.id)}
               onKeyDown={(e) => onKeyDown(e, index)}
               className={cn(
-                "relative h-12 shrink-0 cursor-pointer whitespace-nowrap text-step-0 font-medium transition-colors duration-[160ms]",
+                "label-caps relative h-12 shrink-0 cursor-pointer whitespace-nowrap text-[0.9375rem] transition-colors duration-[140ms]",
                 selected ? "text-ink" : "text-ink-muted hover-device:hover:text-ink",
               )}
             >
               {item.label}
-              {selected ? <span aria-hidden="true" className="shelf-rule-solid absolute inset-x-0 bottom-[3px]" /> : null}
+              {selected ? (
+                <>
+                  <span aria-hidden="true" className="absolute inset-x-0 -bottom-px h-px bg-rule" />
+                  <span aria-hidden="true" className="absolute -bottom-px left-0 h-0.5 w-6 bg-brand" />
+                </>
+              ) : null}
             </button>
           );
         })}

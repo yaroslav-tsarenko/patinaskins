@@ -14,7 +14,7 @@
       "items": {
         "place": {
           "q": "How do I place an order?",
-          "a": "Sign in, link your Steam account and save your trade URL. Add items to your bag, go to checkout, enter your contact and billing details, tick the two confirmation boxes and pay on our payment provider's secure page. We email your order confirmation once the payment is confirmed."
+          "a": "Sign in, link your Steam account and save your trade URL. Add items to your cart, go to checkout, enter your contact and billing details, tick the two confirmation boxes and pay on our payment provider's secure page. We email your order confirmation once the payment is confirmed."
         },
         "account": {
           "q": "Do I need an account to order?",
@@ -30,7 +30,7 @@
         },
         "change": {
           "q": "Can I cancel my order?",
-          "a": "You can cancel free of charge before {cancelBefore}. Email {email} with your order number. Once delivery has begun, the right of withdrawal no longer applies, as explained in our <returns>Refund policy</returns>."
+          "a": "You can cancel free of charge before {cancelBefore}. Email {email} with your order number. Once delivery has begun, the right to cancel no longer applies, as explained in our <returns>Refund policy</returns>."
         },
         "noEmail": {
           "q": "I paid but did not get a confirmation email.",
@@ -76,7 +76,7 @@
         },
         "withdrawal": {
           "q": "Can I return an item I no longer want?",
-          "a": "Before delivery begins you can cancel for free. At checkout you ask us to start delivery straight away and confirm that you lose the {withdrawalDays}-day right of withdrawal once delivery begins, so delivered items cannot be returned for a change of mind."
+          "a": "Before delivery begins you can cancel for free. At checkout you ask us to start delivery straight away and confirm that you lose the {withdrawalDays}-day right to cancel once delivery begins, so delivered items cannot be returned for a change of mind."
         },
         "refund": {
           "q": "How long does a refund take?",

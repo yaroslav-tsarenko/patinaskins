@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "./Button";
-import { Plate } from "./Plate";
 import { Alert } from "./Alert";
 
 export interface StepperStep {
@@ -18,7 +18,7 @@ export interface StepperErrorSummary {
   message?: string;
 }
 
-export interface DrawerStepperProps {
+export interface StepperProps {
   steps: StepperStep[];
   current: number;
   label: string;
@@ -34,7 +34,7 @@ export interface DrawerStepperProps {
   className?: string;
 }
 
-export function DrawerStepper({
+export function Stepper({
   steps,
   current,
   label,
@@ -48,17 +48,15 @@ export function DrawerStepper({
   errorSummary,
   hideActions,
   className,
-}: DrawerStepperProps) {
+}: StepperProps) {
   const baseId = useId();
   const headingRefs = useRef<(HTMLHeadingElement | null)[]>([]);
   const summaryRef = useRef<HTMLDivElement>(null);
-  const mounted = useRef(false);
+  const previous = useRef(current);
 
   useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return;
-    }
+    if (previous.current === current) return;
+    previous.current = current;
     headingRefs.current[current]?.focus();
   }, [current]);
 
@@ -74,21 +72,24 @@ export function DrawerStepper({
       <p aria-live="polite" className="sr-only">
         {active ? `Step ${current + 1} of ${steps.length}, ${active.title}` : ""}
       </p>
-      <ol aria-label={label} className="m-0 list-none border-t border-line p-0">
+      <ol aria-label={label} className="m-0 list-none p-0">
         {steps.map((step, index) => {
           const state = index < current ? "complete" : index === current ? "current" : "upcoming";
           const open = state === "current";
+          const last = index === steps.length - 1;
           return (
-            <li
-              key={step.id}
-              data-drawer=""
-              data-state={state}
-              aria-current={open ? "step" : undefined}
-              className="border-b border-line"
-            >
-              <div className="flex min-h-14 flex-wrap items-center gap-x-4 gap-y-2 py-3 sm:min-h-16">
-                <span aria-hidden="true" className={cn("tabular w-7 shrink-0 font-display text-step-2 leading-none", state === "upcoming" ? "text-ink-subtle" : "text-ink")}>
-                  {index + 1}
+            <li key={step.id} data-step-state={state} aria-current={open ? "step" : undefined} className="relative">
+              {!last ? <span aria-hidden="true" className="absolute bottom-0 left-4 top-8 w-px bg-line" /> : null}
+              <div className="relative flex min-h-14 flex-wrap items-center gap-x-4 gap-y-1 py-3 sm:min-h-16">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "relative z-[1] flex size-8 shrink-0 items-center justify-center rounded-control font-mono text-[1rem] font-semibold",
+                    state === "current" ? "bg-brand text-on-brand" : "bg-surface-1 text-ink",
+                    state === "upcoming" && "text-ink-subtle",
+                  )}
+                >
+                  {state === "complete" ? <Check size={16} strokeWidth={2} /> : index + 1}
                 </span>
                 <h2
                   ref={(node) => {
@@ -97,44 +98,32 @@ export function DrawerStepper({
                   tabIndex={open ? -1 : undefined}
                   id={`${baseId}-${step.id}-title`}
                   className={cn(
-                    "m-0 min-w-0 flex-1 font-sans text-step-1 font-semibold tracking-normal focus-visible:outline-offset-4 max-sm:min-w-[55%]",
+                    "m-0 min-w-0 flex-1 font-display text-step-2 font-semibold leading-[1.1] outline-none",
                     state === "upcoming" ? "text-ink-subtle" : "text-ink",
                   )}
                 >
                   <span className="sr-only">Step {index + 1}: </span>
                   {step.title}
                 </h2>
-                {state === "complete" ? (
-                  <span className="flex min-w-0 max-w-full items-center gap-4 pl-11 sm:pl-0">
-                    {step.summary ? (
-                      <Plate variant="brass" className="max-w-[min(60vw,320px)]">
-                        {step.summary}
-                      </Plate>
-                    ) : null}
-                    {onEdit ? (
-                      <button
-                        type="button"
-                        onClick={() => onEdit(index)}
-                        className="min-h-11 cursor-pointer text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4 hover-device:hover:decoration-2"
-                      >
-                        Change<span className="sr-only"> {step.title}</span>
-                      </button>
-                    ) : null}
-                  </span>
+                {state === "complete" && onEdit ? (
+                  <button
+                    type="button"
+                    onClick={() => onEdit(index)}
+                    className="min-h-11 cursor-pointer text-ui-md font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline"
+                  >
+                    Change<span className="sr-only"> {step.title}</span>
+                  </button>
                 ) : null}
-                {state === "upcoming" ? <Plate variant="neutral">Next</Plate> : null}
+                {state === "complete" && step.summary ? <p className="m-0 w-full pl-12 text-ui-sm text-ink-muted">{step.summary}</p> : null}
               </div>
               <div
                 inert={!open}
                 aria-labelledby={`${baseId}-${step.id}-title`}
                 role="group"
-                className={cn(
-                  "grid transition-[grid-template-rows] duration-[260ms] ease-[var(--ease-furniture)]",
-                  open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-                )}
+                className={cn("grid transition-[grid-template-rows] duration-[200ms] ease-[var(--ease-instrument)]", open ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}
               >
-                <div className="min-h-0 overflow-hidden">
-                  <div className="bg-raised px-4 py-6 sm:px-6">
+                <div className="relative min-h-0 overflow-hidden">
+                  <div className="pb-8 pl-12 pt-2">
                     {open && errorSummary && errorSummary.fields.length > 0 ? (
                       <div ref={summaryRef} tabIndex={-1} className="mb-6 focus-visible:outline-offset-2">
                         <Alert tone="danger" title={errorSummary.message ?? `Check ${errorSummary.fields.length} ${errorSummary.fields.length === 1 ? "field" : "fields"}`}>
@@ -173,7 +162,6 @@ export function DrawerStepper({
                       </div>
                     ) : null}
                   </div>
-                  <span aria-hidden="true" className="shelf-rule" />
                 </div>
               </div>
             </li>

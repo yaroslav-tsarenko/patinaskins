@@ -5,6 +5,7 @@ import { hasEnv } from "@/lib/env";
 import { getBaseUrl } from "@/lib/steam";
 import { clientIp, consumeRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { createSkinCheckout, SkinCheckoutError } from "@/lib/sih/checkout";
+import { getPaymentProvider, PaymentUnavailableError } from "@/lib/payments/provider";
 import { checkoutRequestSchema } from "@/lib/validators/checkout";
 import { composePhone } from "@/lib/validators/fields";
 import { dialCodeFor } from "@/lib/countries";
@@ -19,7 +20,11 @@ export async function POST(request: NextRequest) {
     const limited = rateLimitResponse(consumeRateLimit("checkout", user.id));
     if (limited) return limited;
 
-    if (!hasEnv("TRANSFERMIT_API_KEY", "SIH_API_KEY")) {
+    const provider = getPaymentProvider();
+    if (!provider.available) {
+      return NextResponse.json({ code: "PAYMENTS_NOT_CONNECTED" }, { status: 503 });
+    }
+    if (!hasEnv("SIH_API_KEY")) {
       return NextResponse.json({ code: "PAYMENT_UNAVAILABLE" }, { status: 503 });
     }
 
@@ -48,6 +53,9 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ orderId: result.orderId, paymentLink: result.paymentUrl }, { status: 201 });
   } catch (error) {
+    if (error instanceof PaymentUnavailableError) {
+      return NextResponse.json({ code: error.code }, { status: 503 });
+    }
     if (error instanceof SkinCheckoutError) {
       return NextResponse.json({ code: error.code, ...error.details }, { status: error.status });
     }

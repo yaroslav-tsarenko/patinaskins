@@ -1,34 +1,33 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ShelfGrid, ShelfGridSkeleton, ShelfTile, type ShelfProduct } from "@/components/product/ShelfTile/ShelfTile";
+import { SkinGrid, SkinGridSkeleton, SkinTray, type SkinProduct } from "@/components/skin/SkinTray";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
-import { Plate } from "@/components/ui/Plate";
 import { AccountPageHeader } from "./AccountSidebar/AccountSidebar";
 import { useAccountData } from "./useAccountData";
 import { LoadError } from "./LoadError";
 
 export function SavedItems() {
   const t = useTranslations("account.saved");
-  const { data, error, loading, reload } = useAccountData<{ product: ShelfProduct }[]>("/api/wishlist");
+  const { data, error, loading, reload } = useAccountData<{ product: SkinProduct }[]>("/api/wishlist");
   const products = (data ?? []).map((item) => item.product).filter(Boolean);
   const count = loading ? null : products.length;
 
   return (
     <div>
-      <AccountPageHeader title={t("title")} aside={count ? <Plate variant="neutral">{count}</Plate> : null} />
+      <AccountPageHeader title={t("title")} aside={count ? <span className="font-mono text-data text-ink-muted">{count}</span> : null} />
       {loading ? (
-        <ShelfGridSkeleton count={3} dense />
+        <SkinGridSkeleton count={3} columns={3} />
       ) : error ? (
         <LoadError onRetry={reload} />
       ) : products.length === 0 ? (
-        <EmptyState title={t("emptyTitle")} subtitle={t("emptyBody")} actionLabel={t("browse")} actionHref="/catalog" align="start" className="border-t border-line px-0 py-10" />
+        <EmptyState title="Nothing saved yet" subtitle={t("emptyBody")} actionLabel="Browse all skins" actionHref="/catalog" align="start" className="border-t border-line px-0 py-10" />
       ) : (
-        <ShelfGrid dense>
+        <SkinGrid columns={3}>
           {products.map((product) => (
-            <ShelfTile key={product.id} product={product} headingLevel={2} />
+            <SkinTray key={product.id} product={product} headingLevel={2} />
           ))}
-        </ShelfGrid>
+        </SkinGrid>
       )}
     </div>
   );

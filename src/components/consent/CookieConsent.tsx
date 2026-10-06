@@ -11,8 +11,8 @@ import { COOKIE_CATEGORIES, COOKIE_TABLE, type CookieCategory } from "@/config/c
 import { onOpenCookieSettings, useConsent, writeConsent } from "@/lib/consent";
 
 const bannerButton = cn(
-  "bevel-outline bevel-sm inline-flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center px-4 text-ui-sm font-semibold text-on-paint sm:flex-none sm:px-5",
-  "before:bg-on-paint hover-device:hover:after:bg-on-paint-line active:translate-y-px",
+  "label-caps inline-flex h-9 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-control border border-control px-3 text-[0.875rem] text-ink transition-colors duration-[140ms] touch-device:h-11",
+  "hover-device:hover:border-ink hover-device:hover:bg-surface-1 active:translate-y-px",
 );
 
 function CookieList({ category }: { category: CookieCategory }) {
@@ -26,30 +26,30 @@ function CookieList({ category }: { category: CookieCategory }) {
         aria-expanded={open}
         aria-controls={`${id}-list`}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4 hover-device:hover:decoration-2"
+        className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 text-ui-sm font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline"
       >
         {open ? "Hide cookies" : "Show cookies"}
-        <ChevronDown size={16} aria-hidden="true" className={cn("transition-transform duration-[260ms]", open && "rotate-180")} />
+        <ChevronDown size={16} aria-hidden="true" className={cn("transition-transform duration-[200ms]", open && "rotate-180")} />
       </button>
-      <div id={`${id}-list`} inert={!open} className={cn("grid transition-[grid-template-rows] duration-[260ms] ease-[var(--ease-furniture)]", open ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
-        <div className="min-h-0 overflow-hidden">
+      <div id={`${id}-list`} inert={!open} className={cn("grid transition-[grid-template-rows] duration-[200ms] ease-[var(--ease-instrument)]", open ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
+        <div className="relative min-h-0 overflow-hidden">
           {rows.length === 0 ? (
             <p className="meta pt-2 text-ink-muted">None in use. We will list them here before any are added.</p>
           ) : (
             <div className="pt-2">
-              <table className="w-full table-fixed border-collapse text-left text-ui-xs">
+              <table className="w-full table-fixed border-collapse text-left text-ui-sm">
                 <thead>
-                  <tr className="border-b border-line text-ink-muted">
-                    <th scope="col" className="w-[32%] py-2 pr-3 font-medium">Name</th>
-                    <th scope="col" className="w-[18%] py-2 pr-3 font-medium max-sm:hidden">Provider</th>
-                    <th scope="col" className="py-2 pr-3 font-medium">Purpose</th>
-                    <th scope="col" className="w-[20%] py-2 font-medium">Expiry</th>
+                  <tr className="border-b border-rule text-ink-muted">
+                    <th scope="col" className="eyebrow w-[32%] py-2 pr-3">Name</th>
+                    <th scope="col" className="eyebrow w-[18%] py-2 pr-3 max-sm:hidden">Provider</th>
+                    <th scope="col" className="eyebrow py-2 pr-3">Purpose</th>
+                    <th scope="col" className="eyebrow w-[20%] py-2">Expiry</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.name} className="border-b border-line align-top">
-                      <td className="py-2 pr-3 font-mono text-ink [overflow-wrap:anywhere]">
+                      <td className="py-2 pr-3 font-mono text-[0.75rem] text-ink [overflow-wrap:anywhere]">
                         {row.name}
                         <span className="block font-sans text-ink-muted">{row.kind}</span>
                       </td>
@@ -102,17 +102,16 @@ export function CookieConsent() {
           role="region"
           aria-label="Cookie consent"
           data-print-hide=""
-          className="on-paint fixed inset-x-0 bottom-[var(--sticky-bar-offset,0px)] z-90 bg-paint text-on-paint animate-rise-in"
+          className="fixed bottom-[calc(var(--sticky-bar-offset,0px)+16px)] left-4 right-4 z-90 animate-rise-in rounded-control bg-raised p-5 text-ink shadow-lg sm:right-auto sm:w-[440px]"
         >
-          <span aria-hidden="true" className="block h-[2px] bg-shelf" />
-          <div className="mx-auto flex max-w-container flex-col gap-4 px-gutter py-4 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
-            <p className="max-w-[78ch] text-ui-sm leading-[1.5]">
-              We use necessary cookies to run the store, and optional analytics and marketing cookies only if you allow them.{" "}
-              <Link href="/policies/cookies" className="font-semibold text-brass-on-paint underline underline-offset-4">
+          <div className="flex flex-col gap-4">
+            <p className="m-0 text-ui-md leading-[1.5]">
+              We use necessary cookies to run the store. Analytics and marketing cookies load only if you allow them.{" "}
+              <Link href="/policies/cookies" className="font-semibold text-ink underline decoration-1 underline-offset-4">
                 Cookie policy
               </Link>
             </p>
-            <div className="flex w-full shrink-0 gap-2 sm:w-auto sm:gap-3">
+            <div className="flex w-full gap-2">
               <button type="button" className={bannerButton} onClick={() => decide({ analytics: true, marketing: true })}>
                 Accept all
               </button>
@@ -151,7 +150,7 @@ export function CookieConsent() {
             const locked = category.id === "necessary";
             const checked = locked ? true : draft[category.id as "analytics" | "marketing"];
             return (
-              <div key={category.id} data-drawer="" className="border-b border-line py-5">
+              <div key={category.id} className="border-b border-line py-5">
                 <Switch
                   label={category.title}
                   description={category.purpose}

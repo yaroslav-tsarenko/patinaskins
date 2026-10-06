@@ -5,24 +5,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Sheet } from "@/components/ui/Dialog";
-import { Cubby, type ShelfProduct } from "@/components/product/ShelfTile/ShelfTile";
+import { SkinRow, type SkinProduct } from "@/components/skin/SkinTray";
 import { PriceDisplay } from "@/components/shared/PriceDisplay/PriceDisplay";
-import { ShelfLoader } from "@/components/ui/ShelfLoader";
+import { NAV_CATEGORIES } from "@/config/navigation";
+import { ReadoutLoader } from "@/components/ui/ReadoutLoader";
 import { subtreeCount, type CategoryNode } from "@/lib/hooks/useCategoryTree";
 import { cn } from "@/lib/utils/cn";
 
-const SUGGESTED = [
-  { slug: "knives", name: "Knives" },
-  { slug: "gloves", name: "Gloves" },
-  { slug: "rifles", name: "Rifles" },
-];
 
 function flatten(categories: CategoryNode[]): CategoryNode[] {
   return categories.flatMap((c) => [c, ...flatten(c.children ?? [])]);
 }
 
 type Option =
-  | { kind: "product"; id: string; href: string; product: ShelfProduct }
+  | { kind: "product"; id: string; href: string; product: SkinProduct }
   | { kind: "category"; id: string; href: string; category: CategoryNode }
   | { kind: "all"; id: string; href: string; total: number };
 
@@ -31,7 +27,7 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
   const baseId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{ q: string; products: ShelfProduct[]; total: number } | null>(null);
+  const [results, setResults] = useState<{ q: string; products: SkinProduct[]; total: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const trimmed = query.trim();
@@ -48,7 +44,7 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
     const timer = window.setTimeout(() => {
       fetch(`/api/products?search=${encodeURIComponent(trimmed)}&pageSize=6`, { signal: controller.signal })
         .then((r) => r.json())
-        .then((data: { data?: ShelfProduct[]; total?: number }) => {
+        .then((data: { data?: SkinProduct[]; total?: number }) => {
           setResults({ q: trimmed, products: data.data ?? [], total: data.total ?? 0 });
           setActiveIndex(-1);
         })
@@ -110,13 +106,13 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
   const cats = options.filter((o): o is Extract<Option, { kind: "category" }> => o.kind === "category");
   const all = options.find((o): o is Extract<Option, { kind: "all" }> => o.kind === "all");
   const empty = results && results.products.length === 0 && matchedCategories.length === 0;
-  const optionCls = (id: string) => cn("block w-full cursor-pointer", options[activeIndex]?.id === id && "bg-brand-soft");
+  const optionCls = (id: string) => cn("block w-full cursor-pointer rounded-control", options[activeIndex]?.id === id && "bg-brand-soft shadow-[inset_2px_0_0_var(--color-accent)]");
 
   return (
-    <Sheet open={open} onClose={close} side="top" label="Search" initialFocus={inputRef} motion="drawer-down">
+    <Sheet open={open} onClose={close} side="top" label="Search" initialFocus={inputRef}>
       <div className="mx-auto flex max-h-[80vh] max-w-container flex-col px-gutter pb-6 pt-5">
-        <div className="flex items-center gap-3 border-b-2 border-shelf pb-3">
-          <Search size={24} aria-hidden="true" className="shrink-0 text-ink-muted" />
+        <div className="flex items-center gap-3 border-b border-rule pb-3">
+          <Search size={20} aria-hidden="true" className="shrink-0 text-ink-muted" />
           <input
             ref={inputRef}
             type="search"
@@ -125,16 +121,17 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
             aria-controls={listboxId}
             aria-autocomplete="list"
             aria-activedescendant={activeIndex >= 0 ? options[activeIndex]?.id : undefined}
-            aria-label="Search the shop"
-            placeholder="Search AK-47, Karambit, Asiimov…"
+            aria-label="Search skins"
+            placeholder="Search skins: AK-47 Redline, Karambit Fade…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             className="h-14 min-w-0 flex-1 bg-transparent text-step-2 text-ink placeholder:text-ink-subtle focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
           />
-          {loading ? <ShelfLoader label="Searching" /> : null}
-          <button type="button" onClick={close} className="min-h-11 shrink-0 cursor-pointer text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4">
+          {loading ? <ReadoutLoader label="Searching" /> : null}
+          <button type="button" onClick={close} className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 text-ui-md font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline">
             Close
+            <kbd className="rounded-[1px] border border-line px-1.5 font-mono text-[0.6875rem] font-normal leading-[1.3] text-ink-muted max-sm:hidden">Esc</kbd>
           </button>
         </div>
 
@@ -142,7 +139,7 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
           <div id={listboxId} role="listbox" aria-label="Search suggestions" className={cn(options.length === 0 && "hidden")}>
             {products.length > 0 ? (
               <div role="group" aria-labelledby={`${baseId}-products`} className="pt-5">
-                <p id={`${baseId}-products`} className="eyebrow pb-2 text-ink-muted">Products</p>
+                <p id={`${baseId}-products`} className="eyebrow m-0 pb-2">Skins</p>
                 <div className="grid gap-x-8 sm:grid-cols-2">
                   {products.map((o) => (
                     <div
@@ -152,11 +149,9 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
                       aria-selected={options[activeIndex]?.id === o.id}
                       onClick={() => go(o.href)}
                       onPointerEnter={() => setActiveIndex(options.indexOf(o))}
-                      className={cn(optionCls(o.id), "flex items-center gap-4 border-b border-line py-2.5 pr-2")}
+                      className={cn(optionCls(o.id), "border-b border-line px-2 py-2.5")}
                     >
-                      <Cubby src={o.product.images?.[0]?.url} alt="" size="thumb" sizes="48px" className="w-12 shrink-0" />
-                      <span className="line-clamp-2 min-w-0 flex-1 text-ui-sm font-medium text-ink">{o.product.name}</span>
-                      <PriceDisplay price={Number(o.product.price)} comparePrice={o.product.comparePrice ? Number(o.product.comparePrice) : null} size="sm" className="shrink-0" />
+                      <SkinRow name={o.product.name} imageUrl={o.product.images?.[0]?.url} skin={o.product.skin} showRarity={false} headingLevel={3} aside={<PriceDisplay price={Number(o.product.price)} size="sm" />} />
                     </div>
                   ))}
                 </div>
@@ -164,7 +159,7 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
             ) : null}
             {cats.length > 0 ? (
               <div role="group" aria-labelledby={`${baseId}-cats`} className="pt-6">
-                <p id={`${baseId}-cats`} className="eyebrow pb-2 text-ink-muted">Categories</p>
+                <p id={`${baseId}-cats`} className="eyebrow m-0 pb-2">Weapons</p>
                 <div className="flex flex-wrap gap-x-6 gap-y-1">
                   {cats.map((o) => (
                     <div
@@ -174,10 +169,10 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
                       aria-selected={options[activeIndex]?.id === o.id}
                       onClick={() => go(o.href)}
                       onPointerEnter={() => setActiveIndex(options.indexOf(o))}
-                      className={cn(optionCls(o.id), "inline-flex w-auto min-h-11 items-center gap-2 px-1 text-ui-sm text-ink underline decoration-1 underline-offset-4")}
+                      className={cn(optionCls(o.id), "inline-flex w-auto min-h-11 items-center gap-2 px-2 font-display text-[1rem] font-semibold text-ink")}
                     >
                       {o.category.name}
-                      <span className="tabular meta text-ink-subtle no-underline">{subtreeCount(o.category)}</span>
+                      <span className="font-mono text-[0.75rem] font-normal text-ink-subtle">· {subtreeCount(o.category)}</span>
                     </div>
                   ))}
                 </div>
@@ -191,9 +186,9 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
                   aria-selected={options[activeIndex]?.id === all.id}
                   onClick={() => go(all.href)}
                   onPointerEnter={() => setActiveIndex(options.indexOf(all))}
-                  className={cn(optionCls(all.id), "inline-flex w-auto min-h-11 items-center px-1 text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4")}
+                  className={cn(optionCls(all.id), "inline-flex w-auto min-h-11 items-center px-2 text-ui-md font-semibold text-ink underline decoration-1 underline-offset-4")}
                 >
-                  See all {all.total} results
+                  See all {all.total.toLocaleString("en-GB")} results
                 </div>
               </div>
             ) : null}
@@ -201,12 +196,12 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
 
           {empty ? (
             <div className="pt-6" role="status">
-              <p className="text-step-1 text-ink">Nothing matches &lsquo;{results?.q}&rsquo;.</p>
-              <p className="mt-2 text-ui-sm text-ink-muted">Try a broader word, or start from a category:</p>
+              <p className="m-0 text-step-1 text-ink">Nothing matches &ldquo;{results?.q}&rdquo;.</p>
+              <p className="m-0 mt-2 text-ui-md text-ink-muted">Try a weapon name, or start from a weapon type:</p>
               <ul className="m-0 mt-3 flex list-none flex-wrap gap-x-6 gap-y-2 p-0">
-                {SUGGESTED.map((c) => (
+                {NAV_CATEGORIES.map((c) => (
                   <li key={c.slug}>
-                    <Link href={`/catalog/${c.slug}`} onClick={close} className="text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4">
+                    <Link href={`/catalog/${c.slug}`} onClick={close} className="text-ui-md font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline">
                       {c.name}
                     </Link>
                   </li>

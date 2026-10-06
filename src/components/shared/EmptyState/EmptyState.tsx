@@ -20,14 +20,8 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export function EmptyShelf({ className }: { className?: string }) {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 120 28" className={cn("h-7 w-[120px] text-shelf", className)} fill="none">
-      <path d="M8 4v16M112 4v16" stroke="var(--color-text-secondary)" strokeWidth="1" />
-      <rect x="0" y="20" width="120" height="2" fill="currentColor" />
-      <rect x="0" y="25" width="120" height="1" fill="var(--color-shelf-hairline)" />
-    </svg>
-  );
+export function EmptyBay({ className }: { className?: string }) {
+  return <div aria-hidden="true" data-stage="" data-lamp="on" className={cn("stage h-[120px] w-[160px] rounded-tray", className)} />;
 }
 
 export function EmptyState({
@@ -46,9 +40,9 @@ export function EmptyState({
   const Heading = `h${headingLevel}` as "h1" | "h2" | "h3";
   const centered = align === "center";
   return (
-    <div className={cn("flex flex-col gap-4 px-4 py-16", centered ? "items-center text-center" : "items-start", className)}>
-      <EmptyShelf />
-      <Heading className="text-step-2 leading-[1.2] text-ink">{title}</Heading>
+    <div className={cn("flex flex-col gap-3 px-4 py-16", centered ? "items-center text-center" : "items-start", className)}>
+      <EmptyBay />
+      <Heading className="mt-3 text-step-2 font-semibold leading-[1.12] text-ink">{title}</Heading>
       {subtitle ? <p className={cn("max-w-[48ch] text-ink-muted", centered && "mx-auto")}>{subtitle}</p> : null}
       {children}
       {(actionLabel && (actionHref || onAction)) || (secondaryLabel && secondaryHref) ? (

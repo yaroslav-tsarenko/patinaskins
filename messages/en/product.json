@@ -1,5 +1,5 @@
 {
-  "addToBag": "Add to bag",
+  "addToBag": "Add to cart",
   "soldOut": "Sold out",
   "checkBackLater": "This item is no longer listed. Similar items are below.",
   "chooseOption": "Choose a {option}",
@@ -13,7 +13,7 @@
   "savedToWishlist": "Saved to wishlist",
   "deliveryLine": "Delivered by {method}, {usual}.",
   "deliveryLink": "Delivery via Steam",
-  "returnsLine": "The {days}-day right of withdrawal ends once delivery begins.",
+  "returnsLine": "The {days}-day right to cancel ends once delivery begins.",
   "returnsLink": "Refunds",
   "securePayment": "Secure card payment",
   "tabsLabel": "Product information",
@@ -52,8 +52,8 @@
   "drRequirements": "What you need",
   "drGuarantee": "Item guarantee",
   "drGuaranteeBody": "If we cannot deliver the item within {hours} hours, or Steam reverses the trade during trade protection, we refund the price you paid for it within {refundDays} days.",
-  "drWithdrawal": "Right of withdrawal",
-  "drWithdrawalBody": "You have a {days}-day right of withdrawal until delivery begins. At checkout you ask us to start delivery straight away, and from that point the right no longer applies.",
+  "drWithdrawal": "Right to cancel",
+  "drWithdrawalBody": "You have a {days}-day right to cancel until delivery begins. At checkout you ask us to start delivery straight away, and from that point the right no longer applies.",
   "skin": {
     "rarity": "Rarity",
     "exterior": "Exterior",

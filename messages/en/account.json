@@ -11,15 +11,15 @@
   },
   "nav": {
     "label": "Account",
-    "account": "Your account",
+    "account": "Account",
     "overview": "Overview",
-    "orders": "Orders",
+    "orders": "My purchases",
     "saved": "Saved",
     "addresses": "Billing addresses",
     "profile": "Profile",
     "signOut": "Sign out",
     "loading": "Loading your account",
-    "steam": "Steam account"
+    "steam": "Trade URL"
   },
   "loadError": "Something went wrong loading this page.",
   "retry": "Try again",
@@ -39,17 +39,17 @@
     "signedInAs": "Signed in as {email}",
     "welcomeTitle": "Your account is ready",
     "welcomeBody": "We've saved your billing address for checkout and sent a welcome email. Link your Steam account next.",
-    "latestTitle": "Latest order",
+    "latestTitle": "Latest purchase",
     "placed": "{date} · {count, plural, one {# item} other {# items}}",
     "view": "View",
-    "allOrders": "See all {count} orders",
-    "noOrdersTitle": "No orders yet",
-    "noOrdersBody": "When you place an order, you can follow each item's Steam delivery here.",
-    "browse": "Browse skins",
+    "allOrders": "See all {count} purchases",
+    "noOrdersTitle": "No purchases yet",
+    "noOrdersBody": "When you buy a skin, you can follow its Steam delivery here.",
+    "browse": "Browse all skins",
     "linksTitle": "Your account",
     "links": {
       "steam": {
-        "title": "Steam account",
+        "title": "Trade URL",
         "body": "Linked Steam account and trade URL"
       },
       "addresses": {
@@ -65,14 +65,14 @@
         "body": "Skins you saved for later"
       },
       "orders": {
-        "title": "Orders",
-        "body": "Every order and each item's delivery"
+        "title": "My purchases",
+        "body": "Every purchase and its delivery status"
       }
     },
     "signedInSteam": "Signed in through Steam"
   },
   "orders": {
-    "title": "Orders",
+    "title": "My purchases",
     "caption": "Your orders, newest first",
     "columns": {
       "order": "Order",
@@ -84,13 +84,13 @@
     },
     "view": "View",
     "mobileMeta": "{date} · {count, plural, one {# item} other {# items}}",
-    "emptyTitle": "No orders yet",
-    "emptyBody": "When you place an order, you can follow each item's Steam delivery here.",
-    "browse": "Browse skins"
+    "emptyTitle": "No purchases yet",
+    "emptyBody": "When you buy a skin, you can follow its Steam delivery here.",
+    "browse": "Browse all skins"
   },
   "order": {
     "loading": "Loading the order",
-    "title": "Order {number}",
+    "title": "Purchase {number}",
     "placedOn": "Placed on {date}",
     "progressTitle": "Order progress",
     "steps": {
@@ -110,15 +110,15 @@
     "paymentMethod": "Paid by card on our payment provider's secure page.",
     "totalsTitle": "Totals",
     "invoiceDownload": "Download invoice (PDF)",
-    "helpTitle": "Need help with this order?",
+    "helpTitle": "Need help with this purchase?",
     "helpBody": "Questions about a trade offer, a refund or anything else. Your order number will be filled in for you.",
-    "helpAction": "Contact us about this order",
+    "helpAction": "Contact us about this purchase",
     "notFoundTitle": "Order not found",
     "notFoundBody": "This order isn't in your account. It may have been placed from a different account.",
-    "backToOrders": "Back to your orders",
+    "backToOrders": "Back to my purchases",
     "deliveryMethod": "Steam trade offer",
     "steamId": "Steam ID {id}",
-    "waiver": "You asked for immediate delivery on {date} and acknowledged that the right of withdrawal ends once delivery begins.",
+    "waiver": "You asked for immediate delivery on {date} and acknowledged that the right to cancel ends once delivery begins.",
     "liveUpdates": "This page updates while your items are being delivered."
   },
   "saved": {
@@ -165,8 +165,8 @@
     "emailAdd": "Add an email address so we can send order confirmations and invoices."
   },
   "steam": {
-    "title": "Steam account",
-    "lead": "Items you buy are sent as a Steam trade offer to this account, using the trade URL saved here.",
+    "title": "Trade URL",
+    "lead": "We send every skin you buy as a trade offer to this URL. It must belong to the Steam account linked here.",
     "accountTitle": "Linked Steam account",
     "unnamed": "Steam user",
     "steamId": "Steam ID {id}",

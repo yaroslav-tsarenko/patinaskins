@@ -44,7 +44,7 @@ export const policyTable = cn(
   "[&_td]:border-b [&_td]:border-line [&_td]:py-3.5 [&_td]:pr-4 [&_td]:align-top",
 );
 
-const sideLinkCls = "relative block py-2 text-ui-sm text-ink-muted transition-colors duration-[160ms] hover-device:hover:text-ink";
+const sideLinkCls = "relative block py-2 text-ui-md text-ink-muted transition-colors duration-[140ms] hover-device:hover:text-ink";
 
 export function policyMetadata(slug: PolicySlug, description: string) {
   return async function generateMetadata(): Promise<Metadata> {
@@ -73,19 +73,18 @@ export async function PolicyLayout({ slug, title: titleProp, lastUpdated = POLIC
         <aside data-print-hide="" className="hidden lg:block">
           <div className="sticky top-[calc(var(--header-height-compact)+2rem)] flex max-h-[calc(100vh-var(--header-height-compact)-4rem)] flex-col gap-10 overflow-y-auto pb-6 no-scrollbar">
             <nav aria-label={t("policiesNav")}>
-              <p className="eyebrow text-ink-muted">{t("policiesNav")}</p>
-              <ul className="m-0 mt-3 list-none border-t border-line p-0">
+              <p className="eyebrow m-0">{t("policiesNav")}</p>
+              <ul className="m-0 mt-3 list-none p-0">
                 {entries.map((entry) => {
                   const active = entry.slug === slug;
                   return (
-                    <li key={entry.slug} data-drawer="" data-open={active || undefined} className="border-b border-line">
+                    <li key={entry.slug}>
                       <Link
                         href={entry.href}
                         aria-current={active ? "page" : undefined}
-                        className={cn(sideLinkCls, active && "font-medium text-ink")}
+                        className={cn(sideLinkCls, "pl-4 before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 aria-[current=page]:before:opacity-100", active && "font-semibold text-ink")}
                       >
-                        <span className={cn("block transition-transform duration-[260ms] ease-[var(--ease-furniture)]", active && "translate-x-1.5")}>{entry.title}</span>
-                        {active ? <span aria-hidden="true" className="shelf-rule absolute inset-x-0 -bottom-px" /> : null}
+                        {entry.title}
                       </Link>
                     </li>
                   );
@@ -95,12 +94,12 @@ export async function PolicyLayout({ slug, title: titleProp, lastUpdated = POLIC
 
             {hasToc ? (
               <nav aria-label={t("onThisPage")}>
-                <p className="eyebrow text-ink-muted">{t("onThisPage")}</p>
+                <p className="eyebrow m-0">{t("onThisPage")}</p>
                 <ol className="m-0 mt-3 flex list-none flex-col gap-0.5 p-0">
                   {sections!.map((section, index) => (
                     <li key={section.id}>
-                      <a href={`#${section.id}`} className="flex gap-2 py-1.5 text-ui-xs leading-[1.45] text-ink-muted hover-device:hover:text-ink">
-                        <span className="tabular w-5 shrink-0 text-ink-subtle">{index + 1}.</span>
+                      <a href={`#${section.id}`} className="flex gap-2 py-1.5 text-ui-sm leading-[1.45] text-ink-muted hover-device:hover:text-ink">
+                        <span className="w-6 shrink-0 font-mono text-[0.75rem] leading-[1.9] text-ink-subtle">{index + 1}.</span>
                         <span>{section.title}</span>
                       </a>
                     </li>
@@ -123,7 +122,7 @@ export async function PolicyLayout({ slug, title: titleProp, lastUpdated = POLIC
           ) : null}
 
           <header className="measure">
-            <h1 className="m-0 font-display text-step-5 leading-[1.02] tracking-[-0.01em] text-ink">{title}</h1>
+            <h1 className="m-0 text-step-5 font-[650] leading-none tracking-[-0.01em] text-ink">{title}</h1>
             {lastUpdated ? (
               <div className="mt-5">
                 <Plate variant="neutral">
@@ -157,7 +156,7 @@ export async function PolicyLayout({ slug, title: titleProp, lastUpdated = POLIC
             <div className="measure">
               {sections.map((section, index) => (
                 <section key={section.id} id={section.id} aria-labelledby={`${section.id}-title`} className="scroll-mt-28 border-t border-line pt-8 mt-12 first:mt-12">
-                  <h2 id={`${section.id}-title`} className="m-0 flex gap-3 font-display text-step-3 leading-[1.12] text-ink">
+                  <h2 id={`${section.id}-title`} className="m-0 flex gap-3 text-step-3 font-semibold leading-[1.1] text-ink">
                     <span className="tabular shrink-0 text-ink-subtle">{index + 1}.</span>
                     <span>{section.title}</span>
                   </h2>

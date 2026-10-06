@@ -1,236 +1,218 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Handbag, Menu, Search } from "lucide-react";
+import { AlignRight, ChevronDown, CircleUser, Search, ShoppingCart } from "lucide-react";
 import { Wordmark } from "@/components/layout/BrandMark";
-import { Plate } from "@/components/ui/Plate";
 import { useCart } from "@/providers/CartProvider";
 import { useAuth } from "@/providers/AuthProvider";
+import { useSteamAccount } from "@/components/account/SteamDelivery/SteamDelivery";
 import { catalogSlugFromPath, findRootSlug, useCategoryTree } from "@/lib/hooks/useCategoryTree";
-import { CORNICE_LINKS, navCategory } from "@/config/navigation";
-import { SHIPPING } from "@/config/shipping";
+import { RIG_LINKS, navCategory } from "@/config/navigation";
 import { cn } from "@/lib/utils/cn";
 import { BRAND } from "@/lib/brand";
 import { ThemeToggle } from "./ThemeToggle";
 import { CurrencySelect } from "./CurrencySelect";
-import { MegaMenu } from "./MegaMenu";
+import { LoadoutBoard } from "./LoadoutBoard";
 import { MobileMenu } from "./MobileMenu";
 import { SearchDialog } from "@/components/search/SearchDialog/SearchDialog";
 import { CartSheet } from "@/components/cart/CartSheet/CartSheet";
 import { CheckoutHeader } from "@/components/checkout/CheckoutFrame";
 
-type HeaderState = "top" | "compact" | "hidden";
-
-const corniceLink = cn(
-  "relative inline-flex h-full items-center whitespace-nowrap text-ui-md font-medium text-on-paint",
-  "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-[calc(50%-17px)] after:h-[2px] after:origin-left after:scale-x-0 after:bg-brass-on-paint after:transition-transform after:duration-[160ms] after:ease-[var(--ease-furniture)]",
-  "hover-device:hover:after:scale-x-100 aria-[current=page]:after:scale-x-100 aria-[current=true]:after:scale-x-100 aria-expanded:after:scale-x-100",
+const navLink = cn(
+  "indicator-bar label-caps relative inline-flex h-full items-center whitespace-nowrap text-[0.9375rem] text-ink-muted transition-colors duration-[140ms]",
+  "after:!bottom-[calc(50%-14px)] hover-device:hover:text-ink aria-[current]:text-ink data-[active=true]:text-ink",
 );
 
-const corniceAction = "relative inline-flex h-11 cursor-pointer items-center gap-2 whitespace-nowrap text-ui-md font-medium text-on-paint hover-device:hover:underline hover-device:hover:decoration-1 hover-device:hover:underline-offset-[6px]";
+const action = "relative inline-flex h-10 cursor-pointer items-center gap-2 whitespace-nowrap rounded-control px-2 text-ui-md font-semibold text-ink transition-colors duration-[140ms] hover-device:hover:bg-raised";
+
+export function CartCount({ count, bump }: { count: number; bump: number }) {
+  if (count <= 0) return null;
+  return (
+    <span data-cart-count="" className="inline-flex h-5 min-w-5 items-center justify-center overflow-hidden rounded-control bg-brand px-1 font-mono text-[0.6875rem] font-semibold leading-none text-on-brand">
+      <span key={bump} className={cn("inline-block", bump > 0 && "animate-count-roll")}>
+        {count > 99 ? "99+" : count}
+      </span>
+    </span>
+  );
+}
 
 function StoreHeader() {
   const pathname = usePathname();
   const { itemCount, cartBounce, openSheet, isSheetOpen } = useCart();
-  const { user, role } = useAuth();
+  const { user } = useAuth();
+  const steam = useSteamAccount(Boolean(user));
   const categories = useCategoryTree();
-  const megaId = useId();
-  const [megaOpen, setMegaOpen] = useState(false);
+  const boardId = useId();
+  const [boardOpen, setBoardOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [state, setState] = useState<HeaderState>("top");
-  const megaTimer = useRef<number | undefined>(undefined);
-  const megaTrigger = useRef<HTMLButtonElement>(null);
-  const lastY = useRef(0);
-  const anyOpen = megaOpen || mobileOpen || searchOpen || isSheetOpen;
-  const anyOpenRef = useRef(anyOpen);
+  const [compact, setCompact] = useState(false);
+  const boardTimer = useRef<number | undefined>(undefined);
+  const boardTrigger = useRef<HTMLButtonElement>(null);
+  const anyOpen = boardOpen || mobileOpen || searchOpen || isSheetOpen;
 
   useEffect(() => {
-    anyOpenRef.current = anyOpen;
-  }, [anyOpen]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      const delta = y - lastY.current;
-      lastY.current = y;
-      if (anyOpenRef.current) return;
-      if (y <= 120) setState("top");
-      else if (delta > 4) setState("hidden");
-      else if (delta < -4) setState("compact");
-    };
+    const onScroll = () => setCompact(window.scrollY > 80);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    setMegaOpen(false);
+    setBoardOpen(false);
   }, [pathname]);
 
-  const openMega = useCallback((delay: number) => {
-    window.clearTimeout(megaTimer.current);
-    megaTimer.current = window.setTimeout(() => setMegaOpen(true), delay);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || anyOpen) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      e.preventDefault();
+      setSearchOpen(true);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [anyOpen]);
+
+  const openBoard = useCallback((delay: number) => {
+    window.clearTimeout(boardTimer.current);
+    boardTimer.current = window.setTimeout(() => setBoardOpen(true), delay);
   }, []);
 
-  const closeMega = useCallback((delay: number, restoreFocus = false) => {
-    window.clearTimeout(megaTimer.current);
-    megaTimer.current = window.setTimeout(() => {
-      setMegaOpen(false);
-      if (restoreFocus) megaTrigger.current?.focus();
+  const closeBoard = useCallback((delay: number, restoreFocus = false) => {
+    window.clearTimeout(boardTimer.current);
+    boardTimer.current = window.setTimeout(() => {
+      setBoardOpen(false);
+      if (restoreFocus) boardTrigger.current?.focus();
     }, delay);
   }, []);
 
   useEffect(() => {
-    if (!megaOpen) return;
+    if (!boardOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeMega(0, true);
+      if (e.key === "Escape") closeBoard(0, true);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [megaOpen, closeMega]);
+  }, [boardOpen, closeBoard]);
 
-  const compact = state !== "top";
   const catalogSlug = catalogSlugFromPath(pathname);
   const activeRoot = findRootSlug(categories, catalogSlug) ?? catalogSlug;
-  const triggerActive = pathname === "/catalog" || (activeRoot !== null && !CORNICE_LINKS.includes(activeRoot)) ? "all" : activeRoot ? "link" : undefined;
-  const isAdmin = Boolean(user && (role === "ADMIN" || role === "SUPER_ADMIN"));
-
-  const bagPlate =
-    itemCount > 0 ? (
-      <Plate key={cartBounce} variant="on-paint" size="sm" data-bag-count="" className={cn("min-w-5 justify-center px-1.5", cartBounce > 0 && "animate-plate-in")}>
-        {itemCount > 99 ? "99+" : itemCount}
-      </Plate>
-    ) : null;
+  const boardActive = pathname === "/catalog" || (activeRoot !== null && !RIG_LINKS.includes(activeRoot));
+  const persona = steam.steam?.personaName ?? user?.firstName ?? user?.name ?? null;
+  const avatar = steam.steam?.avatar ?? null;
 
   return (
     <>
-      <div aria-hidden="true" className="h-[var(--header-height-mobile)] shrink-0 lg:h-[calc(var(--utility-height)+var(--header-height))]" />
+      <div aria-hidden="true" className="h-[var(--header-height-mobile)] shrink-0 lg:h-[var(--header-height)]" />
       <header
         data-header=""
-        data-header-state={state}
+        data-header-state={compact ? "compact" : "top"}
         data-print-hide=""
         onPointerLeave={() => {
-          if (megaOpen) closeMega(250);
+          if (boardOpen) closeBoard(250);
         }}
-        className={cn(
-          "fixed inset-x-0 top-0 z-40 transition-transform duration-[320ms] ease-[var(--ease-furniture)]",
-          state === "hidden" && "-translate-y-full",
-          state === "compact" && "lg:-translate-y-[var(--utility-height)]",
-        )}
+        className="fixed inset-x-0 top-0 z-40"
       >
-        <div data-depth="0" className="hidden h-[var(--utility-height)] border-b border-line bg-surface lg:block">
-          <div className="mx-auto flex h-full max-w-container items-center justify-between gap-6 px-gutter">
-            <p className="meta text-ink-muted">{SHIPPING.statement}</p>
-            <div className="flex items-center gap-4">
-              <CurrencySelect />
-              <ThemeToggle />
-              <Link href="/faq" className="meta text-ink-muted hover-device:hover:text-ink hover-device:hover:underline hover-device:hover:underline-offset-4">
-                Help
-              </Link>
-              {isAdmin ? (
-                <a href="/admin" className="meta text-ink-muted hover-device:hover:text-ink hover-device:hover:underline hover-device:hover:underline-offset-4">
-                  Admin
-                </a>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
         <div
-          data-cornice=""
-          data-depth="3"
+          data-rig=""
           className={cn(
-            "on-paint relative bg-paint text-on-paint transition-[height] duration-[320ms] ease-[var(--ease-furniture)]",
+            "relative border-b border-line bg-rig text-ink transition-[height] duration-[200ms] ease-[var(--ease-instrument)]",
             "h-[var(--header-height-mobile)]",
             compact ? "lg:h-[var(--header-height-compact)]" : "lg:h-[var(--header-height)]",
           )}
         >
-          <div className="relative mx-auto grid h-full max-w-container grid-cols-[1fr_auto_1fr] items-center gap-4 px-gutter lg:flex lg:justify-between lg:gap-8">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              className="-ml-2 flex h-11 min-w-11 cursor-pointer items-center gap-2 justify-self-start px-2 text-on-paint lg:hidden"
-            >
-              <Menu size={20} aria-hidden="true" />
-              <span className="text-ui-md font-medium max-[389px]:sr-only">Menu</span>
-            </button>
-
-            <Link href="/" aria-label={`${BRAND.name}, home`} className="flex shrink-0 items-center justify-self-center text-on-paint">
-              <Wordmark className={cn("w-auto transition-[height] duration-[320ms] ease-[var(--ease-furniture)]", "h-[25px]", compact ? "lg:h-[25px]" : "lg:h-[33px]")} />
+          <div className="mx-auto flex h-full max-w-container items-center justify-between gap-4 px-gutter xl:gap-6">
+            <Link href="/" aria-label={`${BRAND.name}, home`} className="flex shrink-0 items-center text-ink">
+              <Wordmark className="h-[22px] w-auto lg:h-[26px]" />
             </Link>
 
-            <nav aria-label="Main" className="hidden h-full items-center gap-7 lg:flex">
-              {CORNICE_LINKS.map((slug) => {
+            <nav aria-label="Main" className="hidden h-full min-w-0 items-center gap-5 lg:flex 2xl:gap-6">
+              {RIG_LINKS.map((slug) => {
                 const cat = navCategory(slug);
-                const href = `/catalog/${slug}`;
                 const current = catalogSlug === slug ? "page" : activeRoot === slug ? "true" : undefined;
                 return (
-                  <Link key={slug} href={href} aria-current={current} className={cn(corniceLink, "hidden xl:inline-flex")}>
+                  <Link key={slug} href={`/catalog/${slug}`} aria-current={current} className={cn(navLink, "hidden xl:inline-flex")}>
                     {cat?.short ?? slug}
                   </Link>
                 );
               })}
               <button
-                ref={megaTrigger}
+                ref={boardTrigger}
                 type="button"
-                data-mega-trigger=""
-                data-active={triggerActive}
-                aria-expanded={megaOpen}
-                aria-controls={megaId}
+                data-board-trigger=""
+                data-active={boardActive || undefined}
+                aria-expanded={boardOpen}
+                aria-controls={boardId}
                 onClick={() => {
-                  window.clearTimeout(megaTimer.current);
-                  setMegaOpen((v) => !v);
+                  window.clearTimeout(boardTimer.current);
+                  setBoardOpen((v) => !v);
                 }}
                 onPointerEnter={(e) => {
-                  if (e.pointerType === "mouse") openMega(150);
+                  if (e.pointerType === "mouse") openBoard(150);
                 }}
                 onPointerLeave={(e) => {
-                  if (e.pointerType === "mouse" && !megaOpen) window.clearTimeout(megaTimer.current);
+                  if (e.pointerType === "mouse" && !boardOpen) window.clearTimeout(boardTimer.current);
                 }}
-                className={cn(corniceLink, "cursor-pointer gap-1.5 data-[active=all]:after:scale-x-100 max-xl:data-[active=link]:after:scale-x-100")}
+                className={cn(navLink, "cursor-pointer gap-1", boardOpen && "text-ink")}
               >
-                <span className="xl:hidden">Shop</span>
-                <span className="hidden xl:inline">All categories</span>
-                <ChevronDown size={16} aria-hidden="true" className={cn("transition-transform duration-[260ms]", megaOpen && "rotate-180")} />
+                <span className="xl:hidden">Skins</span>
+                <span className="hidden xl:inline">All skins</span>
+                <ChevronDown size={16} aria-hidden="true" />
               </button>
             </nav>
 
-            <div className="flex items-center gap-1 justify-self-end lg:gap-6">
-              <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search" className={cn(corniceAction, "w-11 justify-center lg:w-auto")}>
-                <Search size={20} aria-hidden="true" className="lg:hidden" />
-                <span className="hidden lg:inline">Search</span>
+            <div className="flex items-center gap-1 lg:gap-2">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="hidden h-9 w-[200px] cursor-pointer items-center gap-2 rounded-control border border-control bg-raised px-3 text-left text-ui-md text-ink-subtle shadow-lamp-catch transition-colors duration-[140ms] hover-device:hover:border-ink-muted lg:flex 2xl:w-[240px]"
+              >
+                <Search size={16} aria-hidden="true" className="text-ink-muted" />
+                <span className="flex-1">Search skins</span>
+                <kbd className="rounded-[1px] border border-line px-1.5 font-mono text-[0.6875rem] leading-[1.3] text-ink-muted">/</kbd>
               </button>
-              <Link href={user ? "/account" : "/auth/login"} className={cn(corniceAction, "hidden lg:inline-flex")}>
-                {user ? "Account" : "Sign in"}
+              <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search" className={cn(action, "w-11 justify-center px-0 lg:hidden")}>
+                <Search size={20} aria-hidden="true" />
+              </button>
+              <CurrencySelect className="hidden lg:flex" />
+              <ThemeToggle className="hidden lg:flex" />
+              <Link href={user ? "/account" : "/auth/login"} className={cn(action, "hidden lg:inline-flex")} aria-label={user ? `Account${persona ? `, ${persona}` : ""}` : "Sign in"}>
+                {user && avatar ? (
+                  <Image src={avatar} alt="" width={24} height={24} unoptimized className="size-6 rounded-control" />
+                ) : (
+                  <CircleUser size={20} aria-hidden="true" />
+                )}
+                <span className="hidden max-w-[14ch] truncate 2xl:inline">{user ? persona ?? "Account" : "Sign in"}</span>
               </Link>
               <button
                 type="button"
                 onClick={openSheet}
-                aria-label={`Bag, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
-                data-bag-target=""
-                className={cn(corniceAction, "-mr-2 min-w-11 justify-center px-2 lg:mr-0 lg:px-0")}
+                aria-label={`Cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`}
+                data-cart-target=""
+                className={cn(action, "-mr-2 min-w-11 justify-center lg:mr-0")}
               >
-                <Handbag size={20} aria-hidden="true" className="lg:hidden" />
-                <span className="hidden lg:inline">Bag</span>
-                {bagPlate}
+                <ShoppingCart size={20} aria-hidden="true" />
+                <span className="hidden lg:inline">Cart</span>
+                <CartCount count={itemCount} bump={cartBounce} />
+              </button>
+              <button type="button" onClick={() => setMobileOpen(true)} aria-label="Menu" className={cn(action, "-mr-2 w-11 justify-center px-0 lg:hidden")}>
+                <AlignRight size={20} aria-hidden="true" />
               </button>
             </div>
           </div>
-          <span aria-hidden="true" className={cn("absolute inset-x-0 top-full h-[2px] bg-shelf transition-opacity duration-[160ms]", compact ? "opacity-100" : "opacity-0")} />
           <div className="hidden lg:block">
-            <MegaMenu
-              id={megaId}
-              open={megaOpen}
+            <LoadoutBoard
+              id={boardId}
+              open={boardOpen}
               categories={categories}
               activeSlug={catalogSlug}
-              activeRoot={activeRoot}
-              onClose={(restore) => closeMega(0, restore)}
-              onPointerEnter={() => window.clearTimeout(megaTimer.current)}
-              onPointerLeave={() => closeMega(250)}
+              onClose={(restore) => closeBoard(0, restore)}
+              onPointerEnter={() => window.clearTimeout(boardTimer.current)}
+              onPointerLeave={() => closeBoard(250)}
             />
           </div>
         </div>

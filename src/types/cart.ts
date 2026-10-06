@@ -1,3 +1,5 @@
+import type { SkinSummary } from "@/lib/skins/cs2";
+
 export interface CartItem {
   id: string;
   productId: string;
@@ -10,6 +12,7 @@ export interface CartItem {
   variantId?: string;
   variantName?: string;
   maxQuantity: number;
+  skin?: SkinSummary;
 }
 
 export interface Cart {

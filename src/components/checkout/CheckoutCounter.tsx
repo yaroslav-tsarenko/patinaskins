@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Cubby } from "@/components/product/ShelfTile/ShelfTile";
+import { SkinRow } from "@/components/skin/SkinTray";
 import { formatPrice } from "@/lib/utils/format-price";
 import { cn } from "@/lib/utils/cn";
 import type { CartItem } from "@/types/cart";
@@ -23,7 +23,6 @@ interface CheckoutCounterProps {
 export const POLICY_LINKS = [
   { href: "/policies/terms", key: "terms" },
   { href: "/policies/returns", key: "returns" },
-  { href: "/policies/shipping", key: "delivery" },
   { href: "/policies/privacy", key: "privacy" },
 ] as const;
 
@@ -35,8 +34,8 @@ export function CheckoutCounter({ items, totals, currency, quote, loading, headi
   return (
     <div className={cn("flex flex-col gap-6", className)} aria-busy={loading || undefined}>
       <div className="flex items-baseline justify-between gap-4">
-        <Heading className="m-0 text-step-2 leading-none text-ink">{t("title")}</Heading>
-        <Link href="/cart" className="text-ui-sm font-semibold text-ink underline decoration-1 underline-offset-4 hover-device:hover:decoration-2">
+        <Heading className="m-0 text-step-2 font-semibold leading-none text-ink">{t("title")}</Heading>
+        <Link href="/cart" className="text-ui-md font-semibold text-ink decoration-1 underline-offset-4 hover-device:hover:underline">
           {t("editBag")}
         </Link>
       </div>
@@ -46,13 +45,8 @@ export function CheckoutCounter({ items, totals, currency, quote, loading, headi
           const line = quote && quote.currency === currency ? quote.lines[index] : null;
           const lineTotal = line?.total ?? totals.lines[index]?.total ?? 0;
           return (
-            <li key={item.id} className="flex items-start gap-3 py-3 first:pt-0">
-              <Cubby src={item.imageUrl} alt="" size="compact" sizes="56px" className="w-14 shrink-0" />
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <p className="m-0 line-clamp-2 text-ui-sm font-medium leading-[1.4] text-ink">{item.name}</p>
-                {item.variantName ? <p className="meta m-0 text-ink-muted">{item.variantName}</p> : null}
-              </div>
-              <p className="tabular m-0 shrink-0 text-ui-sm text-ink">{formatPrice(lineTotal, currency)}</p>
+            <li key={item.id} className="py-3 first:pt-0">
+              <SkinRow name={item.name} imageUrl={item.imageUrl} skin={item.skin} showRarity={false} aside={<span className="font-mono text-data text-ink">{formatPrice(lineTotal, currency)}</span>} />
             </li>
           );
         })}
@@ -63,7 +57,7 @@ export function CheckoutCounter({ items, totals, currency, quote, loading, headi
       <ul className="m-0 flex list-none flex-wrap gap-x-4 gap-y-1 border-t border-line p-0 pt-4">
         {POLICY_LINKS.map((link) => (
           <li key={link.href}>
-            <Link href={link.href} target="_blank" className="meta text-ink-muted underline underline-offset-4 hover-device:hover:text-ink">
+            <Link href={link.href} target="_blank" className="text-ui-sm text-ink-muted underline decoration-1 underline-offset-4 hover-device:hover:text-ink">
               {tp(link.key)}
             </Link>
           </li>

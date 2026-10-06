@@ -2,19 +2,27 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
+import { Segmented } from "@/components/ui/Choice";
 import { cn } from "@/lib/utils/cn";
 
 export function ThemeToggle({ variant = "icon", className }: { variant?: "icon" | "row"; className?: string }) {
-  const { theme, toggleTheme } = useTheme();
-  const next = theme === "light" ? "dark" : "light";
-  const label = `Switch to ${next} theme`;
+  const { theme, toggleTheme, setTheme } = useTheme();
+  const label = theme === "light" ? "Switch to dark" : "Switch to Daylight";
 
   if (variant === "row") {
     return (
-      <button type="button" onClick={toggleTheme} className={cn("flex min-h-14 w-full cursor-pointer items-center justify-between text-step-0 text-ink", className)}>
-        <span>{theme === "light" ? "Dark theme" : "Light theme"}</span>
-        {theme === "light" ? <Moon size={20} aria-hidden="true" /> : <Sun size={20} aria-hidden="true" />}
-      </button>
+      <div className={cn("flex min-h-14 items-center justify-between gap-4", className)}>
+        <span className="text-step-0 text-ink">Theme</span>
+        <Segmented
+          label="Theme"
+          value={theme}
+          onChange={setTheme}
+          options={[
+            { value: "dark", label: "Dark" },
+            { value: "light", label: "Daylight" },
+          ]}
+        />
+      </div>
     );
   }
 
@@ -24,9 +32,9 @@ export function ThemeToggle({ variant = "icon", className }: { variant?: "icon" 
       onClick={toggleTheme}
       aria-label={label}
       title={label}
-      className={cn("flex size-8 cursor-pointer items-center justify-center text-ink-muted transition-colors duration-[160ms] hover-device:hover:bg-brand-soft hover-device:hover:text-ink", className)}
+      className={cn("flex size-10 cursor-pointer items-center justify-center rounded-control text-ink-muted transition-colors duration-[140ms] hover-device:hover:bg-raised hover-device:hover:text-ink", className)}
     >
-      {theme === "light" ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+      {theme === "light" ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
     </button>
   );
 }
