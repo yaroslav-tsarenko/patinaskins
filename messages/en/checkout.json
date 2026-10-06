@@ -65,7 +65,10 @@
   "counter": {
     "title": "Your order",
     "toggle": "Show order summary · {total}",
-    "editBag": "Edit cart"
+    "editBag": "Edit cart",
+    "soldBy": "Sold by",
+    "merchant": "Merchant of record",
+    "sellerLine": "{company}, {address}"
   },
   "policies": {
     "terms": "Terms & conditions",
@@ -99,6 +102,7 @@
     "PRICE_UNAVAILABLE": "We couldn't confirm the current price of {name}. Nothing has been charged. Please try again in a moment.",
     "STEAM_NOT_LINKED": "Link your Steam account before you pay.",
     "TRADE_URL_REQUIRED": "Save your Steam trade URL before you pay.",
+    "AGE_REQUIRED": "You must be {minAge} or over to order. Add your date of birth under Account → Profile, then come back to pay. Nothing has been charged.",
     "CART_EMPTY": "Your cart is empty.",
     "INVALID_REQUEST": "Some details are missing or not valid. Check each step and try again.",
     "RATE_LIMITED": "Too many attempts in a short time. Wait a minute and try again.",

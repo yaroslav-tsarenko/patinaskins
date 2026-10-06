@@ -125,8 +125,8 @@
           "a": "Cosmetic items for Counter-Strike 2: weapon skins, knives and gloves. They change how weapons look in the game and have no effect on gameplay."
         },
         "store": {
-          "q": "Can I sell my skins to you?",
-          "a": "No. {brand} is a store: we sell items we source. You cannot sell, list or exchange items here."
+          "q": "Do you buy skins from customers?",
+          "a": "No. {brand} is a store: we supply items we source ourselves. You cannot list, trade in or exchange items here."
         },
         "rarity": {
           "q": "What do rarity, exterior and quality mean?",

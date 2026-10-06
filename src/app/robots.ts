@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/brand";
+import { ANY_PRODUCT_FEED_ENABLED } from "@/config/catalog";
 
 const FACET_PARAMS = ["minPrice", "maxPrice", "inStock", "onSale", "brand", "sort"];
 
@@ -8,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/api/feeds/"],
+        allow: ANY_PRODUCT_FEED_ENABLED ? ["/", "/api/feeds/"] : ["/"],
         disallow: [
           "/admin",
           "/api/",

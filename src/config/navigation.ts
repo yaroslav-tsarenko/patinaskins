@@ -33,13 +33,17 @@ export const ORDER_LINKS: { href: string; label: string }[] = [
 export const HELP_LINKS: { href: string; label: string }[] = [
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact us" },
+  { href: "/policies/shipping", label: "Delivery policy" },
   { href: "/policies/returns", label: "Refunds" },
+  { href: "/policies/warranty", label: "Item guarantee" },
   { href: "/policies/payment", label: "Payment" },
+  { href: "/policies/complaints", label: "Complaints" },
 ];
 
 export const POLICY_LINKS = [
   { href: "/policies/terms", label: "Terms & conditions" },
   { href: "/policies/privacy", label: "Privacy policy" },
   { href: "/policies/cookies", label: "Cookie policy" },
+  { href: "/policies/acceptable-use", label: "Acceptable use" },
   { href: "/policies", label: "All policies" },
 ];

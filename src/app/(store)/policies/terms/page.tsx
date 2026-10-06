@@ -34,7 +34,8 @@ const sections: PolicySection[] = [
       <>
         <p>
           You must be at least {F.minAge} years old to create an account or place an order. We ask for your date of birth when you
-          register and do not open accounts for anyone under {F.minAge}.
+          register with an email, or before your first order if you sign in through Steam, and we do not take orders from anyone
+          under {F.minAge}.
         </p>
         <p>
           We sell to consumers buying items for their own Steam account. {F.brand} is a store: we sell items we source, and you cannot sell,
@@ -182,11 +183,11 @@ const sections: PolicySection[] = [
         <p>
           At checkout there is a separate box, which is not ticked in advance: &ldquo;{F.waiverText}&rdquo; You cannot place an order without
           ticking it. We record the time you ticked it and the wording you agreed to, and we repeat it in your order confirmation email.
-          Delivery begins when we request the trade offer for your item, which happens straight after your payment is confirmed.
+          Delivery begins when we send the trade offer for your item, which happens straight after your payment is confirmed.
         </p>
         <p>
           You can cancel an order without charge before {F.cancelBefore}. Email {F.email} or use the <Link href="/contact">contact form</Link>{" "}
-          with your order number. If the offer has not yet been requested, we cancel the order and refund you in full.
+          with your order number. If the offer has not been sent yet, we cancel the order and refund you in full.
         </p>
       </>
     ),

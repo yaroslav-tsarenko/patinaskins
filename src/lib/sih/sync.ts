@@ -168,7 +168,7 @@ function assignSlugs(selected: Candidate[], taken: Map<string, string>): Map<str
       slugs.set(c.marketHashName, existing);
       continue;
     }
-    let slug = slugify(c.marketHashName.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")) || productIdFor(c.marketHashName);
+    let slug = slugify(c.marketHashName.replace(/[™★]/g, "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "")) || productIdFor(c.marketHashName);
     if (used.has(slug)) slug = `${slug}-${stableHash(c.marketHashName).slice(0, 6)}`;
     used.add(slug);
     slugs.set(c.marketHashName, slug);

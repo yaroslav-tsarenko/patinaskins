@@ -80,7 +80,7 @@ export function CategoryOpener({ name, count, lead, minPrice, maxPrice, index = 
             <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
               {rarities.map((r) => (
                 <li key={r.key} data-rarity={r.slug}>
-                  <Link href={r.href} className="group grid grid-cols-[120px_minmax(0,1fr)_40px] items-center gap-3 py-0.5">
+                  <Link href={r.href} className="group grid grid-cols-[148px_minmax(0,1fr)_40px] items-center gap-3 py-0.5">
                     <span className="truncate font-mono text-[0.75rem] font-medium uppercase tracking-[0.06em] text-rarity [font-stretch:87.5%] group-hover:underline">{r.label}</span>
                     <span aria-hidden="true" className="h-0.5 bg-rarity" style={{ width: `${Math.max(2, (r.count / maxRarity) * 100)}%` }} />
                     <span className="text-right font-mono text-[0.75rem] text-ink-muted">{r.count}</span>

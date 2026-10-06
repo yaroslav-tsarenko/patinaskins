@@ -350,7 +350,7 @@ function waiverNote(data: OrderEmailData): string {
   const text = data.waiverText || STORE_POLICY.waiver.text;
   const when = data.waiverAcceptedAt ? ` on ${formatDate(data.waiverAcceptedAt)}` : "";
   return `${label("Your consent at checkout")}
-${paragraph(`You confirmed${when}: &ldquo;${escape(text)}&rdquo; Delivery begins when we request the trade offer for your item, so the ${STORE_POLICY.returns.withdrawalDays}-day right of withdrawal no longer applies from that point. Our <a href="${SITE_URL}/policies/warranty" style="color:${C.ink};">item guarantee</a> still covers items we cannot deliver.`, "font-size:13px;")}`;
+${paragraph(`You confirmed${when}: &ldquo;${escape(text)}&rdquo; Delivery begins when we send the trade offer for your item, so the ${STORE_POLICY.returns.withdrawalDays}-day right of withdrawal no longer applies from that point. Our <a href="${SITE_URL}/policies/warranty" style="color:${C.ink};">item guarantee</a> still covers items we cannot deliver.`, "font-size:13px;")}`;
 }
 
 export async function sendWelcomeEmail(email: string, name?: string | null): Promise<boolean> {

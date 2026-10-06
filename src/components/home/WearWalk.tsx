@@ -10,7 +10,7 @@ import { Jaw } from "@/components/skin/FloatRuler";
 export function WearWalk({ wear, skin }: { wear: { code: string; product: SkinProduct | null }[]; skin: string | null }) {
   if (wear.every((w) => !w.product)) return null;
   return (
-    <section aria-labelledby="wear-title" data-pin="wear" data-section="wear" className="bg-surface-2">
+    <section aria-labelledby="wear-title" data-pin="wear" data-section="wear" className="overflow-x-clip bg-surface-2">
       <div data-wear-stage="" className="mx-auto max-w-wide px-gutter py-24">
         <div className="grid gap-x-6 gap-y-6 lg:grid-cols-12">
           <div className="lg:col-span-5">

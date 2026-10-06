@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { AlignRight, ChevronDown, CircleUser, Search, ShoppingCart } from "lucide-react";
 import { Wordmark } from "@/components/layout/BrandMark";
 import { useCart } from "@/providers/CartProvider";
@@ -39,8 +39,18 @@ export function CartCount({ count, bump }: { count: number; bump: number }) {
   );
 }
 
+function CatalogFilterProbe({ onChange }: { onChange: (slug: string | null) => void }) {
+  const params = useSearchParams();
+  const types = (params.get("type") ?? "").split(",").filter(Boolean);
+  const weapons = (params.get("weapon") ?? "").split(",").filter(Boolean);
+  const slug = types.length === 1 ? types[0] : types.length === 0 && weapons.length === 1 ? weapons[0] : null;
+  useEffect(() => onChange(slug), [slug, onChange]);
+  return null;
+}
+
 function StoreHeader() {
   const pathname = usePathname();
+  const [filterSlug, setFilterSlug] = useState<string | null>(null);
   const { itemCount, cartBounce, openSheet, isSheetOpen } = useCart();
   const { user } = useAuth();
   const steam = useSteamAccount(Boolean(user));
@@ -100,13 +110,17 @@ function StoreHeader() {
   }, [boardOpen, closeBoard]);
 
   const catalogSlug = catalogSlugFromPath(pathname);
-  const activeRoot = findRootSlug(categories, catalogSlug) ?? catalogSlug;
-  const boardActive = pathname === "/catalog" || (activeRoot !== null && !RIG_LINKS.includes(activeRoot));
+  const filteredSlug = pathname === "/catalog" ? filterSlug : null;
+  const activeRoot = findRootSlug(categories, catalogSlug ?? filteredSlug) ?? catalogSlug ?? filteredSlug;
+  const boardActive = (pathname === "/catalog" && !filteredSlug) || (activeRoot !== null && !RIG_LINKS.includes(activeRoot));
   const persona = steam.steam?.personaName ?? user?.firstName ?? user?.name ?? null;
   const avatar = steam.steam?.avatar ?? null;
 
   return (
     <>
+      <Suspense fallback={null}>
+        <CatalogFilterProbe onChange={setFilterSlug} />
+      </Suspense>
       <div aria-hidden="true" className="h-[var(--header-height-mobile)] shrink-0 lg:h-[var(--header-height)]" />
       <header
         data-header=""

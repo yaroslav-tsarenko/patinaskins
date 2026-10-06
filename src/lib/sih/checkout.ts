@@ -9,6 +9,7 @@ import { getPaymentProvider, PaymentUnavailableError } from "@/lib/payments/prov
 import { canonicalTradeUrl } from "@/lib/steam";
 import { sendAlert } from "@/lib/alerts/telegram";
 import { skinSpecText } from "@/lib/skins/cs2";
+import { ageOn } from "@/lib/validators/fields";
 import { sihClient } from "./client";
 import { computeSellPrice, round2 } from "./pricing";
 import { logSihEvent, applySihOrderObject } from "./orders";
@@ -191,6 +192,7 @@ export async function createSkinCheckout(input: SkinCheckoutInput): Promise<Skin
   const steam = user.steamAccount;
   if (!steam) throw new SkinCheckoutError("STEAM_NOT_LINKED", 409);
   if (!steam.tradeUrlVerified || !steam.tradeToken || !steam.tradePartnerId) throw new SkinCheckoutError("TRADE_URL_REQUIRED", 409);
+  if (!user.dateOfBirth || ageOn(user.dateOfBirth) < STORE_POLICY.minAge) throw new SkinCheckoutError("AGE_REQUIRED", 409);
 
   const ids = uniqueIds(input.items);
   if (ids.length === 0) throw new SkinCheckoutError("CART_EMPTY");

@@ -1,9 +1,11 @@
 import type { NextRequest } from "next/server";
+import { PRODUCT_FEEDS } from "@/config/catalog";
 import { feedContext, feedHeaders, loadFeedItems } from "@/lib/feeds/catalog";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
+  if (!PRODUCT_FEEDS.generic.enabled) return Response.json({ code: "FEED_DISABLED" }, { status: 404 });
   try {
     const [ctx, items] = await Promise.all([feedContext(request.nextUrl.searchParams.get("currency")), loadFeedItems()]);
     const products = items.map((item) => ({

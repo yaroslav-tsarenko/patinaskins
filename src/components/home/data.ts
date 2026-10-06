@@ -139,9 +139,10 @@ export async function getHomeData(): Promise<HomeData> {
   );
   claim(tierPicks.filter((id): id is string => Boolean(id)));
   const tierProducts = await loadSkinProducts(tierPicks.filter((id): id is string => Boolean(id)));
+  const contrabandCount = rarityRows.find((r) => r.rarity === "contraband")?.count ?? 0;
   const rarities: HomeRarityTier[] = tierSlugs.map((slug, i) => ({
     slug,
-    label: TIER_LABEL[slug],
+    label: slug === "gold" && contrabandCount > 0 ? "Extraordinary & Contraband" : TIER_LABEL[slug],
     keys: TIER_KEYS[slug],
     count: tierCounts.get(slug) ?? 0,
     product: tierProducts.find((p) => p.id === tierPicks[i]) ?? null,

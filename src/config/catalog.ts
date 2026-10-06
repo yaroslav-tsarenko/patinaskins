@@ -81,3 +81,22 @@ export const catalogConfig: CatalogConfig = {
 export function quotaTotal(): number {
   return catalogConfig.quotas.reduce((sum, q) => sum + q.cap, 0);
 }
+
+export type ProductFeedId = "google" | "facebook" | "generic";
+
+export const PRODUCT_FEEDS: Record<ProductFeedId, { enabled: boolean; reason: string }> = {
+  google: {
+    enabled: false,
+    reason: "Off: Google Shopping listings are built for goods that ship to an address. In-game items delivered by Steam trade offer are commonly disapproved, and repeated disapprovals can suspend the Merchant Center account.",
+  },
+  facebook: {
+    enabled: false,
+    reason: "Off: Meta's commerce policies do not allow digital products in catalogues and shops.",
+  },
+  generic: {
+    enabled: false,
+    reason: "Off: no partner consumes this feed yet. Turn it on in src/config/catalog.ts when one does.",
+  },
+};
+
+export const ANY_PRODUCT_FEED_ENABLED = Object.values(PRODUCT_FEEDS).some((feed) => feed.enabled);

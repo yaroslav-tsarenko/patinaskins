@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { SkinRow } from "@/components/skin/SkinTray";
 import { formatPrice } from "@/lib/utils/format-price";
 import { cn } from "@/lib/utils/cn";
+import { COMPANY } from "@/lib/company";
 import type { CartItem } from "@/types/cart";
 import type { Totals } from "@/lib/pricing";
 import type { ClientQuote } from "./useCheckoutQuote";
@@ -53,6 +54,13 @@ export function CheckoutCounter({ items, totals, currency, quote, loading, headi
       </ul>
 
       <TotalsList totals={totals} currency={currency} />
+
+      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 border-t border-line pt-4 text-ui-sm">
+        <dt className="text-ink-muted">{t("soldBy")}</dt>
+        <dd className="m-0 text-ink">{t("sellerLine", { company: COMPANY.name, address: COMPANY.registeredOffice })}</dd>
+        <dt className="text-ink-muted">{t("merchant")}</dt>
+        <dd className="m-0 text-ink">{COMPANY.name}</dd>
+      </dl>
 
       <ul className="m-0 flex list-none flex-wrap gap-x-4 gap-y-1 border-t border-line p-0 pt-4">
         {POLICY_LINKS.map((link) => (

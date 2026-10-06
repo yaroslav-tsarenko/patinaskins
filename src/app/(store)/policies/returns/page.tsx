@@ -37,7 +37,7 @@ const sections: PolicySection[] = [
           confirmation email.
         </p>
         <p>
-          Delivery begins when we request the Steam trade offer for an item. Until then you can cancel without charge: email {F.email} or use
+          Delivery begins when we send the Steam trade offer for an item. Until then you can cancel without charge: email {F.email} or use
           the <Link href="/contact">contact form</Link> with your order number.
         </p>
       </>

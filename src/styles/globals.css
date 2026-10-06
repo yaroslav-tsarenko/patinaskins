@@ -3,6 +3,13 @@
 @import "./animations.css";
 @import "./motion.css";
 
+@source not "../../package.json";
+@source not "../../README.md";
+@source not "../../scripts";
+@source not "../../.claude";
+@source not "../lib/sih";
+@source not "../../.env.example";
+
 @custom-variant dark ([data-theme="dark"] &);
 @custom-variant hover-device (@media (hover: hover) and (pointer: fine));
 @custom-variant touch-device {

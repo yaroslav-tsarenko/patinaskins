@@ -34,8 +34,8 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-.env
-.env*.local
+.env*
+!.env.example
 
 # vercel
 .vercel
@@ -45,12 +45,12 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
-claude-code-ecommerce-free.md
 
+# local data, caches and scratch output
+/data/
+/_dev/
 /public/_dev/
-/data/catalog-preview.json
-/data/r2-image-manifest.json
-/data/r2-image-manifest.json.tmp
-
-/data/bigbuy-cache/
-/data/catalog-preview.json
+/scratch/
+/tmp/
+*.cache
+invoice-sample*.pdf

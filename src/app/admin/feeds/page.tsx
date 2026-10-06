@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import { AdminButton as Button } from "@/components/admin/AdminButton/AdminButton";
 import { Copy, ExternalLink, Rss } from "lucide-react";
 import { toast } from "sonner";
+import { PRODUCT_FEEDS, type ProductFeedId } from "@/config/catalog";
 
-const feeds = [
+const feeds: { name: string; type: ProductFeedId; url: string; format: string }[] = [
   { name: "Google Merchant", type: "google", url: "/api/feeds/google", format: "XML" },
   { name: "Facebook / Instagram", type: "facebook", url: "/api/feeds/facebook", format: "CSV" },
   { name: "Generic Feed", type: "generic", url: "/api/feeds/generic", format: "JSON" },
@@ -39,16 +40,25 @@ export default function AdminFeedsPage() {
               <div>
                 <h3 style={{ fontWeight: 600, color: "var(--admin-text)" }}>{feed.name}</h3>
                 <p style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)", fontFamily: "var(--font-mono)" }}>{feed.url}</p>
+                {PRODUCT_FEEDS[feed.type].enabled ? null : (
+                  <p style={{ fontSize: "0.8125rem", color: "var(--admin-text-secondary)", marginTop: "0.375rem", maxWidth: "68ch" }}>{PRODUCT_FEEDS[feed.type].reason}</p>
+                )}
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span className="admin-badge admin-badge-default">{feed.format}</span>
-              <Button size="sm" variant="flat" startContent={<Copy size={14} />} onPress={() => copyUrl(feed.url)}>
-                Copy URL
-              </Button>
-              <Button size="sm" variant="flat" as="a" href={feed.url} target="_blank" startContent={<ExternalLink size={14} />}>
-                Preview
-              </Button>
+              {PRODUCT_FEEDS[feed.type].enabled ? (
+                <>
+                  <Button size="sm" variant="flat" startContent={<Copy size={14} />} onPress={() => copyUrl(feed.url)}>
+                    Copy URL
+                  </Button>
+                  <Button size="sm" variant="flat" as="a" href={feed.url} target="_blank" startContent={<ExternalLink size={14} />}>
+                    Preview
+                  </Button>
+                </>
+              ) : (
+                <span className="admin-badge admin-badge-default">Off</span>
+              )}
             </div>
           </motion.div>
         ))}

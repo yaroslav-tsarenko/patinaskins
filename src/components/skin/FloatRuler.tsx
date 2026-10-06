@@ -145,8 +145,10 @@ export function CalibratedRuler({
           ))}
           <RulerTicks minor={minor} />
           {draw && zones.length === 1 ? (
-            <span aria-hidden="true" data-ruler-scan="" className="pointer-events-none absolute inset-x-0 bottom-0 h-3" style={{ ["--scan-to" as string]: pct(zones[0].floatMax) }}>
-              <span className="absolute bottom-0 left-0 h-3 w-px bg-ink" />
+            <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-3 overflow-hidden">
+              <span data-ruler-scan="" className="absolute inset-0" style={{ ["--scan-to" as string]: pct(zones[0].floatMax) }}>
+                <span className="absolute bottom-0 left-0 h-3 w-px bg-ink" />
+              </span>
             </span>
           ) : null}
           {jaw !== null ? (

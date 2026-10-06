@@ -81,6 +81,7 @@ const KNOWN_PROBLEMS = [
   "PRICE_UNAVAILABLE",
   "STEAM_NOT_LINKED",
   "TRADE_URL_REQUIRED",
+  "AGE_REQUIRED",
   "CART_EMPTY",
   "INVALID_REQUEST",
   "RATE_LIMITED",
@@ -295,6 +296,7 @@ export function CheckoutView() {
       max: p.max ?? STORE_POLICY.limits.maxItemsPerOrder,
       total: formatPrice((p as SubmitProblem).total ?? totals.total, currency),
       email: COMPANY.email,
+      minAge: STORE_POLICY.minAge,
     });
   };
 

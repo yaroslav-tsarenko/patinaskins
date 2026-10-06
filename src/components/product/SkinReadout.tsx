@@ -71,7 +71,7 @@ function ExteriorSwitch({ options }: { options: ExteriorOption[] }) {
                   <span className="sr-only">{def?.label}, this listing</span>
                 </span>
               ) : o.slug ? (
-                <Link href={`/product/${o.slug}`} className={cn(base, "text-ink-muted transition-colors duration-[140ms] hover-device:hover:bg-raised hover-device:hover:text-ink")} aria-label={`${def?.label}${o.price !== null ? `, from ${formatPrice(convert(o.price), currency)}` : ""}`}>
+                <Link href={`/product/${o.slug}`} className={cn(base, "text-ink-muted transition-colors duration-[140ms] hover-device:hover:bg-raised hover-device:hover:text-ink")} aria-label={`${def?.label}${o.price !== null ? `, ${formatPrice(convert(o.price), currency)}` : ""}`}>
                   {body}
                 </Link>
               ) : (
