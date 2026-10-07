@@ -32,8 +32,8 @@ const sections: PolicySection[] = [
           right is lost.
         </p>
         <p>
-          Our items are delivered straight after payment. At checkout you tick a separate box, which is not ticked in advance: &ldquo;
-          {F.waiverText}&rdquo; Without it the order cannot be placed. We store the time and the wording with your order and repeat it in your
+          Our items are delivered straight after payment. At checkout you tick a separate box, which is not ticked in advance: “
+          {F.waiverText}” Without it the order cannot be placed. We store the time and the wording with your order and repeat it in your
           confirmation email.
         </p>
         <p>
@@ -89,8 +89,8 @@ const sections: PolicySection[] = [
           a few further working days to show it on your statement.
         </p>
         <p>
-          Each item on your <Link href="/account/orders">order page</Link> shows its status, including &ldquo;Refund pending&rdquo; and
-          &ldquo;Refunded&rdquo;. We also email you when a refund is issued.
+          Each item on your <Link href="/account/orders">order page</Link> shows its status, including “Refund pending” and
+          “Refunded”. We also email you when a refund is issued.
         </p>
       </>
     ),

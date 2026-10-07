@@ -21,7 +21,7 @@ export default async function NotFound() {
         <div className="lg:col-span-5 lg:col-start-8 lg:pt-6">
           <p className="eyebrow m-0">Error 404</p>
           <h1 className="m-0 mt-3 text-step-5 font-[650] leading-none tracking-[-0.01em] text-ink">Nothing under the lamp</h1>
-          <p className="m-0 mt-4 max-w-[46ch] text-step-1 leading-[1.5] text-ink-muted">This page doesn&apos;t exist or the skin is no longer listed.</p>
+          <p className="m-0 mt-4 max-w-[46ch] text-step-1 leading-[1.5] text-ink-muted">This page doesn’t exist or the skin is no longer listed.</p>
 
           <form action="/search" method="get" role="search" className="mt-8 flex max-w-[34rem] items-end gap-3">
             <Input name="q" type="search" label={t("searchLabel")} placeholder="Search skins" wrapperClassName="flex-1" autoComplete="off" />

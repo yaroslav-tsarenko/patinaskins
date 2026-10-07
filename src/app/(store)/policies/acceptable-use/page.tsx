@@ -25,7 +25,7 @@ const sections: PolicySection[] = [
       <ul>
         <li>You must be {F.minAge} or over to hold an account.</li>
         <li>One account per person, registered in your own name with accurate details.</li>
-        <li>Keep your password private. Do not share your account or use someone else&rsquo;s.</li>
+        <li>Keep your password private. Do not share your account or use someone else’s.</li>
         <li>
           Accounts may not be opened from, or used to order for delivery to, {F.restrictedCountries} or {F.restrictedTerritories}. Do not
           use a VPN, proxy or false address to get around this.
@@ -43,7 +43,7 @@ const sections: PolicySection[] = [
         <li>Linking a Steam account or saving a trade URL that is not your own, or using {F.brand} to move items between accounts for someone else.</li>
         <li>Accepting an item and then reversing the trade, or opening a chargeback for an item you received, to obtain the item without paying.</li>
         <li>Automated access that puts load on the site, such as scraping, bulk account creation or repeated checkout attempts.</li>
-        <li>Trying to access other customers&rsquo; data, our admin area or systems you are not authorised to use, or testing for security weaknesses without our written permission.</li>
+        <li>Trying to access other customers’ data, our admin area or systems you are not authorised to use, or testing for security weaknesses without our written permission.</li>
         <li>Uploading or sending malware, spam or anything unlawful.</li>
       </ul>
     ),

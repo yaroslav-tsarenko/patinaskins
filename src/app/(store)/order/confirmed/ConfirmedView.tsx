@@ -193,7 +193,7 @@ export function ConfirmedView() {
         <div className="flex flex-col gap-4">
           {heading(order.paymentStatus === "PAID" ? "Payment confirmed" : "Payment received")}
           <OrderId number={order.number} />
-          <p className="measure m-0 text-step-1 text-ink-muted">We&apos;ve sent a receipt to {order.email}. {t("confirmedState.paid", { total: formatPrice(order.totals.total, order.currency) })}</p>
+          <p className="measure m-0 text-step-1 text-ink-muted">We’ve sent a receipt to {order.email}. {t("confirmedState.paid", { total: formatPrice(order.totals.total, order.currency) })}</p>
         </div>
         <OrderSummary order={order} live />
         <div className="flex flex-wrap items-center gap-4 border-t border-line pt-8">

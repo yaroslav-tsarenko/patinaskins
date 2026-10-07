@@ -37,7 +37,7 @@ const sections: PolicySection[] = [
         </ul>
         <p>
           You save your trade URL under <Link href="/account/steam">Steam account</Link>. You find it in Steam under Inventory, Trade
-          Offers, &ldquo;Who can send me Trade Offers?&rdquo;. We check that the trade URL belongs to the Steam account you linked.
+          Offers, “Who can send me Trade Offers?”. We check that the trade URL belongs to the Steam account you linked.
         </p>
       </>
     ),
@@ -114,7 +114,7 @@ const sections: PolicySection[] = [
     body: (
       <p>
         An item is delivered when you accept the trade offer and it appears in your Steam inventory. It is held in your Steam account under
-        Steam&rsquo;s terms of service. Questions about an order: email {F.email}.
+        Steam’s terms of service. Questions about an order: email {F.email}.
       </p>
     ),
   },

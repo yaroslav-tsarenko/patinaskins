@@ -209,7 +209,7 @@ export function SkinReadout({ product, breadcrumbs, exteriors, markSwitch, weapo
               Out of stock
             </Button>
             <p className="m-0 text-ui-md text-ink-muted">
-              This exact skin isn&apos;t in stock right now.{" "}
+              This exact skin isn’t in stock right now.{" "}
               {weaponHref ? (
                 <Link href={weaponHref} className="font-semibold text-ink underline decoration-1 underline-offset-4">
                   See other {skin?.weapon ?? ""} skins

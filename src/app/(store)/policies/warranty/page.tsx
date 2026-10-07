@@ -63,7 +63,7 @@ const sections: PolicySection[] = [
     body: (
       <p>
         Most failed deliveries and reversed trades are reported to us by our delivery partner. When that happens, the item shows
-        &ldquo;Refund pending&rdquo; on your <Link href="/account/orders">order page</Link> and we refund it without you needing to write to us.
+        “Refund pending” on your <Link href="/account/orders">order page</Link> and we refund it without you needing to write to us.
       </p>
     ),
   },

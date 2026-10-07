@@ -68,7 +68,7 @@ const sections: PolicySection[] = [
           </strong>
         </p>
         <p>
-          You enter your card details on the provider&rsquo;s hosted payment page, not on our website. Payments are protected by 3-D Secure
+          You enter your card details on the provider’s hosted payment page, not on our website. Payments are protected by 3-D Secure
           and Strong Customer Authentication (SCA), so your bank may ask you to confirm a payment, for example in your banking app. We
           receive only the result of the payment and a transaction reference.
         </p>
@@ -129,7 +129,7 @@ const sections: PolicySection[] = [
     title: "International transfers",
     body: (
       <p>
-        Steam is operated by Valve Corporation in the United States, and Steam sign-in and trade offers are processed there under Valve&rsquo;s
+        Steam is operated by Valve Corporation in the United States, and Steam sign-in and trade offers are processed there under Valve’s
         own privacy policy. Our item delivery partner receives your Steam ID and trade token to send the offer. Where a service provider
         processes data outside the UK or the European Economic Area, we use an adequacy decision or standard contractual clauses (with the UK
         International Data Transfer Addendum for UK data).
@@ -167,7 +167,7 @@ const sections: PolicySection[] = [
           request.
         </p>
         <p>
-          You can complain to a supervisory authority: in the United Kingdom, the Information Commissioner&rsquo;s Office (ico.org.uk); in
+          You can complain to a supervisory authority: in the United Kingdom, the Information Commissioner’s Office (ico.org.uk); in
           the European Union, the data protection authority of the country where you live or work. We would appreciate the chance to deal
           with your concern first.
         </p>

@@ -86,10 +86,10 @@ export default function HowItWorksPage() {
 
       <section aria-labelledby="steam-rules" className="mt-24 border-t border-line pt-12">
         <h2 id="steam-rules" className="m-0 text-step-3 font-semibold leading-[1.1] text-ink">
-          Steam&apos;s own rules
+          Steam’s own rules
         </h2>
         <p className="measure m-0 mt-4 text-step-0 leading-[1.7] text-ink-muted">
-          Steam may keep items you receive in a trade under trade protection for up to {d.tradeProtectionDays} days, during which they can&apos;t be traded or sold. Accounts without the Steam Guard Mobile Authenticator can see trade holds of up to {d.tradeHoldMaxDays} days. These are Valve&apos;s rules and apply to every trade, whoever it&apos;s with. Read more in our{" "}
+          Steam may keep items you receive in a trade under trade protection for up to {d.tradeProtectionDays} days, during which they can’t be traded or sold. Accounts without the Steam Guard Mobile Authenticator can see trade holds of up to {d.tradeHoldMaxDays} days. These are Valve’s rules and apply to every trade, whoever it’s with. Read more in our{" "}
           <Link href="/policies/shipping" className="font-semibold text-ink underline underline-offset-4">
             delivery policy
           </Link>

@@ -33,7 +33,7 @@ export function SteamAccountBlock({
         <Button as="a" href={`/api/auth/steam?link=1&next=${encodeURIComponent(nextPath)}`} variant="steam">
           Sign in through Steam
         </Button>
-        <p className="m-0 text-ui-sm text-ink-muted">You sign in on Steam&apos;s own page. We never see your Steam password or Steam Guard codes.</p>
+        <p className="m-0 text-ui-sm text-ink-muted">You sign in on Steam’s own page. We never see your Steam password or Steam Guard codes.</p>
       </div>
     );
   }

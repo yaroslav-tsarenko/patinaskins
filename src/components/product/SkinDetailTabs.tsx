@@ -46,7 +46,7 @@ export function SkinDetailTabs({ skin, className }: { skin: SkinSummary | null; 
         </table>
       ) : null}
       <div className={reading}>
-        <p className="m-0">The image is Steam&apos;s standard render for this skin. Wear and pattern on your copy may differ.</p>
+        <p className="m-0">The image is Steam’s standard render for this skin. Wear and pattern on your copy may differ.</p>
         {range ? <p className="m-0 mt-4">The float of the copy you receive falls inside {range}, the range for its exterior. Steam shows the exact value after delivery.</p> : null}
       </div>
     </div>

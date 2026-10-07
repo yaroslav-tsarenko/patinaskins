@@ -15,7 +15,7 @@ const sections: PolicySection[] = [
       <>
         <p>
           These terms apply to every order placed on {F.domain}. {F.brand} is a trading name of {F.company}. When these terms say
-          &ldquo;we&rdquo;, &ldquo;us&rdquo; or &ldquo;our&rdquo;, they mean {F.company}. &ldquo;You&rdquo; means the person placing the order.
+          “we”, “us” or “our”, they mean {F.company}. “You” means the person placing the order.
         </p>
         <SellerBlock />
         <p>
@@ -80,7 +80,7 @@ const sections: PolicySection[] = [
           images for the item.
         </p>
         <p>
-          Items exist inside Steam, a service run by Valve Corporation. {F.brand} is not affiliated with or endorsed by Valve. Steam&rsquo;s
+          Items exist inside Steam, a service run by Valve Corporation. {F.brand} is not affiliated with or endorsed by Valve. Steam’s
           own terms, including the Steam Subscriber Agreement, apply to your Steam account and to items in it. Valve can change how items
           work, how they can be traded or whether they remain available in the game.
         </p>
@@ -97,7 +97,7 @@ const sections: PolicySection[] = [
           <li>You add items to your bag and go to checkout, where you enter your contact details and billing address.</li>
           <li>We check the current price of each item. If a price has gone up, we show you the new total before you can pay.</li>
           <li>You tick the box to agree to these terms and, separately, the box asking us to start delivery straight away, and select Pay.</li>
-          <li>You are taken to our payment provider&rsquo;s hosted page to pay by card.</li>
+          <li>You are taken to our payment provider’s hosted page to pay by card.</li>
           <li>Once the payment provider confirms the payment to us, we email you an order confirmation. The contract between you and {F.company} is formed when we send that email.</li>
         </ol>
         <p>
@@ -181,7 +181,7 @@ const sections: PolicySection[] = [
           once delivery of the digital content has begun with your express consent and your acknowledgement that you lose the right.
         </p>
         <p>
-          At checkout there is a separate box, which is not ticked in advance: &ldquo;{F.waiverText}&rdquo; You cannot place an order without
+          At checkout there is a separate box, which is not ticked in advance: “{F.waiverText}” You cannot place an order without
           ticking it. We record the time you ticked it and the wording you agreed to, and we repeat it in your order confirmation email.
           Delivery begins when we send the trade offer for your item, which happens straight after your payment is confirmed.
         </p>

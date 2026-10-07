@@ -75,7 +75,7 @@ export function CartSheet() {
                   <dd className="price m-0 text-step-2 leading-none text-ink">{formatPrice(displayTotals.total, currency)}</dd>
                 </div>
               </dl>
-              <p className="m-0 mt-3 text-ui-sm text-ink-muted">Prices are re-confirmed when you pay. If one changes, you&apos;ll see it before paying.</p>
+              <p className="m-0 mt-3 text-ui-sm text-ink-muted">Prices are re-confirmed when you pay. If one changes, you’ll see it before paying.</p>
               <Button as={Link} href="/checkout" size="lg" fullWidth onClick={closeSheet} className="mt-5">
                 Checkout
               </Button>

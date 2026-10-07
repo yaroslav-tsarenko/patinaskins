@@ -117,7 +117,7 @@ export function CartView() {
                 {t("summary")}
               </h2>
               <TotalsList totals={displayTotals} currency={currency} />
-              <p className="m-0 mt-4 text-ui-sm text-ink-muted">Prices are re-confirmed when you pay. If one changes, you&apos;ll see it before paying.</p>
+              <p className="m-0 mt-4 text-ui-sm text-ink-muted">Prices are re-confirmed when you pay. If one changes, you’ll see it before paying.</p>
               <Button as={Link} href="/checkout" size="lg" fullWidth className="mt-6">
                 {t("checkout")}
               </Button>

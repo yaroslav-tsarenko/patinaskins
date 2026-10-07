@@ -196,7 +196,7 @@ export function SearchDialog({ open, onClose, categories }: { open: boolean; onC
 
           {empty ? (
             <div className="pt-6" role="status">
-              <p className="m-0 text-step-1 text-ink">Nothing matches &ldquo;{results?.q}&rdquo;.</p>
+              <p className="m-0 text-step-1 text-ink">Nothing matches “{results?.q}”.</p>
               <p className="m-0 mt-2 text-ui-md text-ink-muted">Try a weapon name, or start from a weapon type:</p>
               <ul className="m-0 mt-3 flex list-none flex-wrap gap-x-6 gap-y-2 p-0">
                 {NAV_CATEGORIES.map((c) => (
