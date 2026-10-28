@@ -54,3 +54,6 @@ next-env.d.ts
 /tmp/
 *.cache
 invoice-sample*.pdf
+
+# local credentials
+/addons

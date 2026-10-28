@@ -12,14 +12,14 @@ export const COMPANY: {
   email: string;
   supportHours: string;
 } = {
-  name: "COMPANY NAME",
-  companyNumber: "[REG_NUMBER]",
-  vatNumber: "[VAT_NUMBER]",
+  name: "HIGHER MARGINS LTD",
+  companyNumber: "15605091",
+  vatNumber: "",
   vatRegistered: false,
-  addressLine: "[COMPANY ADDRESS]",
-  country: "[COUNTRY]",
-  registeredOffice: "[COMPANY ADDRESS]",
+  addressLine: "20 Wenlock Road, London, England, N1 7GU",
+  country: "United Kingdom",
+  registeredOffice: "20 Wenlock Road, London, England, N1 7GU",
   phone: null,
-  email: "youremail@example.com",
+  email: "info@patinaskins.com",
   supportHours: "Mon–Fri, 09:00–18:00 (GMT)",
 };
