@@ -35,6 +35,11 @@ export function AccountOverview() {
     <div>
       <AccountPageHeader title={firstName ? t("title", { name: firstName }) : t("titleNoName")}>
         <p className="m-0 text-ink-muted">{user?.email ? t("signedInAs", { email: user.email }) : t("signedInSteam")}</p>
+        {user?.balance && user.balance > 0 ? (
+          <p className="m-0 mt-1 text-ink">
+            Test balance: <span className="font-mono font-semibold">{formatPrice(user.balance, "USD")}</span>
+          </p>
+        ) : null}
       </AccountPageHeader>
 
       {welcome ? (

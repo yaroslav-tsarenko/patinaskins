@@ -119,7 +119,7 @@ export function CheckoutView() {
   const searchParams = useSearchParams();
   const { cart, displayTotals, isHydrated, removeItem } = useCart();
   const { user, loading: authLoading } = useAuth();
-  const { currency } = useCurrency();
+  const { currency, convert } = useCurrency();
   const steamAccount = useSteamAccount(Boolean(user));
   const [step, setStep] = useState(0);
   const [errorSummary, setErrorSummary] = useState<StepperErrorSummary | null>(null);
@@ -252,7 +252,7 @@ export function CheckoutView() {
     goTo(Math.min(step + 1, LAST_STEP));
   };
 
-  const pay = form.handleSubmit(
+  const submitWith = (payWith: "card" | "balance") => form.handleSubmit(
     async (data) => {
       if (!quote || !quoteReady || !steamReady) return;
       setSubmitting(true);
@@ -262,7 +262,7 @@ export function CheckoutView() {
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: quotePayloadItems(cart.items), currency, form: data, expectedTotal: quote.totals.total }),
+          body: JSON.stringify({ items: quotePayloadItems(cart.items), currency, form: data, expectedTotal: quote.totals.total, payWith }),
         });
         const body = await res.json().catch(() => ({ code: "SERVER_ERROR" }));
         if (res.ok && typeof body.paymentLink === "string" && (/^https:\/\//.test(body.paymentLink) || (process.env.NODE_ENV !== "production" && /^http:\/\/localhost[:/]/.test(body.paymentLink)))) {
@@ -287,6 +287,10 @@ export function CheckoutView() {
       setErrorSummary(buildSummary(STEP_FIELDS[target]));
     },
   );
+  const pay = submitWith("card");
+  const payBalance = submitWith("balance");
+  // Test accounts only: a balance in the base currency, shown in the cart currency.
+  const balance = user?.balance && user.balance > 0 ? convert(user.balance) : null;
 
   const problemText = (p: SubmitProblem | QuoteProblem | null) => {
     if (!p) return null;
@@ -543,6 +547,25 @@ export function CheckoutView() {
             {payLabel}
           </Button>
         </div>
+        {balance !== null ? (
+          <div className="flex flex-col gap-2 border-t border-line pt-5">
+            <Button
+              variant="outline"
+              size="lg"
+              isDisabled={!accepted || !quoteReady || !steamReady || priceIssueOpen || !quote || balance < quote.totals.total}
+              isLoading={submitting}
+              onPress={() => payBalance()}
+              className="max-sm:w-full"
+            >
+              {`Pay with test balance (${formatPrice(balance, currency)} available)`}
+            </Button>
+            {quote && balance < quote.totals.total ? (
+              <p className="m-0 text-ui-sm text-ink-muted">Your test balance does not cover this order.</p>
+            ) : (
+              <p className="m-0 text-ui-sm text-ink-muted">Test order: paid from your test balance and never sent to the supplier.</p>
+            )}
+          </div>
+        ) : null}
         <div className="flex flex-col gap-3 border-t border-line pt-5">
           <PaymentLogos height={28} />
           <p className="m-0 text-ui-sm text-ink-muted">Card payments are processed securely by {provider}. We never see or store your full card number.</p>

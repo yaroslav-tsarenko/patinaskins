@@ -14,6 +14,7 @@ export async function GET() {
         lastName: user.lastName,
         phone: user.phone,
         role: user.role,
+        balance: Number(user.balance),
       },
     });
   } catch (error) {

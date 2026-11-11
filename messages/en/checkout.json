@@ -108,7 +108,9 @@
     "RATE_LIMITED": "Too many attempts in a short time. Wait a minute and try again.",
     "UNAUTHORISED": "Your session has ended. Sign in again to continue.",
     "NETWORK": "We couldn't reach the store. Check your connection and try again.",
-    "SERVER_ERROR": "Something went wrong on our side. Nothing has been charged. Please try again."
+    "SERVER_ERROR": "Something went wrong on our side. Nothing has been charged. Please try again.",
+    "BALANCE_TOO_LOW": "Your test balance doesn't cover this order. Nothing has been charged.",
+    "BALANCE_UNAVAILABLE": "This account has no test balance."
   },
   "confirmed": {
     "meta": {

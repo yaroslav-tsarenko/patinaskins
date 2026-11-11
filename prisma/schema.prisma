@@ -18,6 +18,8 @@ model User {
   dateOfBirth  DateTime?
   avatarUrl    String?
   role         UserRole  @default(CUSTOMER)
+  // Test balance (base currency). Only test accounts get one; it pays orders that never reach the supplier.
+  balance      Decimal   @default(0) @db.Decimal(12, 2)
   phone        String?
   termsAcceptedAt DateTime?
 

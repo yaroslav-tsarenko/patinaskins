@@ -51,7 +51,14 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
       <div className="admin-page-header" style={{ marginBottom: "2rem" }}>
         <h1 className="admin-page-title">Order #{order.orderNumber.slice(-8)}</h1>
         <Chip size="lg">{order.status}</Chip>
+        {order.paymentMethod === "balance" ? <Chip size="lg" color="warning">TEST · paid from balance</Chip> : null}
       </div>
+      {order.notes ? (
+        <div className="admin-info-card" style={{ marginBottom: "1.5rem" }}>
+          <h3>Notes</h3>
+          <p style={{ fontSize: "0.875rem", color: "var(--admin-text)", whiteSpace: "pre-wrap" }}>{order.notes}</p>
+        </div>
+      ) : null}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
         <div className="admin-info-card">

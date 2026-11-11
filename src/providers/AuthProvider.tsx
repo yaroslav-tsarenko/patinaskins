@@ -10,6 +10,8 @@ interface AuthUser {
   lastName?: string | null;
   role: string;
   phone?: string | null;
+  /** Test balance in the store's base currency; only test accounts have one. */
+  balance?: number;
 }
 
 interface AuthContextType {

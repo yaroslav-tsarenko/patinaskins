@@ -55,6 +55,7 @@ export const checkoutQuoteSchema = z.object({
 export const checkoutRequestSchema = checkoutQuoteSchema.extend({
   form: checkoutFormSchema,
   expectedTotal: z.number().nonnegative(),
+  payWith: z.enum(["card", "balance"]).optional(),
 });
 
 export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;

@@ -12,6 +12,7 @@ interface Order {
   id: string;
   orderNumber: string;
   status: string;
+  paymentMethod?: string | null;
   total: number;
   createdAt: string;
   user: { name: string | null; email: string };
@@ -81,6 +82,7 @@ export default function AdminOrdersPage() {
                   <td>{order.user.name || order.user.email}</td>
                   <td style={{ textAlign: "center" }}>
                     <Chip size="sm" color={statusColors[order.status]}>{order.status}</Chip>
+                    {order.paymentMethod === "balance" ? <Chip size="sm" color="warning" style={{ marginLeft: 6 }}>TEST</Chip> : null}
                   </td>
                   <td style={{ textAlign: "right", fontWeight: 600, color: "var(--admin-text)" }}>{formatPrice(Number(order.total))}</td>
                   <td style={{ textAlign: "right", color: "var(--admin-text-muted)" }}>{format(new Date(order.createdAt), "MMM d, yyyy")}</td>

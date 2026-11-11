@@ -20,15 +20,18 @@ export async function POST(request: NextRequest) {
     const limited = rateLimitResponse(consumeRateLimit("checkout", user.id));
     if (limited) return limited;
 
-    const provider = getPaymentProvider();
-    if (!provider.available) {
-      return NextResponse.json({ code: "PAYMENTS_NOT_CONNECTED" }, { status: 503 });
-    }
-    if (!hasEnv("SIH_API_KEY")) {
-      return NextResponse.json({ code: "PAYMENT_UNAVAILABLE" }, { status: 503 });
+    const body = checkoutRequestSchema.parse(await request.json());
+    const payWith = body.payWith ?? "card";
+    if (payWith === "card") {
+      const provider = getPaymentProvider();
+      if (!provider.available) {
+        return NextResponse.json({ code: "PAYMENTS_NOT_CONNECTED" }, { status: 503 });
+      }
+      if (!hasEnv("SIH_API_KEY")) {
+        return NextResponse.json({ code: "PAYMENT_UNAVAILABLE" }, { status: 503 });
+      }
     }
 
-    const body = checkoutRequestSchema.parse(await request.json());
     const { form } = body;
     const phone = form.contact.phone ? composePhone(form.contact.phoneCountry, form.contact.phone, dialCodeFor(form.contact.phoneCountry)) : null;
     const ip = clientIp(request);
@@ -50,6 +53,7 @@ export async function POST(request: NextRequest) {
       },
       ip: ip === "unknown" ? "127.0.0.1" : ip,
       baseUrl: getBaseUrl(),
+      payWith,
     });
     return NextResponse.json({ orderId: result.orderId, paymentLink: result.paymentUrl }, { status: 201 });
   } catch (error) {

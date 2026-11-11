@@ -13,8 +13,12 @@ import { ageOn } from "@/lib/validators/fields";
 import { sihClient } from "./client";
 import { computeSellPrice, round2 } from "./pricing";
 import { logSihEvent, applySihOrderObject } from "./orders";
-import { refreshOrderStatus } from "./order-status";
+import { loadOrderForEmail, orderEmailPayload, refreshOrderStatus } from "./order-status";
 import { SihError, userMessageForSih } from "./errors";
+import { hasEnv } from "@/lib/env";
+import { scheduleEmail } from "@/lib/email-jobs";
+import { sendOrderConfirmationEmail, sendOrderInvoiceEmail } from "@/lib/email";
+import { BALANCE_ORDER_NOTE, BALANCE_PAYMENT_METHOD, debitBalance } from "@/lib/balance";
 
 export class SkinCheckoutError extends Error {
   constructor(
@@ -176,6 +180,8 @@ export interface SkinCheckoutInput {
   billing: { firstName: string; lastName: string; address1: string; address2: string | null; city: string; postalCode: string; country: string };
   ip: string;
   baseUrl: string;
+  /** "balance" pays from the user's test balance: the order is paid at once and never sent to the supplier. */
+  payWith?: "card" | "balance";
 }
 
 export interface SkinCheckoutResult {
@@ -184,6 +190,7 @@ export interface SkinCheckoutResult {
 }
 
 export async function createSkinCheckout(input: SkinCheckoutInput): Promise<SkinCheckoutResult> {
+  if (input.payWith === "balance") return createBalanceCheckout(input);
   const provider = getPaymentProvider();
   if (!provider.available) throw new PaymentUnavailableError(provider.id);
 
@@ -311,6 +318,98 @@ export async function createSkinCheckout(input: SkinCheckoutInput): Promise<Skin
     if (err instanceof PaymentUnavailableError) throw err;
     throw new SkinCheckoutError("PAYMENT_LINK_FAILED", 502);
   }
+}
+
+// Test-balance checkout. Same checks and order record as a card order, but the order is paid at
+// once from the balance, carries a TEST note and gets no SihOrder rows, so nothing is ever bought.
+async function createBalanceCheckout(input: SkinCheckoutInput): Promise<SkinCheckoutResult> {
+  const user = await prisma.user.findUnique({ where: { id: input.userId }, include: { steamAccount: true } });
+  if (!user) throw new SkinCheckoutError("UNAUTHORISED", 401);
+  if (Number(user.balance) <= 0) throw new SkinCheckoutError("BALANCE_UNAVAILABLE", 403);
+  if (!user.dateOfBirth || ageOn(user.dateOfBirth) < STORE_POLICY.minAge) throw new SkinCheckoutError("AGE_REQUIRED", 409);
+  const steam = user.steamAccount;
+
+  const ids = uniqueIds(input.items);
+  if (ids.length === 0) throw new SkinCheckoutError("CART_EMPTY");
+  if (ids.length > STORE_POLICY.limits.maxItemsPerOrder) {
+    throw new SkinCheckoutError("ORDER_LIMIT", 409, { max: STORE_POLICY.limits.maxItemsPerOrder });
+  }
+
+  const products = await loadSellable(ids);
+  // Read-only price check against the supplier; no order is placed with it.
+  const live = hasEnv("SIH_API_KEY") ? await confirmLivePrices(products) : [];
+  const quote = await buildSkinQuote({ items: ids.map((productId) => ({ productId })), currency: input.currency });
+  if (live.some((l) => l.repriced) || Math.abs(quote.charge.total - input.expectedTotal) > 0.009) {
+    throw new SkinCheckoutError("TOTAL_CHANGED", 409, { quote: publicSkinQuote(quote) });
+  }
+
+  const now = new Date();
+  const address = {
+    firstName: input.billing.firstName,
+    lastName: input.billing.lastName,
+    address1: input.billing.address1,
+    address2: input.billing.address2,
+    city: input.billing.city,
+    postalCode: input.billing.postalCode,
+    country: input.billing.country.toUpperCase(),
+  };
+  const tradeUrl = steam?.tradePartnerId && steam.tradeToken ? canonicalTradeUrl({ partnerId: steam.tradePartnerId, token: steam.tradeToken }) : null;
+
+  const order = await prisma.$transaction(async (tx) => {
+    if (!(await debitBalance(tx, user.id, quote.base.total))) {
+      throw new SkinCheckoutError("BALANCE_TOO_LOW", 409, { balance: Number(user.balance) });
+    }
+    return tx.order.create({
+      data: {
+        userId: user.id,
+        customerName: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
+        customerEmail: input.contact.email,
+        customerPhone: input.contact.phone,
+        shippingAddress: address,
+        billingAddress: address,
+        shippingMethod: "steam_trade",
+        shippingCost: 0,
+        subtotal: quote.base.subtotal,
+        taxAmount: quote.base.vat,
+        discountAmount: 0,
+        total: quote.base.total,
+        currency: quote.currency,
+        exchangeRate: quote.rate,
+        chargeTotal: quote.charge.total,
+        termsAcceptedAt: now,
+        waiverAcceptedAt: now,
+        waiverText: STORE_POLICY.waiver.text,
+        waiverVersion: STORE_POLICY.waiver.version,
+        steamId: steam?.steamId64 ?? null,
+        tradeUrl,
+        paymentMethod: BALANCE_PAYMENT_METHOD,
+        paymentId: `balance_${crypto.randomUUID()}`,
+        paymentStatus: "PAID",
+        status: "CONFIRMED",
+        paidAt: now,
+        notes: BALANCE_ORDER_NOTE,
+        items: {
+          create: quote.lines.map((line, index) => ({
+            productId: line.productId,
+            productName: line.name,
+            productSku: line.sku,
+            variantName: line.spec,
+            quantity: 1,
+            price: line.basePrice,
+            total: quote.base.lines[index].total,
+          })),
+        },
+      },
+    });
+  });
+
+  const full = await loadOrderForEmail(order.id);
+  if (full) {
+    const payload = orderEmailPayload(full);
+    scheduleEmail(`order confirmation ${full.orderNumber}`, () => sendOrderConfirmationEmail(payload));
+    scheduleEmail(`order invoice ${full.orderNumber}`, () => sendOrderInvoiceEmail(payload));
+  }
+  return { orderId: order.id, paymentUrl: `${input.baseUrl}/order/confirmed?order=${order.id}` };
 }
 
 export async function submitOrderToSih(orderId: string): Promise<void> {
