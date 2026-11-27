@@ -1,4 +1,5 @@
 import { BRAND, SITE_URL } from "@/lib/brand";
+import { SOCIAL_LINKS } from "@/lib/social";
 import { COMPANY } from "@/lib/company";
 import { defaultLocale, localeTags } from "@/i18n/config";
 import { absoluteUrl } from "./url";
@@ -6,7 +7,7 @@ import { absoluteUrl } from "./url";
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;
 
-const SOCIAL_PROFILES = [process.env.NEXT_PUBLIC_INSTAGRAM_URL, process.env.NEXT_PUBLIC_LINKEDIN_URL].filter((url): url is string => Boolean(url));
+const SOCIAL_PROFILES = SOCIAL_LINKS.map((s) => s.href);
 
 export function organizationJsonLd(): Record<string, unknown> {
   return {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CheckoutFooter } from "@/components/checkout/CheckoutFrame";
 import { BRAND } from "@/lib/brand";
+import { SOCIAL_LINKS } from "@/lib/social";
 import { HELP_LINKS, NAV_CATEGORIES, ORDER_LINKS, POLICY_LINKS } from "@/config/navigation";
 import { openCookieSettings } from "@/lib/consent";
 import { Accordion, AccordionItem } from "@/components/ui/Accordion";
@@ -13,11 +14,7 @@ import { CredentialsSheet } from "@/components/layout/Credentials/CredentialsShe
 
 const linkCls = "text-ui-md text-ink decoration-1 underline-offset-4 hover-device:hover:underline";
 
-const SOCIAL = [
-  { label: "Instagram", href: process.env.NEXT_PUBLIC_INSTAGRAM_URL },
-  { label: "LinkedIn", href: process.env.NEXT_PUBLIC_LINKEDIN_URL },
-  { label: "Facebook", href: process.env.NEXT_PUBLIC_FACEBOOK_URL },
-].filter((s): s is { label: string; href: string } => Boolean(s.href));
+const SOCIAL = SOCIAL_LINKS;
 
 function LinkList({ links, children }: { links: { href: string; label: string }[]; children?: React.ReactNode }) {
   return (

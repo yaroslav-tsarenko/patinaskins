@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/brand";
+import { SITE_URL, publicOrigin } from "@/lib/brand";
 
 const STEAM_OPENID = "https://steamcommunity.com/openid/login";
 const OPENID_NS = "http://specs.openid.net/auth/2.0";
@@ -6,7 +6,7 @@ const IDENTIFIER_SELECT = "http://specs.openid.net/auth/2.0/identifier_select";
 const STEAMID64_BASE = BigInt("76561197960265728");
 
 export function getBaseUrl(): string {
-  return (process.env.APP_URL?.trim() || SITE_URL).replace(/\/+$/, "");
+  return publicOrigin(process.env.APP_URL) ?? SITE_URL;
 }
 
 export function buildSteamAuthUrl(returnTo: string): string {
